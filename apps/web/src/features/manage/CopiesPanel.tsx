@@ -1,7 +1,8 @@
 import { COPY_STATUSES, CopyInputSchema, type Copy, type CopyStatus } from '@library/shared';
-import { Pencil, Plus } from 'lucide-react';
+import { Pencil, Plus, Tags } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { formatDate } from '../../lib/format';
@@ -27,9 +28,20 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
 
   return (
     <section aria-labelledby="copies-heading" className="space-y-4">
-      <h2 id="copies-heading" className="text-xl font-semibold">
-        {t('manage.copies.heading', { count: copies.length })}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="copies-heading" className="text-xl font-semibold">
+          {t('manage.copies.heading', { count: copies.length })}
+        </h2>
+        {copies.length > 0 && (
+          <Link
+            to={`/manage/labels?codes=${sorted.map((c) => c.barcode).join(',')}`}
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-accent underline underline-offset-4"
+          >
+            <Tags className="size-4" aria-hidden="true" />
+            {t('labels.printForCopies')}
+          </Link>
+        )}
+      </div>
 
       {copies.length === 0 ? (
         <p className="text-muted">{t('manage.copies.none')}</p>
@@ -264,7 +276,21 @@ function AddCopyForm({ titleId }: { titleId: string }) {
           {t('manage.copies.add')}
         </Button>
       </div>
-      {added && <Alert tone="success">{t('manage.copies.added', { barcode: added })}</Alert>}
+      {added && (
+        <Alert
+          tone="success"
+          action={
+            <Link
+              to={`/manage/labels?codes=${added}`}
+              className="font-medium underline underline-offset-4"
+            >
+              {t('labels.printOne')}
+            </Link>
+          }
+        >
+          {t('manage.copies.added', { barcode: added })}
+        </Alert>
+      )}
       {add.isError && <Alert tone="danger">{errorMessage(add.error)}</Alert>}
     </form>
   );

@@ -1,4 +1,4 @@
-import { BookCopy, ClipboardList, ScanBarcode, Settings2, Users } from 'lucide-react';
+import { BookCopy, ClipboardList, ScanBarcode, Settings2, Tags, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 
@@ -7,6 +7,7 @@ const items = [
   { to: '/manage/loans', key: 'loans', icon: ClipboardList },
   { to: '/manage', key: 'collection', icon: BookCopy, end: true },
   { to: '/manage/readers', key: 'readers', icon: Users },
+  { to: '/manage/labels', key: 'labels', icon: Tags },
   { to: '/manage/settings', key: 'settings', icon: Settings2 },
 ] as const;
 

@@ -177,3 +177,7 @@ function changedFields<T extends object>(before: T, after: T): string[] {
       JSON.stringify(before[key as keyof T]) !== JSON.stringify(after[key as keyof T]),
   );
 }
+
+export function getCopyLabels(codes: string[]) {
+  return repository.getCopyLabels([...new Set(codes)]);
+}

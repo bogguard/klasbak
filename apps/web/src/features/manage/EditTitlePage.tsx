@@ -68,7 +68,19 @@ export function EditTitlePage() {
       </header>
 
       {flash.flash === 'created' && !missingCopies && (
-        <Alert tone="success">
+        <Alert
+          tone="success"
+          action={
+            title.data.copies.length > 0 && (
+              <Link
+                to={`/manage/labels?codes=${title.data.copies.map((c) => c.barcode).join(',')}`}
+                className="font-medium underline underline-offset-4"
+              >
+                {t('labels.printForCopies')}
+              </Link>
+            )
+          }
+        >
           {t('manage.edit.created', { count: flash.copiesCreated ?? 0 })}
         </Alert>
       )}

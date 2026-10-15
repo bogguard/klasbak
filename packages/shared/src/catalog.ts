@@ -135,3 +135,14 @@ export type IsbnLookupResult = {
   coverUrl?: string;
   source: string;
 };
+
+export const LABEL_LOOKUP_MAX = 500;
+
+export const LabelLookupRequestSchema = z.object({
+  codes: z.array(CodeSchema).min(1).max(LABEL_LOOKUP_MAX),
+});
+
+/** What a book label shows. */
+export type CopyLabel = { barcode: string; titleId: string; title: string; authors: string[] };
+
+export type LabelLookupResult = { labels: CopyLabel[]; unknown: string[] };

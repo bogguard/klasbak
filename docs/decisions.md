@@ -87,3 +87,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: SAM's esbuild builder runs `npm install` inside the workspace, which removes the monorepo's dev dependencies.
 - **Decision**: `npm run build:api` (scripts/build-api.mjs) bundles each Lambda with esbuild into `services/api/dist/<name>/`; the template points there and `sam deploy` uploads it. No `sam build`.
 - **Consequences**: One build path for CI and deploys, easy to read. New Lambdas must be added to the script and the template.
+
+## 015 — Labels and reader cards as PDFs made in the browser
+
+- **Context**: Labels must land exactly on standard label sheets, and schools print on whatever printer they have.
+- **Decision**: The web app builds PDFs with jsPDF (loaded only on the labels page) in millimetres for known sheet layouts (Avery L7651, L7159, L7160, Zweckform 3474) and credit-card-size reader cards, 10 per A4. Barcodes are Code 128, encoded by JsBarcode's encoder (rather than our own copy of the encoding table) and drawn as vector bars. People can start on a partly used sheet and nudge the alignment by a few millimetres (remembered per computer).
+- **Consequences**: No server work or cost, and a PDF printed at 100% is far more exact than printing a web page. The built-in PDF font covers Western European characters; names in other scripts (e.g. Arabic) would need an embedded font.

@@ -1,5 +1,6 @@
 import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
 import {
+  BatchGetCommand,
   GetCommand,
   QueryCommand,
   UpdateCommand,
@@ -35,6 +36,34 @@ export async function getItem<T>(key: { pk: string; sk: string }): Promise<T | u
   const result = await db.send(new GetCommand({ TableName: env.tableName, Key: key }));
   return result.Item ? stripKeys<T>(result.Item) : undefined;
 }
+
+type Key = { pk: string; sk: string };
+
+/**
+ * Reads many items by key (in chunks of 100, DynamoDB's limit), retrying keys DynamoDB
+ * couldn't serve in time. Missing items are simply absent from the result.
+ */
+export async function batchGetItems<T>(keys: Key[]): Promise<Map<string, T>> {
+  const unique = [...new Map(keys.map((k) => [`${k.pk}|${k.sk}`, k])).values()];
+  const found = new Map<string, T>();
+  for (let start = 0; start < unique.length; start += 100) {
+    let pending: Key[] = unique.slice(start, start + 100);
+    for (let attempt = 0; pending.length > 0 && attempt < 5; attempt++) {
+      if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 50 * 2 ** attempt));
+      const result = await db.send(
+        new BatchGetCommand({ RequestItems: { [env.tableName]: { Keys: pending } } }),
+      );
+      for (const item of result.Responses?.[env.tableName] ?? []) {
+        found.set(`${String(item.pk)}|${String(item.sk)}`, stripKeys<T>(item));
+      }
+      pending = (result.UnprocessedKeys?.[env.tableName]?.Keys ?? []) as Key[];
+    }
+    if (pending.length > 0) throw new Error('DynamoDB kept returning unprocessed keys');
+  }
+  return found;
+}
+
+export const keyId = (key: Key) => `${key.pk}|${key.sk}`;
 
 /** Atomically reserves the next number of a counter (e.g. for generated barcodes). */
 export async function nextCounterValue(name: string): Promise<number> {

@@ -1,17 +1,19 @@
 import { ScanCommand, TransactWriteCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
-import type { Copy, Title, TitleWithCopies } from '@library/shared';
+import type { Copy, CopyLabel, Title, TitleWithCopies } from '@library/shared';
 import { db, env } from '../lib/aws';
 import {
+  batchGetItems,
   failedConditionAt,
   getCodePointer,
   getItem,
+  keyId,
   nextCounterValue,
   queryAll,
   stripKeys,
   type Item,
 } from '../lib/dynamo';
 import { ConflictError, NotFoundError } from '../lib/errors';
-import { codeKey, copyKey, titleKey } from '../lib/keys';
+import { codeKey, copyKey, titleKey, type CodePointer } from '../lib/keys';
 
 export async function getTitleWithCopies(titleId: string): Promise<TitleWithCopies | undefined> {
   const items = await queryAll({
@@ -122,6 +124,32 @@ export async function getCopyByBarcode(barcode: string): Promise<Copy | undefine
   const pointer = await getCodePointer(barcode);
   if (pointer?.kind !== 'copy') return undefined;
   return getItem<Copy>(copyKey(pointer.titleId, pointer.copyId));
+}
+
+/** Title data for printing labels, in the order of `codes`; unknown codes are listed apart. */
+export async function getCopyLabels(
+  codes: string[],
+): Promise<{ labels: CopyLabel[]; unknown: string[] }> {
+  const pointers = await batchGetItems<CodePointer>(codes.map(codeKey));
+  const copyPointer = (code: string) => {
+    const pointer = pointers.get(keyId(codeKey(code)));
+    // Pointers from before readers existed have no kind and are copies.
+    return pointer && (pointer.kind ?? 'copy') === 'copy'
+      ? (pointer as Extract<CodePointer, { kind: 'copy' }>)
+      : undefined;
+  };
+  const titleIds = codes.flatMap((code) => copyPointer(code)?.titleId ?? []);
+  const titles = await batchGetItems<Title>(titleIds.map(titleKey));
+
+  const labels: CopyLabel[] = [];
+  const unknown: string[] = [];
+  for (const code of codes) {
+    const title = titles.get(keyId(titleKey(copyPointer(code)?.titleId ?? '')));
+    if (title)
+      labels.push({ barcode: code, titleId: title.id, title: title.title, authors: title.authors });
+    else unknown.push(code);
+  }
+  return { labels, unknown };
 }
 
 /**

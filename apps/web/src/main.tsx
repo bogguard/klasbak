@@ -85,6 +85,12 @@ const router = createBrowserRouter([
             }),
           },
           {
+            path: 'labels',
+            lazy: async () => ({
+              Component: (await import('./features/labels/LabelsPage')).LabelsPage,
+            }),
+          },
+          {
             path: 'readers/:id',
             lazy: async () => ({
               Component: (await import('./features/readers/ReaderPage')).ReaderPage,

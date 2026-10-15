@@ -235,7 +235,8 @@
     "loans": "Loans",
     "collection": "Collection",
     "readers": "Readers",
-    "settings": "Settings"
+    "settings": "Settings",
+    "labels": "Labels"
   },
   "readers": {
     "heading": "Readers",
@@ -381,5 +382,48 @@
     },
     "invalid": "Please check the settings: days and numbers must be numbers, and a period must end after it starts.",
     "save": "Save settings"
+  },
+  "labels": {
+    "heading": "Labels and reader cards",
+    "kind": "What do you want to print?",
+    "books": "Book labels",
+    "cards": "Reader cards",
+    "which": "Which copies?",
+    "source": {
+      "range": "A range of barcodes",
+      "codes": "Specific barcodes"
+    },
+    "from": "From",
+    "to": "Up to and including",
+    "codes": "Barcodes",
+    "codesHint": "One per line, or separated by commas. You can also scan them.",
+    "sheet": "Label sheet",
+    "sheetType": "Sheet type",
+    "sheetOption": "{{name}}: {{count}} per sheet ({{width}} × {{height}} mm)",
+    "startAt": "Start at label",
+    "startAtHint": "Useful for a partly used sheet: 1 to {{max}}, counted left to right.",
+    "alignment": "Adjust alignment",
+    "alignmentHint": "Is the print slightly off on the sheet? Shift everything a few millimetres. Positive = right or down. Remembered on this computer.",
+    "offset": {
+      "x": "Horizontal (mm)",
+      "y": "Vertical (mm)"
+    },
+    "makePdf": "Make PDF",
+    "busy": "Working…",
+    "done_one": "PDF with {{count}} label downloaded.",
+    "done_other": "PDF with {{count}} labels downloaded.",
+    "unknown": "Not found and skipped: {{codes}}.",
+    "errors": {
+      "range": "Enter a range of numbers, low to high, of at most {{max}} labels.",
+      "codes": "Enter at least one and at most {{max}} barcodes."
+    },
+    "cardsCount_one": "{{count}} reader card (active readers only).",
+    "cardsCount_other": "{{count}} reader cards (active readers only).",
+    "cardsDone_one": "PDF with {{count}} card downloaded.",
+    "cardsDone_other": "PDF with {{count}} cards downloaded.",
+    "printTip": "Print the PDF at ‘actual size’ (100%), not ‘fit to page’. Test on plain paper first and hold it against a label sheet.",
+    "printForCopies": "Print labels",
+    "printOne": "Print label",
+    "printCard": "Print reader card"
   }
 }

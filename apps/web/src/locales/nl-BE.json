@@ -235,7 +235,8 @@
     "loans": "Uitleningen",
     "collection": "Collectie",
     "readers": "Lezers",
-    "settings": "Instellingen"
+    "settings": "Instellingen",
+    "labels": "Labels"
   },
   "readers": {
     "heading": "Lezers",
@@ -381,5 +382,48 @@
     },
     "invalid": "Controleer de instellingen: dagen en aantallen moeten getallen zijn, en een periode moet eindigen na de start.",
     "save": "Instellingen opslaan"
+  },
+  "labels": {
+    "heading": "Labels en lezerskaarten",
+    "kind": "Wat wil je afdrukken?",
+    "books": "Boeklabels",
+    "cards": "Lezerskaarten",
+    "which": "Welke exemplaren?",
+    "source": {
+      "range": "Een reeks barcodes",
+      "codes": "Bepaalde barcodes"
+    },
+    "from": "Van",
+    "to": "Tot en met",
+    "codes": "Barcodes",
+    "codesHint": "Eén per regel, of gescheiden door komma's. Je kunt ze ook scannen.",
+    "sheet": "Etiketvel",
+    "sheetType": "Soort vel",
+    "sheetOption": "{{name}}: {{count}} per vel ({{width}} × {{height}} mm)",
+    "startAt": "Begin bij label",
+    "startAtHint": "Handig voor een half gebruikt vel: 1 tot {{max}}, van links naar rechts geteld.",
+    "alignment": "Uitlijning bijstellen",
+    "alignmentHint": "Staat de afdruk wat verschoven op het vel? Schuif alles een paar millimeter op. Positief = naar rechts of naar beneden. Wordt onthouden op deze computer.",
+    "offset": {
+      "x": "Horizontaal (mm)",
+      "y": "Verticaal (mm)"
+    },
+    "makePdf": "PDF maken",
+    "busy": "Bezig…",
+    "done_one": "PDF met {{count}} label gedownload.",
+    "done_other": "PDF met {{count}} labels gedownload.",
+    "unknown": "Niet gevonden en overgeslagen: {{codes}}.",
+    "errors": {
+      "range": "Geef een reeks cijfers, van laag naar hoog, van maximaal {{max}} labels.",
+      "codes": "Geef minstens één en maximaal {{max}} barcodes."
+    },
+    "cardsCount_one": "{{count}} lezerskaart (alleen actieve lezers).",
+    "cardsCount_other": "{{count}} lezerskaarten (alleen actieve lezers).",
+    "cardsDone_one": "PDF met {{count}} kaart gedownload.",
+    "cardsDone_other": "PDF met {{count}} kaarten gedownload.",
+    "printTip": "Druk de PDF af op ‘werkelijke grootte’ (100%), niet ‘passend maken’. Test eerst op gewoon papier en leg het tegen een etiketvel.",
+    "printForCopies": "Labels afdrukken",
+    "printOne": "Label afdrukken",
+    "printCard": "Lezerskaart afdrukken"
   }
 }

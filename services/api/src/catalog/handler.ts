@@ -1,6 +1,7 @@
 import {
   CopyInputSchema,
   CreateTitleRequestSchema,
+  LabelLookupRequestSchema,
   UpdateCopyRequestSchema,
   UpdateTitleRequestSchema,
   isValidIsbn,
@@ -44,6 +45,13 @@ app.post('/titles/:id/copies', async (c) => {
   const id = parse(IdSchema, c.req.param('id'));
   const input = parse(CopyInputSchema, await readJson(c));
   return c.json(await catalog.addCopy(actor, id, input), 201);
+});
+
+// POST because a sheet can hold hundreds of codes, too many for a URL.
+app.post('/copies/labels', async (c) => {
+  requireRole(getActor(c), STAFF);
+  const { codes } = parse(LabelLookupRequestSchema, await readJson(c));
+  return c.json(await catalog.getCopyLabels(codes));
 });
 
 app.get('/copies/:barcode', async (c) => {

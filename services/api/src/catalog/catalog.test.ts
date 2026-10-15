@@ -1,5 +1,6 @@
 import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
 import {
+  BatchGetCommand,
   DynamoDBDocumentClient,
   GetCommand,
   QueryCommand,
@@ -189,5 +190,44 @@ describe('copies', () => {
 describe('formatBarcode', () => {
   it('pads to eight digits', () => {
     expect(formatBarcode(7)).toBe('00000007');
+  });
+});
+
+describe('label data', () => {
+  it('returns titles in the order asked, and lists unknown codes and reader cards apart', async () => {
+    ddb
+      .on(BatchGetCommand)
+      .resolvesOnce({
+        Responses: {
+          'test-table': [
+            { pk: 'CODE#00000002', sk: 'CODE', kind: 'copy', titleId: TITLE_ID, copyId: 'C2' },
+            { pk: 'CODE#00000001', sk: 'CODE', titleId: TITLE_ID, copyId: 'C1' },
+            { pk: 'CODE#L000001', sk: 'CODE', kind: 'reader', readerId: 'R1' },
+          ],
+        },
+      })
+      .resolvesOnce({ Responses: { 'test-table': [titleItem] } });
+
+    const res = await request('POST', '/api/catalog/copies/labels', '[librarian]', {
+      codes: ['00000001', 'NOPE-1', '00000002', 'L000001'],
+    });
+
+    expect(await res.json()).toEqual({
+      labels: [
+        {
+          barcode: '00000001',
+          titleId: TITLE_ID,
+          title: 'Dolfje Weerwolfje',
+          authors: ['Paul van Loon'],
+        },
+        {
+          barcode: '00000002',
+          titleId: TITLE_ID,
+          title: 'Dolfje Weerwolfje',
+          authors: ['Paul van Loon'],
+        },
+      ],
+      unknown: ['NOPE-1', 'L000001'],
+    });
   });
 });

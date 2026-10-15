@@ -8,7 +8,7 @@ import {
   type Reader,
   type ReaderInput,
 } from '@library/shared';
-import { ArrowLeft, Lock, Save, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, IdCard, Lock, Save, TriangleAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -132,6 +132,13 @@ export function ReaderPage() {
           {[reader.group, t(`readers.categories.${reader.category}`)].filter(Boolean).join(' · ')} ·{' '}
           <span className="font-mono">{reader.memberNumber}</span>
         </p>
+        <Link
+          to={`/manage/labels?type=cards&readers=${reader.id}`}
+          className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-accent underline underline-offset-4"
+        >
+          <IdCard className="size-4" aria-hidden="true" />
+          {t('labels.printCard')}
+        </Link>
       </header>
       <LoansSection loans={loans} />
       <section aria-labelledby="reader-details" className="space-y-4">
