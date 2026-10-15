@@ -6,13 +6,10 @@ import {
   isValidIsbn,
   toIsbn13,
 } from '@library/shared';
-import { z } from 'zod';
 import { requireRole, STAFF } from '../lib/auth';
 import { ValidationError } from '../lib/errors';
-import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
+import { createApp, getActor, IdSchema, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as catalog from './service';
-
-const IdSchema = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/, 'Invalid id');
 
 export const app = createApp().basePath('/api/catalog');
 

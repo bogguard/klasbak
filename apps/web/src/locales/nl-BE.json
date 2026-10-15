@@ -82,10 +82,17 @@
     "UNAUTHORIZED": "Je bent niet (meer) aangemeld. Meld je opnieuw aan.",
     "FORBIDDEN": "Je hebt geen toestemming om dit te doen.",
     "VALIDATION_FAILED": "Sommige gegevens kloppen niet. Controleer het formulier.",
-    "VERSION_CONFLICT": "Iemand anders heeft deze titel intussen gewijzigd. Herlaad om de nieuwste versie te zien; je wijzigingen gaan dan verloren.",
-    "BARCODE_IN_USE": "Deze barcode is al in gebruik voor een ander exemplaar.",
+    "VERSION_CONFLICT": "Iemand anders heeft dit intussen gewijzigd. Herlaad om de nieuwste versie te zien; je wijzigingen gaan dan verloren.",
+    "BARCODE_IN_USE": "Deze barcode is al in gebruik voor een ander exemplaar of een lezerskaart.",
     "COPY_ON_LOAN": "Dit exemplaar is uitgeleend. Laat het eerst terugbrengen.",
-    "COPY_CHANGED": "Dit exemplaar werd intussen gewijzigd. Herlaad de pagina en probeer opnieuw."
+    "COPY_CHANGED": "Dit exemplaar werd intussen gewijzigd. Herlaad de pagina en probeer opnieuw.",
+    "CODE_IN_USE": "Dit nummer is al in gebruik voor een lezer of een exemplaar.",
+    "UNKNOWN_CODE": "Deze code kennen we niet. Is het boek of de lezer al ingevoerd?",
+    "NO_READER_SELECTED": "Scan eerst de kaart van de lezer, of zoek de lezer op naam.",
+    "COPY_NOT_LENDABLE": "Dit exemplaar staat als ‘{{status}}’ en kan niet uitgeleend worden.",
+    "MAX_LOANS_REACHED": "Deze lezer heeft al {{maxLoans}} boeken. Eerst iets terugbrengen.",
+    "READER_INACTIVE": "Deze lezer is niet (meer) actief en kan niets lenen.",
+    "COPY_NOT_AVAILABLE": "Dit exemplaar werd net uitgeleend of gewijzigd. Scan opnieuw."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -221,5 +228,158 @@
       "add": "Toevoegen",
       "added": "Exemplaar {{barcode}} toegevoegd. Plak het label op het boek."
     }
+  },
+  "manageNav": {
+    "label": "Beheer",
+    "desk": "Uitleenbalie",
+    "loans": "Uitleningen",
+    "collection": "Collectie",
+    "readers": "Lezers",
+    "settings": "Instellingen"
+  },
+  "readers": {
+    "heading": "Lezers",
+    "import": "Importeren (CSV)",
+    "new": "Nieuwe lezer",
+    "search": "Zoek op naam of kaartnummer",
+    "group": "Klas",
+    "allGroups": "Alle klassen",
+    "showInactive": "Ook niet-actieve lezers",
+    "empty": {
+      "title": "Nog geen lezers",
+      "hint": "Voeg lezers één voor één toe of importeer een klaslijst."
+    },
+    "count_one": "{{count}} lezer",
+    "count_other": "{{count}} lezers",
+    "name": "Naam",
+    "memberNumber": "Kaartnummer",
+    "onLoan": "Uitgeleend",
+    "categories": {
+      "pupil": "Leerling",
+      "teacher": "Leerkracht"
+    },
+    "inactive": "Niet actief",
+    "back": "Terug naar de lezers",
+    "details": "Gegevens",
+    "form": {
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "groupHint": "Bijvoorbeeld 3B. Leeg laten voor leerkrachten.",
+      "category": "Soort",
+      "email": "E-mail",
+      "emailHint": "Niet verplicht. Alleen nodig voor herinneringen.",
+      "memberNumberHint": "Het nummer op de lezerskaart. Leeg laten voor een nieuw nummer.",
+      "active": "Actief (mag lenen)",
+      "save": "Lezer opslaan",
+      "errors": {
+        "firstName": "Vul een voornaam in.",
+        "lastName": "Vul een achternaam in.",
+        "email": "Dit e-mailadres klopt niet.",
+        "memberNumber": "3 tot 32 letters, cijfers of streepjes.",
+        "group": "Maximaal 30 tekens."
+      }
+    },
+    "loans": {
+      "active_one": "{{count}} boek uitgeleend",
+      "active_other": "{{count}} boeken uitgeleend",
+      "none": "Niets uitgeleend.",
+      "due": "terug op {{date}}",
+      "history_one": "Leesgeschiedenis ({{count}} boek)",
+      "history_other": "Leesgeschiedenis ({{count}} boeken)",
+      "privacy": "Leesgeschiedenis is privé. Bekijk ze alleen als het nodig is."
+    },
+    "importPage": {
+      "heading": "Lezers importeren",
+      "explanation": "Kies een CSV-bestand, bijvoorbeeld een klaslijst uit Excel of je schooladministratie. De eerste regel bevat de kolomnamen, zoals hieronder:",
+      "columns": "Verplicht: voornaam en achternaam. Niet verplicht: klas, kaartnummer, e-mail, soort (leerling of leerkracht). Bestaat een kaartnummer al, dan wordt die lezer bijgewerkt.",
+      "chooseFile": "Kies een bestand",
+      "errors": {
+        "empty": "Dit bestand is leeg of bevat alleen kolomnamen.",
+        "missingColumns": "We vonden geen kolommen ‘voornaam’ en ‘achternaam’. Controleer de eerste regel."
+      },
+      "preview": "Controleer voor je importeert",
+      "validCount_one": "{{count}} regel is in orde.",
+      "validCount_other": "{{count}} regels zijn in orde.",
+      "invalidCount_one": "{{count}} regel wordt overgeslagen (naam ontbreekt of gegevens kloppen niet).",
+      "invalidCount_other": "{{count}} regels worden overgeslagen (naam ontbreekt of gegevens kloppen niet).",
+      "line": "Regel",
+      "check": "Controle",
+      "ok": "In orde",
+      "skipped": "Overgeslagen",
+      "progress": "Bezig: {{done}} van {{total}}…",
+      "run_one": "{{count}} lezer importeren",
+      "run_other": "{{count}} lezers importeren",
+      "result": "Resultaat",
+      "summary": "{{created}} nieuw, {{updated}} bijgewerkt, {{failed}} mislukt.",
+      "failedLine": "Regel {{line}}:",
+      "toList": "Naar de lezers"
+    }
+  },
+  "loans": {
+    "late": "Te laat",
+    "headingOverdue": "Te laat",
+    "headingAll": "Alle uitleningen",
+    "print": "Afdrukken",
+    "printedOn": "Afgedrukt op {{date}}",
+    "show": "Toon",
+    "onlyOverdue": "Te laat",
+    "allActive": "Alle uitleningen",
+    "noGroup": "Zonder klas",
+    "noneOverdue": "Niets te laat. Goed zo!",
+    "none": "Er is niets uitgeleend.",
+    "reader": "Lezer",
+    "title": "Titel",
+    "loanedOn": "Uitgeleend",
+    "dueOn": "Terug op",
+    "daysLate_one": "{{count}} dag te laat",
+    "daysLate_other": "{{count}} dagen te laat"
+  },
+  "desk": {
+    "heading": "Uitleenbalie",
+    "soundOn": "Geluid aan",
+    "soundOff": "Geluid uit",
+    "scanLabel": "Scan een lezerskaart of een boek",
+    "scanHint": "Scan eerst de kaart, daarna de boeken. Een uitgeleend boek scannen = terugbrengen. Esc = volgende lezer.",
+    "start": "Klaar om te scannen.",
+    "earlier": "Net gedaan",
+    "onLoan_one": "{{count}} boek in bezit",
+    "onLoan_other": "{{count}} boeken in bezit",
+    "nextReader": "Volgende lezer (Esc)",
+    "noReader": "Nog geen lezer gekozen.",
+    "searchReader": "Kaart vergeten? Zoek op naam",
+    "feedback": {
+      "reader": "{{name}} staat aan de balie",
+      "checkedOut": "Uitgeleend: {{title}}",
+      "dueOn": "Terugbrengen op {{date}}",
+      "alreadyLoaned": "{{title}} is al uitgeleend aan deze lezer (dubbele scan).",
+      "returned": "Teruggebracht: {{title}}",
+      "returnedLate": "Van {{from}}. Te laat: moest terug op {{date}}.",
+      "returnedFrom": "Van {{from}}.",
+      "alreadyReturned": "{{title}} was al teruggebracht."
+    }
+  },
+  "settings": {
+    "heading": "Instellingen",
+    "rules": {
+      "heading": "Uitleenregels",
+      "loanDays": "Dagen",
+      "maxLoans": "Max. boeken",
+      "preview": "Een boek dat vandaag aan een leerling wordt uitgeleend, moet terug op {{date}}."
+    },
+    "closedDays": {
+      "heading": "Vaste sluitingsdagen",
+      "explanation": "Valt de terugbrengdatum op zo’n dag, dan schuift ze op naar de eerstvolgende open dag."
+    },
+    "periods": {
+      "heading": "Vakanties en andere sluitingen",
+      "explanation": "Ook in deze periodes valt nooit een terugbrengdatum.",
+      "label": "Omschrijving",
+      "from": "Van",
+      "to": "Tot en met",
+      "remove": "Verwijder {{label}}",
+      "add": "Periode toevoegen"
+    },
+    "invalid": "Controleer de instellingen: dagen en aantallen moeten getallen zijn, en een periode moet eindigen na de start.",
+    "save": "Instellingen opslaan"
   }
 }

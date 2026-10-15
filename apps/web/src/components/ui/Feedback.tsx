@@ -30,8 +30,18 @@ export function StatusMessage({
 export function useErrorMessage() {
   const { t } = useTranslation();
   return (error: unknown) => {
-    const code = error instanceof ApiError ? error.code : 'UNKNOWN';
-    return t(`errors.${code}`, { defaultValue: t('errors.UNKNOWN') });
+    if (!(error instanceof ApiError)) return t('errors.UNKNOWN');
+    // Details like { maxLoans: 3 } or { status: 'lost' } fill in the message.
+    const details = (typeof error.details === 'object' ? error.details : {}) as Record<
+      string,
+      unknown
+    >;
+    const status = typeof details.status === 'string' ? t(`copyStatus.${details.status}`) : '';
+    return t(`errors.${error.code}`, {
+      ...details,
+      status: status.toLocaleLowerCase(),
+      defaultValue: t('errors.UNKNOWN'),
+    });
   };
 }
 

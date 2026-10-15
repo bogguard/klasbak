@@ -48,6 +48,48 @@ const router = createBrowserRouter([
               Component: (await import('./features/manage/EditTitlePage')).EditTitlePage,
             }),
           },
+          {
+            path: 'desk',
+            lazy: async () => ({
+              Component: (await import('./features/circulation/DeskPage')).DeskPage,
+            }),
+          },
+          {
+            path: 'loans',
+            lazy: async () => ({
+              Component: (await import('./features/circulation/LoansPage')).LoansPage,
+            }),
+          },
+          {
+            path: 'settings',
+            lazy: async () => ({
+              Component: (await import('./features/circulation/SettingsPage')).SettingsPage,
+            }),
+          },
+          {
+            path: 'readers',
+            lazy: async () => ({
+              Component: (await import('./features/readers/ReadersPage')).ReadersPage,
+            }),
+          },
+          {
+            path: 'readers/new',
+            lazy: async () => ({
+              Component: (await import('./features/readers/ReaderPage')).ReaderPage,
+            }),
+          },
+          {
+            path: 'readers/import',
+            lazy: async () => ({
+              Component: (await import('./features/readers/ImportReadersPage')).ImportReadersPage,
+            }),
+          },
+          {
+            path: 'readers/:id',
+            lazy: async () => ({
+              Component: (await import('./features/readers/ReaderPage')).ReaderPage,
+            }),
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

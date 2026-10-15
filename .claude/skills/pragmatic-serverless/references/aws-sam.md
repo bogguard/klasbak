@@ -98,6 +98,7 @@ Resources:
 - **No hardcoded names** for resources unless needed; let CloudFormation generate them and pass via env vars/outputs.
 - **Environments**: separate AWS accounts for dev and prod is ideal (AWS Organizations); at minimum separate stacks with an `Environment` parameter.
 - **Deploy**: `sam build && sam deploy --config-env <env>`; CI deploys `dev` on merge to `main`, `prod` on tag/manual approval.
+- **Monorepos (npm workspaces)**: SAM's esbuild builder runs `npm install` inside the package and can prune the workspace's dependencies. Bundle with your own esbuild script into `dist/<function>/`, point `CodeUri` there and run `sam deploy` without `sam build`.
 
 ## DynamoDB modelling
 

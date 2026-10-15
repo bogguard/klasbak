@@ -24,12 +24,12 @@ export function Layout() {
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
+        className="sr-only print:hidden focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
       >
         {t('app.skipToContent')}
       </a>
 
-      <header className="border-b border-line bg-surface">
+      <header className="border-b border-line bg-surface print:hidden">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-2 px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2 text-lg font-semibold">
             <Library className="size-6 shrink-0 text-accent" aria-hidden="true" />

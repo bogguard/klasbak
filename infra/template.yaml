@@ -68,9 +68,19 @@ Resources:
       AttributeDefinitions:
         - { AttributeName: pk, AttributeType: S }
         - { AttributeName: sk, AttributeType: S }
+        - { AttributeName: gsi1pk, AttributeType: S }
+        - { AttributeName: gsi1sk, AttributeType: S }
       KeySchema:
         - { AttributeName: pk, KeyType: HASH }
         - { AttributeName: sk, KeyType: RANGE }
+      # Lists: all readers sorted by class and name; active loans sorted by due date (sparse).
+      # Key design: services/api/src/lib/keys.ts
+      GlobalSecondaryIndexes:
+        - IndexName: gsi1
+          KeySchema:
+            - { AttributeName: gsi1pk, KeyType: HASH }
+            - { AttributeName: gsi1sk, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
       Tags:
         - { Key: project, Value: library }
         - { Key: environment, Value: !Ref Environment }
@@ -167,7 +177,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Catalogue API (titles, copies, ISBN lookup)
-      CodeUri: ../services/api
+      # Bundled by scripts/build-api.mjs (npm run build:api) before deploying.
+      CodeUri: ../services/api/dist/catalog
       Handler: handler.handler
       LoggingConfig:
         LogGroup: !Ref CatalogLogGroup
@@ -192,20 +203,62 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/catalog/{proxy+}
             Method: ANY
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: esm
-        Target: node24
-        Minify: true
-        Sourcemap: true
-        OutExtension: [.js=.mjs]
-        EntryPoints: [src/catalog/handler.ts]
-        # Some CommonJS dependencies still call require(); this makes it available in ESM output.
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
   CatalogLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !If [IsProd, 30, 7]
+
+  ReadersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Readers API (pupils and teachers, CSV import)
+      CodeUri: ../services/api/dist/readers
+      Handler: handler.handler
+      # Imports write up to 50 readers per request.
+      Timeout: 25
+      LoggingConfig:
+        LogGroup: !Ref ReadersLogGroup
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+      Events:
+        Staff:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/readers/{proxy+}
+            Method: ANY
+        StaffRoot:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/readers
+            Method: ANY
+
+  ReadersLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !If [IsProd, 30, 7]
+
+  CirculationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Lending desk (scan, check-out, check-in), loans and library settings
+      CodeUri: ../services/api/dist/circulation
+      Handler: handler.handler
+      LoggingConfig:
+        LogGroup: !Ref CirculationLogGroup
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+      Events:
+        Staff:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/circulation/{proxy+}
+            Method: ANY
+
+  CirculationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: !If [IsProd, 30, 7]
@@ -214,7 +267,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Rebuilds the public search index when titles change
-      CodeUri: ../services/api
+      CodeUri: ../services/api/dist/search-indexer
       Handler: handler.handler
       MemorySize: 1024
       Timeout: 120
@@ -243,17 +296,6 @@ Resources:
               OnFailure:
                 Type: SQS
                 Destination: !GetAtt SearchIndexerDlq.Arn
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Format: esm
-        Target: node24
-        Minify: true
-        Sourcemap: true
-        OutExtension: [.js=.mjs]
-        EntryPoints: [src/search-indexer/handler.ts]
-        Banner:
-          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
 
   SearchIndexerLogGroup:
     Type: AWS::Logs::LogGroup

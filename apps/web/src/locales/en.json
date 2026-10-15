@@ -82,10 +82,17 @@
     "UNAUTHORIZED": "You are not signed in (anymore). Please sign in again.",
     "FORBIDDEN": "You don't have permission to do this.",
     "VALIDATION_FAILED": "Some details are not valid. Please check the form.",
-    "VERSION_CONFLICT": "Someone else changed this title in the meantime. Reload to see the latest version; your changes will be lost.",
-    "BARCODE_IN_USE": "This barcode is already used for another copy.",
+    "VERSION_CONFLICT": "Someone else changed this in the meantime. Reload to see the latest version; your changes will be lost.",
+    "BARCODE_IN_USE": "This barcode is already used by another copy or a reader card.",
     "COPY_ON_LOAN": "This copy is on loan. Have it returned first.",
-    "COPY_CHANGED": "This copy was changed in the meantime. Reload the page and try again."
+    "COPY_CHANGED": "This copy was changed in the meantime. Reload the page and try again.",
+    "CODE_IN_USE": "This number is already used by a reader or a copy.",
+    "UNKNOWN_CODE": "We don't know this code. Has the book or reader been added yet?",
+    "NO_READER_SELECTED": "Scan the reader's card first, or search for the reader by name.",
+    "COPY_NOT_LENDABLE": "This copy is marked as ‘{{status}}’ and can't be lent.",
+    "MAX_LOANS_REACHED": "This reader already has {{maxLoans}} books. Return something first.",
+    "READER_INACTIVE": "This reader is not active (anymore) and can't borrow.",
+    "COPY_NOT_AVAILABLE": "This copy was just lent or changed. Please scan again."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -221,5 +228,158 @@
       "add": "Add",
       "added": "Copy {{barcode}} added. Stick the label on the book."
     }
+  },
+  "manageNav": {
+    "label": "Management",
+    "desk": "Lending desk",
+    "loans": "Loans",
+    "collection": "Collection",
+    "readers": "Readers",
+    "settings": "Settings"
+  },
+  "readers": {
+    "heading": "Readers",
+    "import": "Import (CSV)",
+    "new": "New reader",
+    "search": "Search by name or card number",
+    "group": "Class",
+    "allGroups": "All classes",
+    "showInactive": "Include inactive readers",
+    "empty": {
+      "title": "No readers yet",
+      "hint": "Add readers one by one or import a class list."
+    },
+    "count_one": "{{count}} reader",
+    "count_other": "{{count}} readers",
+    "name": "Name",
+    "memberNumber": "Card number",
+    "onLoan": "On loan",
+    "categories": {
+      "pupil": "Pupil",
+      "teacher": "Teacher"
+    },
+    "inactive": "Inactive",
+    "back": "Back to readers",
+    "details": "Details",
+    "form": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "groupHint": "For example 3B. Leave empty for teachers.",
+      "category": "Type",
+      "email": "Email",
+      "emailHint": "Optional. Only needed for reminders.",
+      "memberNumberHint": "The number on the reader card. Leave empty for a new number.",
+      "active": "Active (may borrow)",
+      "save": "Save reader",
+      "errors": {
+        "firstName": "Please enter a first name.",
+        "lastName": "Please enter a last name.",
+        "email": "This email address is not valid.",
+        "memberNumber": "3 to 32 letters, digits or dashes.",
+        "group": "At most 30 characters."
+      }
+    },
+    "loans": {
+      "active_one": "{{count}} book on loan",
+      "active_other": "{{count}} books on loan",
+      "none": "Nothing on loan.",
+      "due": "due {{date}}",
+      "history_one": "Reading history ({{count}} book)",
+      "history_other": "Reading history ({{count}} books)",
+      "privacy": "Reading history is private. Only look at it when needed."
+    },
+    "importPage": {
+      "heading": "Import readers",
+      "explanation": "Choose a CSV file, for example a class list from Excel or your school administration. The first line holds the column names, like below:",
+      "columns": "Required: first name and last name. Optional: class, card number, email, type (pupil or teacher). If a card number already exists, that reader is updated.",
+      "chooseFile": "Choose a file",
+      "errors": {
+        "empty": "This file is empty or only has column names.",
+        "missingColumns": "We found no ‘first name’ and ‘last name’ columns. Please check the first line."
+      },
+      "preview": "Check before importing",
+      "validCount_one": "{{count}} line is fine.",
+      "validCount_other": "{{count}} lines are fine.",
+      "invalidCount_one": "{{count}} line will be skipped (missing name or invalid data).",
+      "invalidCount_other": "{{count}} lines will be skipped (missing name or invalid data).",
+      "line": "Line",
+      "check": "Check",
+      "ok": "OK",
+      "skipped": "Skipped",
+      "progress": "Working: {{done}} of {{total}}…",
+      "run_one": "Import {{count}} reader",
+      "run_other": "Import {{count}} readers",
+      "result": "Result",
+      "summary": "{{created}} new, {{updated}} updated, {{failed}} failed.",
+      "failedLine": "Line {{line}}:",
+      "toList": "Go to readers"
+    }
+  },
+  "loans": {
+    "late": "Late",
+    "headingOverdue": "Overdue",
+    "headingAll": "All loans",
+    "print": "Print",
+    "printedOn": "Printed on {{date}}",
+    "show": "Show",
+    "onlyOverdue": "Overdue",
+    "allActive": "All loans",
+    "noGroup": "No class",
+    "noneOverdue": "Nothing overdue. Well done!",
+    "none": "Nothing is on loan.",
+    "reader": "Reader",
+    "title": "Title",
+    "loanedOn": "Lent",
+    "dueOn": "Due",
+    "daysLate_one": "{{count}} day late",
+    "daysLate_other": "{{count}} days late"
+  },
+  "desk": {
+    "heading": "Lending desk",
+    "soundOn": "Sound on",
+    "soundOff": "Sound off",
+    "scanLabel": "Scan a reader card or a book",
+    "scanHint": "Scan the card first, then the books. Scanning a book on loan returns it. Esc = next reader.",
+    "start": "Ready to scan.",
+    "earlier": "Just done",
+    "onLoan_one": "{{count}} book borrowed",
+    "onLoan_other": "{{count}} books borrowed",
+    "nextReader": "Next reader (Esc)",
+    "noReader": "No reader selected yet.",
+    "searchReader": "Forgot the card? Search by name",
+    "feedback": {
+      "reader": "{{name}} is at the desk",
+      "checkedOut": "Lent: {{title}}",
+      "dueOn": "Due back on {{date}}",
+      "alreadyLoaned": "{{title}} is already lent to this reader (double scan).",
+      "returned": "Returned: {{title}}",
+      "returnedLate": "From {{from}}. Late: was due on {{date}}.",
+      "returnedFrom": "From {{from}}.",
+      "alreadyReturned": "{{title}} was already returned."
+    }
+  },
+  "settings": {
+    "heading": "Settings",
+    "rules": {
+      "heading": "Loan rules",
+      "loanDays": "Days",
+      "maxLoans": "Max. books",
+      "preview": "A book lent to a pupil today is due back on {{date}}."
+    },
+    "closedDays": {
+      "heading": "Regular closing days",
+      "explanation": "If a due date falls on such a day, it moves to the next open day."
+    },
+    "periods": {
+      "heading": "Holidays and other closures",
+      "explanation": "No due date ever falls in these periods either.",
+      "label": "Description",
+      "from": "From",
+      "to": "Until (inclusive)",
+      "remove": "Remove {{label}}",
+      "add": "Add period"
+    },
+    "invalid": "Please check the settings: days and numbers must be numbers, and a period must end after it starts.",
+    "save": "Save settings"
   }
 }

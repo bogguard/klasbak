@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
+import { formatDate } from '../../lib/format';
 import { useAddCopy, useUpdateCopy, type CopyChanges } from './api';
 
 const STATUS_TONES: Record<CopyStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
@@ -20,7 +21,7 @@ const EDITABLE_STATUSES = COPY_STATUSES.filter(
 );
 
 export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [editing, setEditing] = useState<string>();
   const sorted = [...copies].sort((a, b) => a.barcode.localeCompare(b.barcode));
 
@@ -72,6 +73,13 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
                       <Badge tone={STATUS_TONES[copy.status]}>
                         {t(`copyStatus.${copy.status}`)}
                       </Badge>
+                      {copy.currentLoan && (
+                        <span className="ml-2 text-muted">
+                          {t('readers.loans.due', {
+                            date: formatDate(copy.currentLoan.dueDate, i18n.language),
+                          })}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-muted">{copy.note ?? ''}</td>
                     <td className="px-4 py-2 text-right">

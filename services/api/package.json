@@ -21,7 +21,6 @@
   "devDependencies": {
     "@hono/node-server": "^2.1.5",
     "@types/aws-lambda": "^8.10.164",
-    "aws-sdk-client-mock": "^4.1.0",
-    "esbuild": "^0.28.2"
+    "aws-sdk-client-mock": "^4.1.0"
   }
 }

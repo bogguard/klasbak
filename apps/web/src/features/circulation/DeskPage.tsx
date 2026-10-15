@@ -1,0 +1,386 @@
+import {
+  isOverdue,
+  localDate,
+  readerName,
+  type ReaderAtDesk,
+  type ScanResult,
+} from '@library/shared';
+import {
+  Barcode,
+  BookCheck,
+  BookUp,
+  CircleAlert,
+  Info,
+  UserRound,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
+import { formatDate } from '../../lib/format';
+import { useReaders } from '../readers/api';
+import { useScan } from './api';
+import { playFeedback } from './sound';
+
+type Tone = 'success' | 'info' | 'danger';
+type Feedback = { id: number; tone: Tone; title: string; detail?: string };
+
+const SOUND_KEY = 'desk-sound';
+
+function storedSound(): boolean {
+  try {
+    return localStorage.getItem(SOUND_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * The lending desk, built for a barcode scanner: the scan field always has focus, Enter
+ * submits, and the result is shown big, announced to screen readers and confirmed by a beep.
+ * Scans are queued, so scanning a stack of books quickly never loses one.
+ */
+export function DeskPage() {
+  const { t, i18n } = useTranslation();
+  const scan = useScan();
+  const errorMessage = useErrorMessage();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const queue = useRef<string[]>([]);
+  const busy = useRef(false);
+  const [code, setCode] = useState('');
+  const [desk, setDesk] = useState<ReaderAtDesk>();
+  const deskRef = useRef<ReaderAtDesk | undefined>(undefined);
+  const [log, setLog] = useState<Feedback[]>([]);
+  const [soundOn, setSoundOn] = useState(storedSound);
+
+  function updateDesk(next: ReaderAtDesk | undefined) {
+    deskRef.current = next;
+    setDesk(next);
+  }
+
+  function show(tone: Tone, title: string, detail?: string) {
+    setLog((current) =>
+      [{ id: Date.now() + Math.random(), tone, title, detail }, ...current].slice(0, 8),
+    );
+    if (soundOn) playFeedback(tone === 'danger' ? 'error' : 'success');
+  }
+
+  function handle(result: ScanResult) {
+    const due = (date: string) => formatDate(date, i18n.language);
+    switch (result.outcome) {
+      case 'reader':
+        updateDesk(result);
+        if (result.reader.active)
+          show('info', t('desk.feedback.reader', { name: readerName(result.reader) }));
+        else show('danger', t('errors.READER_INACTIVE'), readerName(result.reader));
+        break;
+      case 'checkedOut':
+        updateDesk(result);
+        show(
+          'success',
+          t('desk.feedback.checkedOut', { title: result.loan.titleTitle }),
+          t('desk.feedback.dueOn', { date: due(result.loan.dueDate) }),
+        );
+        break;
+      case 'alreadyLoaned':
+        updateDesk(result);
+        show('info', t('desk.feedback.alreadyLoaned', { title: result.loan.titleTitle }));
+        break;
+      case 'returned': {
+        const current = deskRef.current;
+        if (current?.reader.id === result.loan.readerId) {
+          updateDesk({
+            reader: { ...current.reader, activeLoanCount: current.reader.activeLoanCount - 1 },
+            activeLoans: current.activeLoans.filter((loan) => loan.id !== result.loan.id),
+          });
+        }
+        const from = [result.loan.readerName, result.loan.readerGroup].filter(Boolean).join(', ');
+        show(
+          'success',
+          t('desk.feedback.returned', { title: result.loan.titleTitle }),
+          result.wasOverdue
+            ? t('desk.feedback.returnedLate', { from, date: due(result.loan.dueDate) })
+            : t('desk.feedback.returnedFrom', { from }),
+        );
+        break;
+      }
+      case 'alreadyReturned':
+        show('info', t('desk.feedback.alreadyReturned', { title: result.title.title }));
+        break;
+    }
+  }
+
+  async function processQueue() {
+    if (busy.current) return;
+    busy.current = true;
+    try {
+      for (let next = queue.current.shift(); next; next = queue.current.shift()) {
+        try {
+          handle(await scan.mutateAsync({ code: next, readerId: deskRef.current?.reader.id }));
+        } catch (error) {
+          show('danger', errorMessage(error), next);
+        }
+      }
+    } finally {
+      busy.current = false;
+      inputRef.current?.focus();
+    }
+  }
+
+  function enqueue(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    queue.current.push(trimmed);
+    void processQueue();
+  }
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    enqueue(code);
+    setCode('');
+  }
+
+  function nextReader() {
+    updateDesk(undefined);
+    inputRef.current?.focus();
+  }
+
+  // Escape = "next reader", so the librarian never needs the mouse between pupils.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      deskRef.current = undefined;
+      setDesk(undefined);
+      inputRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  function toggleSound() {
+    const next = !soundOn;
+    setSoundOn(next);
+    try {
+      localStorage.setItem(SOUND_KEY, next ? 'on' : 'off');
+    } catch {
+      // Not remembered; fine.
+    }
+  }
+
+  const [latest, ...earlier] = log;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-semibold tracking-tight">{t('desk.heading')}</h1>
+        <Button variant="secondary" onClick={toggleSound} aria-pressed={soundOn}>
+          {soundOn ? (
+            <Volume2 className="size-4" aria-hidden="true" />
+          ) : (
+            <VolumeX className="size-4" aria-hidden="true" />
+          )}
+          {soundOn ? t('desk.soundOn') : t('desk.soundOff')}
+        </Button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_24rem]">
+        <div className="space-y-4">
+          <form onSubmit={submit}>
+            <label htmlFor="scan" className="mb-1.5 block font-medium">
+              {t('desk.scanLabel')}
+            </label>
+            <div className="relative">
+              <Barcode
+                className="pointer-events-none absolute left-4 top-1/2 size-6 -translate-y-1/2 text-muted"
+                aria-hidden="true"
+              />
+              <input
+                ref={inputRef}
+                id="scan"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                autoFocus
+                autoComplete="off"
+                spellCheck={false}
+                aria-describedby="scan-hint"
+                className="h-16 w-full rounded-xl border-2 border-accent bg-surface pl-14 pr-4 font-mono text-2xl tracking-wide"
+              />
+            </div>
+            <p id="scan-hint" className="mt-1.5 text-sm text-muted">
+              {t('desk.scanHint')}
+            </p>
+          </form>
+
+          <div aria-live="polite" aria-atomic="true">
+            {latest ? (
+              <FeedbackCard feedback={latest} large />
+            ) : (
+              <p className="text-muted">{t('desk.start')}</p>
+            )}
+          </div>
+
+          {earlier.length > 0 && (
+            <section aria-labelledby="desk-log">
+              <h2 id="desk-log" className="mb-2 text-sm font-medium text-muted">
+                {t('desk.earlier')}
+              </h2>
+              <ul className="space-y-2">
+                {earlier.map((item) => (
+                  <li key={item.id}>
+                    <FeedbackCard feedback={item} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        <ReaderPanel
+          desk={desk}
+          onNextReader={nextReader}
+          onPickReader={(memberNumber) => enqueue(memberNumber)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FeedbackCard({ feedback, large = false }: { feedback: Feedback; large?: boolean }) {
+  const styles: Record<Tone, string> = {
+    success: 'border-success/30 bg-success-soft text-success',
+    info: 'border-line bg-surface text-ink',
+    danger: 'border-danger/30 bg-danger-soft text-danger',
+  };
+  const Icon =
+    feedback.tone === 'success' ? BookCheck : feedback.tone === 'danger' ? CircleAlert : Info;
+  return (
+    <div
+      role={large && feedback.tone === 'danger' ? 'alert' : undefined}
+      className={`flex items-start gap-3 rounded-xl border ${styles[feedback.tone]} ${large ? 'p-5' : 'px-4 py-2 opacity-80'}`}
+    >
+      <Icon className={`${large ? 'size-7' : 'size-4'} mt-0.5 shrink-0`} aria-hidden="true" />
+      <div>
+        <p className={large ? 'text-xl font-semibold' : 'text-sm font-medium'}>{feedback.title}</p>
+        {feedback.detail && <p className={large ? 'mt-1' : 'text-sm'}>{feedback.detail}</p>}
+      </div>
+    </div>
+  );
+}
+
+function ReaderPanel({
+  desk,
+  onNextReader,
+  onPickReader,
+}: {
+  desk: ReaderAtDesk | undefined;
+  onNextReader: () => void;
+  onPickReader: (memberNumber: string) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const today = localDate();
+
+  if (!desk) return <ReaderSearch onPick={onPickReader} />;
+
+  const { reader, activeLoans } = desk;
+  return (
+    <aside
+      aria-labelledby="desk-reader"
+      className="space-y-4 rounded-xl border border-line bg-surface p-5"
+    >
+      <div className="flex items-start gap-3">
+        <div className="rounded-full bg-accent-soft p-2.5 text-accent">
+          <UserRound className="size-6" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <h2 id="desk-reader" className="text-xl font-semibold">
+            {readerName(reader)}
+          </h2>
+          <p className="text-muted">
+            {[reader.group, t(`readers.categories.${reader.category}`)].filter(Boolean).join(' · ')}
+          </p>
+          {!reader.active && <Badge tone="danger">{t('readers.inactive')}</Badge>}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 font-medium">{t('desk.onLoan', { count: activeLoans.length })}</h3>
+        {activeLoans.length === 0 ? (
+          <p className="text-sm text-muted">{t('readers.loans.none')}</p>
+        ) : (
+          <ul className="divide-y divide-line text-sm">
+            {activeLoans.map((loan) => (
+              <li key={loan.id} className="flex items-start justify-between gap-2 py-2">
+                <span className="flex items-start gap-2">
+                  <BookUp className="mt-0.5 size-4 shrink-0 text-muted" aria-hidden="true" />
+                  {loan.titleTitle}
+                </span>
+                <span className="shrink-0 text-right">
+                  {formatDate(loan.dueDate, i18n.language)}
+                  {isOverdue(loan, today) && (
+                    <span className="ml-1">
+                      <Badge tone="danger">{t('loans.late')}</Badge>
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <Button variant="secondary" className="w-full" onClick={onNextReader}>
+        {t('desk.nextReader')}
+      </Button>
+    </aside>
+  );
+}
+
+/** For a pupil who forgot their card: find them by name. */
+function ReaderSearch({ onPick }: { onPick: (memberNumber: string) => void }) {
+  const { t } = useTranslation();
+  const readers = useReaders();
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLocaleLowerCase('nl');
+  const matches =
+    needle.length < 2
+      ? []
+      : (readers.data ?? [])
+          .filter((r) => r.active && readerName(r).toLocaleLowerCase('nl').includes(needle))
+          .slice(0, 8);
+
+  return (
+    <aside className="space-y-3 rounded-xl border border-dashed border-line p-5">
+      <p className="font-medium">{t('desk.noReader')}</p>
+      <label className="block">
+        <span className="mb-1.5 block text-sm text-muted">{t('desk.searchReader')}</span>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoComplete="off"
+          className="min-h-11 w-full rounded-lg border border-line bg-surface px-3"
+        />
+      </label>
+      {matches.length > 0 && (
+        <ul className="space-y-1">
+          {matches.map((r) => (
+            <li key={r.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  onPick(r.memberNumber);
+                }}
+                className="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-left hover:bg-surface-sunken"
+              >
+                <span>{readerName(r)}</span>
+                <span className="text-sm text-muted">{r.group}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </aside>
+  );
+}

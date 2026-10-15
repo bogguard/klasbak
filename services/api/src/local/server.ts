@@ -5,9 +5,11 @@ import { Hono } from 'hono';
 import type { LambdaEvent } from 'hono/aws-lambda';
 import { ROLES, type Role } from '../lib/auth';
 import { app as catalog } from '../catalog/handler';
+import { app as circulation } from '../circulation/handler';
+import { app as readers } from '../readers/handler';
 import { logger } from '../lib/observability';
 import { rebuildSearchIndex } from '../search-indexer/rebuild';
-import { ensureLocalTable } from './table';
+import { ensureLocalTable, migrateLocalData } from './table';
 
 /*
  * Local development server. It runs the same Hono apps as the Lambdas and stands in for
@@ -35,6 +37,7 @@ function fakeEvent(authorization: string | undefined): { event: LambdaEvent } {
 }
 
 await ensureLocalTable();
+await migrateLocalData();
 await rebuildSearchIndex();
 
 const server = new Hono();
@@ -48,6 +51,15 @@ server.all('/api/catalog/*', async (c) => {
   if (c.req.method !== 'GET' && response.ok) await rebuildSearchIndex();
   return response;
 });
+server.all('/api/readers/*', (c) =>
+  readers.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
+);
+server.all('/api/readers', (c) =>
+  readers.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
+);
+server.all('/api/circulation/*', (c) =>
+  circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
+);
 
 serve({ fetch: server.fetch, port: PORT }, ({ port }) => {
   logger.info(`Local API on http://localhost:${port}`);

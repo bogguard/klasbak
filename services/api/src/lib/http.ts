@@ -1,7 +1,7 @@
 import type { Context as LambdaContext } from 'aws-lambda';
 import { Hono, type Context } from 'hono';
 import { handle, type ApiGatewayRequestContextV2, type LambdaEvent } from 'hono/aws-lambda';
-import type { ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 import { actorFromClaims, type Actor } from './auth';
 import { AppError, ValidationError } from './errors';
 import { logger, metrics } from './observability';
@@ -50,6 +50,9 @@ export function getActor(c: Context<Env>): Actor | undefined {
   };
   return actorFromClaims(requestContext.authorizer?.jwt?.claims);
 }
+
+/** Our ids are ULIDs. */
+export const IdSchema = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/, 'Invalid id');
 
 export function parse<T>(schema: ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);

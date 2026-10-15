@@ -65,3 +65,25 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Developing against AWS for every change is slow, and contributors to an open-source project may have no AWS account.
 - **Decision**: The Hono apps also run on Node through a small local server, with DynamoDB Local in Docker. The local server stands in for the AWS glue: a dev sign-in header instead of the JWT authorizer, an index rebuild after each change instead of the stream, and files on disk instead of S3/CloudFront. It only exists in `services/api/src/local/` and is never deployed.
 - **Consequences**: A fast feedback loop and no cloud costs for development. The AWS glue itself (authorizer, stream, IAM) is only exercised on a deployed dev stack, so test there before production.
+
+## 011 — One code namespace for book barcodes and reader cards
+
+- **Context**: At the lending desk one scan field accepts both reader cards and books. A code that could mean either would be ambiguous.
+- **Decision**: Every scannable code has one pointer item (`CODE#<code>`) with a `kind` (`copy` or `reader`), claimed with a conditional write. Generated card numbers start with `L` (L000123) so they look different from book barcodes (00000123).
+- **Consequences**: One lookup tells the desk what was scanned, and a duplicate code is impossible. Imported card numbers that clash with a book barcode are refused with a clear message.
+
+## 012 — Lending rules enforced in the database
+
+- **Decision**: Check-out is one transaction: the reader must be active and below their maximum (a counter on the reader), the copy must be available, and the loan is written. Check-in reverses it with conditions so a book can't be returned twice. A repeat scan of the same book for the same reader within a minute is treated as a double scan. Due dates are calendar dates in Europe/Brussels, moved past closed weekdays and holidays.
+- **Consequences**: Correct even with two desks or a nervous scanner. The reader's loan counter must only be changed by these transactions; reader edits use an update that never touches it.
+
+## 013 — Readers get no login yet
+
+- **Decision**: Readers are records only in phase 1; Cognito accounts for pupils and teachers come with the reader portal (phase 2). Card numbers can't change once created (they're printed on cards).
+- **Consequences**: No account administration for hundreds of pupils yet. The reader portal will link accounts to existing readers.
+
+## 014 — Lambdas are bundled by our own script
+
+- **Context**: SAM's esbuild builder runs `npm install` inside the workspace, which removes the monorepo's dev dependencies.
+- **Decision**: `npm run build:api` (scripts/build-api.mjs) bundles each Lambda with esbuild into `services/api/dist/<name>/`; the template points there and `sam deploy` uploads it. No `sam build`.
+- **Consequences**: One build path for CI and deploys, easy to read. New Lambdas must be added to the script and the template.

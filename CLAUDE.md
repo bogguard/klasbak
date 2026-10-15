@@ -37,9 +37,12 @@ npm run dev                      # frontend only, against a deployed stack (VITE
 npm run typecheck && npm run lint && npm test
 npm run build                    # build the frontend
 npm run validate:infra           # sam validate --lint
-npm run deploy:dev               # sam build + deploy the dev stack
+npm run build:api                # bundle the Lambdas into services/api/dist (used by deploy)
+npm run deploy:dev               # build:api + sam deploy of the dev stack (no `sam build`, see decision 014)
 scripts/deploy-web.sh dev "Naam van de bib"   # publish the frontend to the dev stack
 ```
+
+The table's key design is documented in `services/api/src/lib/keys.ts`; keep it the single place for item keys.
 
 Local development: the API runs as plain Hono apps on Node (`services/api/src/local/`). Keep Lambda handlers free of AWS-only assumptions so they keep working there; anything that writes public files goes through `lib/public-files.ts`.
 

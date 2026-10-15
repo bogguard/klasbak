@@ -1,16 +1,19 @@
 import './env';
-import type { CopyInput, TitleInput } from '@library/shared';
-import { TitleInputSchema } from '@library/shared';
-import { scanAllTitles } from '../catalog/repository';
+import type { CopyInput, ReaderInput, TitleInput } from '@library/shared';
+import { DEFAULT_SETTINGS, ReaderInputSchema, TitleInputSchema } from '@library/shared';
+import { getTitleWithCopies, scanAllTitles } from '../catalog/repository';
 import { addCopy, createTitle, updateCopy } from '../catalog/service';
+import { getSettings, scan, updateSettings } from '../circulation/service';
 import type { Actor } from '../lib/auth';
+import { createReader, listReaders } from '../readers/service';
 import { rebuildSearchIndex } from '../search-indexer/rebuild';
-import { ensureLocalTable } from './table';
+import { ensureLocalTable, migrateLocalData } from './table';
 
 /*
- * Fills the local database with a small, varied sample catalogue so every screen has
- * something to show. Reading levels and ages are illustrative, not authoritative.
- * Run again after `docker compose down -v` to start fresh.
+ * Fills the local database with sample data so every screen has something to show:
+ * a varied catalogue, two classes of readers, example holidays and a few loans (one late).
+ * All names are made up; reading levels, ages and holiday dates are illustrative only.
+ * Each part is only added when it's missing. Start fresh with `docker compose down -v`.
  */
 
 const actor: Actor = { userId: 'seed', roles: ['admin'] };
@@ -137,22 +140,74 @@ const samples: Sample[] = [
   },
 ];
 
+const sampleReaders: Partial<ReaderInput>[] = [
+  { firstName: 'Lotte', lastName: 'Peeters', group: '3B' },
+  { firstName: 'Noah', lastName: 'Janssens', group: '3B' },
+  { firstName: 'Amira', lastName: 'El Amrani', group: '3B' },
+  { firstName: 'Lucas', lastName: 'Maes', group: '3B' },
+  { firstName: 'Emma', lastName: 'Jacobs', group: '5A' },
+  { firstName: 'Mats', lastName: 'Willems', group: '5A' },
+  { firstName: 'Fien', lastName: 'Claes', group: '5A', active: false },
+  { firstName: 'An', lastName: 'Wouters', category: 'teacher', email: 'an.wouters@example.org' },
+];
+
 await ensureLocalTable();
+await migrateLocalData();
 
-if ((await scanAllTitles()).length > 0) {
-  console.log('The local catalogue already has titles; nothing to do.');
-  console.log('Start fresh with: docker compose down -v && npm run dev:local, then npm run seed');
-  process.exit(0);
-}
-
-for (const sample of samples) {
-  const input = TitleInputSchema.parse({ type: 'book', ...sample.title });
-  const title = await createTitle(actor, input, undefined);
-  for (const copyInput of sample.copies) {
-    const copy = await addCopy(actor, title.id, copyInput);
-    if (sample.lost) await updateCopy(actor, copy.barcode, { status: 'lost' });
+const barcodes: string[] = [];
+if ((await scanAllTitles()).length === 0) {
+  for (const sample of samples) {
+    const input = TitleInputSchema.parse({ type: 'book', ...sample.title });
+    const title = await createTitle(actor, input, undefined);
+    for (const copyInput of sample.copies) {
+      const copy = await addCopy(actor, title.id, copyInput);
+      if (sample.lost) await updateCopy(actor, copy.barcode, { status: 'lost' });
+      else barcodes.push(copy.barcode);
+    }
+  }
+  console.log(`Catalogue: ${await rebuildSearchIndex()} titles.`);
+} else {
+  console.log('Catalogue: already has titles, skipped.');
+  for (const title of await scanAllTitles()) {
+    const copies = (await getTitleWithCopies(title.id))?.copies ?? [];
+    barcodes.push(...copies.filter((c) => c.status === 'available').map((c) => c.barcode));
   }
 }
 
-const count = await rebuildSearchIndex();
-console.log(`Seeded ${count} titles.`);
+if ((await getSettings()).version === 0) {
+  await updateSettings(
+    actor,
+    {
+      ...DEFAULT_SETTINGS,
+      closedPeriods: [
+        { from: '2026-10-26', to: '2026-11-08', label: 'Herfstvakantie (voorbeeld)' },
+        { from: '2026-12-21', to: '2027-01-03', label: 'Kerstvakantie (voorbeeld)' },
+      ],
+    },
+    0,
+  );
+  console.log('Settings: example holidays added.');
+}
+
+if ((await listReaders()).length === 0) {
+  const readers = [];
+  for (const input of sampleReaders) {
+    readers.push(await createReader(actor, ReaderInputSchema.parse(input)));
+  }
+  console.log(`Readers: ${readers.length} added.`);
+
+  // A few loans with available copies from the catalogue.
+  const [lotte, noah, , , emma] = readers;
+  if (barcodes.length >= 8 && lotte && noah && emma) {
+    const book = (index: number) => barcodes[index] ?? '';
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000);
+    await scan(actor, book(0), lotte.id, daysAgo(3));
+    await scan(actor, book(3), lotte.id, daysAgo(2));
+    await scan(actor, book(5), emma.id, daysAgo(40)); // late by now
+    await scan(actor, book(7), noah.id, daysAgo(30));
+    await scan(actor, book(7), undefined, daysAgo(10)); // returned: history
+    console.log('Loans: 3 active (1 late) and 1 returned.');
+  }
+} else {
+  console.log('Readers: already present, skipped.');
+}

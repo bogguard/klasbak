@@ -1,53 +1,23 @@
-import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
-import {
-  GetCommand,
-  QueryCommand,
-  ScanCommand,
-  TransactWriteCommand,
-  UpdateCommand,
-  type QueryCommandOutput,
-  type ScanCommandOutput,
-} from '@aws-sdk/lib-dynamodb';
+import { ScanCommand, TransactWriteCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
 import type { Copy, Title, TitleWithCopies } from '@library/shared';
 import { db, env } from '../lib/aws';
+import {
+  failedConditionAt,
+  getCodePointer,
+  getItem,
+  nextCounterValue,
+  queryAll,
+  stripKeys,
+  type Item,
+} from '../lib/dynamo';
 import { ConflictError, NotFoundError } from '../lib/errors';
-
-/*
- * Key design (single table, see docs/decisions.md):
- *   Title          pk TITLE#<titleId>    sk TITLE
- *   Copy           pk TITLE#<titleId>    sk COPY#<copyId>
- *   Barcode index  pk BARCODE#<barcode>  sk BARCODE    → { titleId, copyId }; guarantees uniqueness
- *   Counter        pk COUNTER            sk BARCODE    → last generated barcode number
- */
-const titleKey = (titleId: string) => ({ pk: `TITLE#${titleId}`, sk: 'TITLE' });
-const copyKey = (titleId: string, copyId: string) => ({
-  pk: `TITLE#${titleId}`,
-  sk: `COPY#${copyId}`,
-});
-const barcodeKey = (barcode: string) => ({ pk: `BARCODE#${barcode}`, sk: 'BARCODE' });
-
-type Item = Record<string, unknown>;
-
-function stripKeys<T>(item: Item): T {
-  const { pk: _pk, sk: _sk, ...rest } = item;
-  return rest as T;
-}
+import { codeKey, copyKey, titleKey } from '../lib/keys';
 
 export async function getTitleWithCopies(titleId: string): Promise<TitleWithCopies | undefined> {
-  const items: Item[] = [];
-  let startKey: Item | undefined;
-  do {
-    const page: QueryCommandOutput = await db.send(
-      new QueryCommand({
-        TableName: env.tableName,
-        KeyConditionExpression: 'pk = :pk',
-        ExpressionAttributeValues: { ':pk': `TITLE#${titleId}` },
-        ExclusiveStartKey: startKey,
-      }),
-    );
-    items.push(...(page.Items ?? []));
-    startKey = page.LastEvaluatedKey;
-  } while (startKey);
+  const items = await queryAll({
+    KeyConditionExpression: 'pk = :pk',
+    ExpressionAttributeValues: { ':pk': titleKey(titleId).pk },
+  });
 
   const titleItem = items.find((item) => item.sk === 'TITLE');
   if (!titleItem) return undefined;
@@ -104,19 +74,8 @@ export async function replaceTitle(
   }
 }
 
-/** Atomically reserves the next number for system-generated barcodes. */
-export async function nextBarcodeNumber(): Promise<number> {
-  const result = await db.send(
-    new UpdateCommand({
-      TableName: env.tableName,
-      Key: { pk: 'COUNTER', sk: 'BARCODE' },
-      UpdateExpression: 'ADD #value :one',
-      ExpressionAttributeNames: { '#value': 'value' },
-      ExpressionAttributeValues: { ':one': 1 },
-      ReturnValues: 'UPDATED_NEW',
-    }),
-  );
-  return Number(result.Attributes?.value);
+export function nextBarcodeNumber(): Promise<number> {
+  return nextCounterValue('BARCODE');
 }
 
 export async function putNewCopy(copy: Copy, audit: Item): Promise<void> {
@@ -134,7 +93,12 @@ export async function putNewCopy(copy: Copy, audit: Item): Promise<void> {
           {
             Put: {
               TableName: env.tableName,
-              Item: { ...barcodeKey(copy.barcode), titleId: copy.titleId, copyId: copy.id },
+              Item: {
+                ...codeKey(copy.barcode),
+                kind: 'copy',
+                titleId: copy.titleId,
+                copyId: copy.id,
+              },
               ConditionExpression: 'attribute_not_exists(pk)',
             },
           },
@@ -148,22 +112,16 @@ export async function putNewCopy(copy: Copy, audit: Item): Promise<void> {
   } catch (error) {
     if (failedConditionAt(error, 0)) throw new NotFoundError('Title');
     if (failedConditionAt(error, 1)) {
-      throw new ConflictError('BARCODE_IN_USE', 'This barcode is already used by another copy');
+      throw new ConflictError('BARCODE_IN_USE', 'This code is already used by a copy or reader');
     }
     throw error;
   }
 }
 
 export async function getCopyByBarcode(barcode: string): Promise<Copy | undefined> {
-  const pointer = await db.send(
-    new GetCommand({ TableName: env.tableName, Key: barcodeKey(barcode) }),
-  );
-  if (!pointer.Item) return undefined;
-  const { titleId, copyId } = pointer.Item as { titleId: string; copyId: string };
-  const copy = await db.send(
-    new GetCommand({ TableName: env.tableName, Key: copyKey(titleId, copyId) }),
-  );
-  return copy.Item ? stripKeys<Copy>(copy.Item) : undefined;
+  const pointer = await getCodePointer(barcode);
+  if (pointer?.kind !== 'copy') return undefined;
+  return getItem<Copy>(copyKey(pointer.titleId, pointer.copyId));
 }
 
 /**
@@ -217,11 +175,4 @@ export async function scanAllTitles(): Promise<Title[]> {
     startKey = page.LastEvaluatedKey;
   } while (startKey);
   return titles;
-}
-
-function failedConditionAt(error: unknown, index: number): boolean {
-  return (
-    error instanceof TransactionCanceledException &&
-    error.CancellationReasons?.[index]?.Code === 'ConditionalCheckFailed'
-  );
 }

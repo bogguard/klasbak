@@ -28,7 +28,6 @@ jobs:
         with:
           use-installer: true
       - run: npm run validate:infra
-      - run: sam build --config-env dev
-        working-directory: infra
+      - run: npm run build:api
 
   # Deployment (GitHub OIDC → AWS role, no stored keys) is added once the AWS accounts exist.

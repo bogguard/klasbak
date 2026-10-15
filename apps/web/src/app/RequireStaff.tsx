@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { Skeleton, StatusMessage } from '../components/ui/Feedback';
 import { useAuth, useIsStaff } from '../lib/auth';
+import { ManageNav } from './ManageNav';
 
 /**
  * Guards the management pages in the browser for a friendly experience.
@@ -26,5 +27,10 @@ export function RequireStaff() {
       </StatusMessage>
     );
   }
-  return <Outlet />;
+  return (
+    <>
+      <ManageNav />
+      <Outlet />
+    </>
+  );
 }

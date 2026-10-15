@@ -34,7 +34,13 @@ export const COPY_STATUSES = ['available', 'onLoan', 'lost', 'damaged', 'withdra
 export const CopyStatusSchema = z.enum(COPY_STATUSES);
 export type CopyStatus = z.infer<typeof CopyStatusSchema>;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
+export const text = (max: number) => z.string().trim().min(1).max(max);
+
+/** Book barcodes and reader card numbers share one namespace (see docs/decisions.md 011). */
+export const CodeSchema = z
+  .string()
+  .trim()
+  .regex(/^[A-Za-z0-9-]{3,32}$/);
 
 const IsbnSchema = z.string().refine(isValidIsbn, { message: 'Invalid ISBN' }).transform(toIsbn13);
 
@@ -89,11 +95,7 @@ export type Title = TitleInput & {
 export const CopyInputSchema = z
   .object({
     /** Omit to let the system assign the next barcode number. */
-    barcode: z
-      .string()
-      .trim()
-      .regex(/^[A-Za-z0-9-]{3,32}$/)
-      .optional(),
+    barcode: CodeSchema.optional(),
     location: text(100).optional(),
     note: z.string().trim().max(500).optional(),
   })
@@ -115,6 +117,8 @@ export type Copy = {
   status: CopyStatus;
   location?: string;
   note?: string;
+  /** Set while the copy is on loan; maintained by circulation only. */
+  currentLoan?: { loanId: string; readerId: string; dueDate: string; loanedAt: string };
   createdAt: string;
   updatedAt: string;
 };

@@ -1,0 +1,148 @@
+import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  QueryCommand,
+  TransactWriteCommand,
+} from '@aws-sdk/lib-dynamodb';
+import { mockClient } from 'aws-sdk-client-mock';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { Actor } from '../lib/auth';
+import { codeKey, copyKey, loanKey, readerKey, titleKey } from '../lib/keys';
+import { scan } from './service';
+
+const ddb = mockClient(DynamoDBDocumentClient);
+const librarian: Actor = { userId: 'lib-1', roles: ['librarian'] };
+
+// Thursday 15 October 2026, 10:00 in Brussels.
+const NOW = new Date('2026-10-15T08:00:00Z');
+
+const reader = {
+  id: 'R1',
+  memberNumber: 'L000001',
+  firstName: 'Lotte',
+  lastName: 'Peeters',
+  group: '3B',
+  category: 'pupil',
+  active: true,
+  activeLoanCount: 0,
+  version: 1,
+};
+const copy = { id: 'C1', titleId: 'T1', barcode: '00000001', status: 'available' };
+const title = { id: 'T1', title: 'Dolfje Weerwolfje' };
+
+function givenItems(items: Array<[{ pk: string; sk: string }, object]>) {
+  for (const [key, item] of items) ddb.on(GetCommand, { Key: key }).resolves({ Item: item });
+}
+
+function cancelledAt(index: number) {
+  return new TransactionCanceledException({
+    message: 'cancelled',
+    $metadata: {},
+    CancellationReasons: [0, 1, 2, 3].map((i) => ({
+      Code: i === index ? 'ConditionalCheckFailed' : 'None',
+    })),
+  });
+}
+
+beforeEach(() => {
+  ddb.reset();
+  ddb.on(GetCommand).resolves({}); // anything not given below doesn't exist (e.g. settings)
+  ddb.on(QueryCommand).resolves({ Items: [] });
+  ddb.on(TransactWriteCommand).resolves({});
+  givenItems([
+    [codeKey('L000001'), { kind: 'reader', readerId: 'R1' }],
+    [codeKey('00000001'), { kind: 'copy', titleId: 'T1', copyId: 'C1' }],
+    [readerKey('R1'), reader],
+    [titleKey('T1'), title],
+  ]);
+});
+
+describe('scanning at the desk', () => {
+  it('selects the reader when a card is scanned', async () => {
+    givenItems([[copyKey('T1', 'C1'), copy]]);
+    const result = await scan(librarian, 'L000001', undefined, NOW);
+    expect(result).toMatchObject({ outcome: 'reader', reader: { id: 'R1' }, activeLoans: [] });
+  });
+
+  it('asks for a reader card before lending a book', async () => {
+    givenItems([[copyKey('T1', 'C1'), copy]]);
+    await expect(scan(librarian, '00000001', undefined, NOW)).rejects.toMatchObject({
+      code: 'NO_READER_SELECTED',
+    });
+  });
+
+  it('lends an available book with a due date from the loan rules', async () => {
+    givenItems([[copyKey('T1', 'C1'), copy]]);
+
+    const result = await scan(librarian, '00000001', 'R1', NOW);
+
+    // Default rules: pupils 21 days → Thursday 5 November.
+    expect(result).toMatchObject({
+      outcome: 'checkedOut',
+      loan: { dueDate: '2026-11-05', readerName: 'Lotte Peeters', titleTitle: 'Dolfje Weerwolfje' },
+    });
+    const [items] = ddb
+      .commandCalls(TransactWriteCommand)
+      .map((c) => c.args[0].input.TransactItems);
+    // The maximum (3 for pupils) and availability are enforced by the database itself.
+    expect(items?.[0]?.Update?.ExpressionAttributeValues).toMatchObject({ ':max': 3 });
+    expect(items?.[1]?.Update?.ConditionExpression).toBe('#status = :available');
+  });
+
+  it('explains when the reader already has the maximum number of books', async () => {
+    givenItems([[copyKey('T1', 'C1'), copy]]);
+    ddb.on(TransactWriteCommand).rejects(cancelledAt(0));
+    await expect(scan(librarian, '00000001', 'R1', NOW)).rejects.toMatchObject({
+      code: 'MAX_LOANS_REACHED',
+      details: { maxLoans: 3 },
+    });
+  });
+
+  it('returns a book that is on loan, and reports if it was late', async () => {
+    const loan = {
+      id: 'LN1',
+      readerId: 'R2',
+      dueDate: '2026-10-01',
+      loanedAt: '2026-09-10T08:00:00Z',
+    };
+    givenItems([
+      [copyKey('T1', 'C1'), { ...copy, status: 'onLoan', currentLoan: { ...loan, loanId: 'LN1' } }],
+      [loanKey('R2', 'LN1'), loan],
+    ]);
+
+    const result = await scan(librarian, '00000001', 'R1', NOW);
+
+    expect(result).toMatchObject({ outcome: 'returned', wasOverdue: true });
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(1);
+  });
+
+  it('treats a second scan right after lending as a double scan, not a return', async () => {
+    const loanedAt = new Date(NOW.getTime() - 5_000).toISOString();
+    const loan = { id: 'LN1', readerId: 'R1', dueDate: '2026-11-05', loanedAt };
+    givenItems([
+      [copyKey('T1', 'C1'), { ...copy, status: 'onLoan', currentLoan: { ...loan, loanId: 'LN1' } }],
+      [loanKey('R1', 'LN1'), loan],
+    ]);
+
+    const result = await scan(librarian, '00000001', 'R1', NOW);
+
+    expect(result.outcome).toBe('alreadyLoaned');
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
+  });
+
+  it('refuses copies that are lost, damaged or withdrawn', async () => {
+    givenItems([[copyKey('T1', 'C1'), { ...copy, status: 'lost' }]]);
+    await expect(scan(librarian, '00000001', 'R1', NOW)).rejects.toMatchObject({
+      code: 'COPY_NOT_LENDABLE',
+      details: { status: 'lost' },
+    });
+  });
+
+  it('says so when a code is unknown', async () => {
+    await expect(scan(librarian, 'NOPE-123', 'R1', NOW)).rejects.toMatchObject({
+      status: 404,
+      code: 'UNKNOWN_CODE',
+    });
+  });
+});
