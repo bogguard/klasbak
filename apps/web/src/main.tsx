@@ -1,0 +1,69 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { Layout } from './app/Layout';
+import { NotFoundPage } from './app/NotFoundPage';
+import { RequireStaff } from './app/RequireStaff';
+import { SearchPage } from './features/catalog/SearchPage';
+import { TitlePage } from './features/catalog/TitlePage';
+import { AuthProvider } from './lib/auth';
+import './lib/i18n';
+import './styles.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+});
+
+// Sign-in and management are loaded on demand: most visitors only use the public catalogue.
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      { index: true, element: <SearchPage /> },
+      { path: 'titles/:id', element: <TitlePage /> },
+      {
+        path: 'login',
+        lazy: async () => ({ Component: (await import('./features/auth/LoginPage')).LoginPage }),
+      },
+      {
+        path: 'manage',
+        element: <RequireStaff />,
+        children: [
+          {
+            index: true,
+            lazy: async () => ({
+              Component: (await import('./features/manage/ManageHomePage')).ManageHomePage,
+            }),
+          },
+          {
+            path: 'titles/new',
+            lazy: async () => ({
+              Component: (await import('./features/manage/NewTitlePage')).NewTitlePage,
+            }),
+          },
+          {
+            path: 'titles/:id',
+            lazy: async () => ({
+              Component: (await import('./features/manage/EditTitlePage')).EditTitlePage,
+            }),
+          },
+        ],
+      },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+]);
+
+const root = document.getElementById('root');
+if (!root) throw new Error('Missing #root element');
+
+createRoot(root).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
+  </StrictMode>,
+);

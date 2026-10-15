@@ -1,0 +1,225 @@
+{
+  "app": {
+    "skipToContent": "Naar de inhoud",
+    "switchLanguage": "Switch to English",
+    "switchLanguageShort": "EN",
+    "privacy": "Privacy",
+    "navigation": "Hoofdmenu",
+    "manage": "Beheer",
+    "signIn": "Aanmelden",
+    "signOut": "Afmelden"
+  },
+  "search": {
+    "heading": "Wat wil je lezen?",
+    "label": "Zoeken in de catalogus",
+    "placeholder": "Titel, auteur, onderwerp of ISBN",
+    "submit": "Zoeken",
+    "catalogueSize_one": "Doorzoek {{count}} titel",
+    "catalogueSize_other": "Doorzoek {{count}} titels",
+    "startHint": "Typ bijvoorbeeld een titel, een schrijver of een onderwerp zoals ‘dinosaurussen’.",
+    "resultCount_one": "{{count}} resultaat",
+    "resultCount_other": "{{count}} resultaten",
+    "showMore": "Meer tonen",
+    "filters": {
+      "type": "Soort",
+      "allTypes": "Alles",
+      "avi": "AVI-niveau",
+      "anyLevel": "Alle niveaus",
+      "clear": "Filters wissen"
+    },
+    "noResults": {
+      "title": "Niets gevonden",
+      "hint": "Probeer een ander woord, minder woorden of wis de filters."
+    },
+    "emptyCatalogue": {
+      "title": "De catalogus is nog leeg",
+      "hint": "Zodra er boeken toegevoegd zijn, kan je hier zoeken."
+    },
+    "loadError": "De catalogus kon niet geladen worden."
+  },
+  "types": {
+    "book": "Boek",
+    "magazine": "Tijdschrift",
+    "audio": "Audio",
+    "video": "Video",
+    "game": "Spel",
+    "score": "Partituur",
+    "other": "Andere"
+  },
+  "title": {
+    "back": "Terug naar zoeken",
+    "by": "door {{authors}}",
+    "details": "Gegevens",
+    "publisher": "Uitgeverij",
+    "year": "Jaar",
+    "isbn": "ISBN",
+    "language": "Taal",
+    "aviLevel": "AVI-niveau",
+    "zizoLevel": "ZIZO-niveau",
+    "age": "Leeftijd",
+    "ageRange": "{{min}} tot {{max}} jaar",
+    "ageFrom": "vanaf {{min}} jaar",
+    "ageUntil": "tot {{max}} jaar",
+    "subjects": "Onderwerpen",
+    "copies": "Exemplaren",
+    "availableCount": "{{available}} van {{total}} beschikbaar",
+    "noneAvailable": "Alle exemplaren zijn uitgeleend",
+    "noCopies": "Er zijn nog geen exemplaren van deze titel.",
+    "copyLabel": "Exemplaar {{number}}"
+  },
+  "copyStatus": {
+    "available": "Beschikbaar",
+    "onLoan": "Uitgeleend",
+    "lost": "Vermist",
+    "damaged": "Beschadigd",
+    "withdrawn": "Afgevoerd"
+  },
+  "errors": {
+    "NOT_FOUND": "We vonden dit niet terug. Misschien werd het verwijderd.",
+    "INTERNAL": "Er ging iets mis bij ons. Probeer het straks opnieuw.",
+    "UNKNOWN": "Er ging iets mis. Controleer je internetverbinding en probeer opnieuw.",
+    "retry": "Opnieuw proberen",
+    "UNAUTHORIZED": "Je bent niet (meer) aangemeld. Meld je opnieuw aan.",
+    "FORBIDDEN": "Je hebt geen toestemming om dit te doen.",
+    "VALIDATION_FAILED": "Sommige gegevens kloppen niet. Controleer het formulier.",
+    "VERSION_CONFLICT": "Iemand anders heeft deze titel intussen gewijzigd. Herlaad om de nieuwste versie te zien; je wijzigingen gaan dan verloren.",
+    "BARCODE_IN_USE": "Deze barcode is al in gebruik voor een ander exemplaar.",
+    "COPY_ON_LOAN": "Dit exemplaar is uitgeleend. Laat het eerst terugbrengen.",
+    "COPY_CHANGED": "Dit exemplaar werd intussen gewijzigd. Herlaad de pagina en probeer opnieuw."
+  },
+  "notFound": {
+    "title": "Deze pagina bestaat niet",
+    "home": "Naar de catalogus"
+  },
+  "roles": {
+    "admin": "beheerder",
+    "librarian": "bibliothecaris",
+    "teacher": "leerkracht",
+    "reader": "lezer"
+  },
+  "auth": {
+    "heading": "Aanmelden",
+    "username": "Gebruikersnaam",
+    "usernameHint": "Je lidnummer of de gebruikersnaam die je van school kreeg.",
+    "password": "Wachtwoord",
+    "submit": "Aanmelden",
+    "busy": "Even geduld…",
+    "dev": {
+      "notice": "Lokale ontwikkelmodus: kies met welke rol je wilt werken. Op de echte website meld je aan met je gebruikersnaam en wachtwoord.",
+      "signInAs": "Aanmelden als {{role}}"
+    },
+    "newPassword": {
+      "explanation": "Welkom! Kies eerst een eigen wachtwoord.",
+      "label": "Nieuw wachtwoord",
+      "hint": "Minstens 8 tekens.",
+      "repeat": "Herhaal het nieuwe wachtwoord"
+    },
+    "totp": {
+      "label": "Code uit je authenticator-app",
+      "hint": "De 6 cijfers die je app nu toont."
+    },
+    "errors": {
+      "passwordsDiffer": "De twee wachtwoorden zijn niet gelijk.",
+      "unsupported": "Aanmelden lukt zo niet. Vraag hulp aan de beheerder.",
+      "wrongCredentials": "Gebruikersnaam of wachtwoord klopt niet.",
+      "tooManyAttempts": "Te veel pogingen. Wacht even en probeer opnieuw.",
+      "weakPassword": "Dit wachtwoord is te kort of te eenvoudig.",
+      "wrongCode": "Die code klopt niet. Probeer de nieuwste code."
+    },
+    "forbidden": {
+      "title": "Geen toegang",
+      "body": "Deze pagina is alleen voor wie de bibliotheek beheert."
+    }
+  },
+  "manage": {
+    "heading": "Beheer van de collectie",
+    "newTitle": "Nieuwe titel",
+    "backToList": "Terug naar de collectie",
+    "new": {
+      "heading": "Nieuwe titel",
+      "isbnLabel": "Scan of typ het ISBN",
+      "isbnHint": "Staat meestal op de achterkant, bij de streepjescode.",
+      "lookup": "Gegevens opzoeken",
+      "searching": "Bezig met opzoeken…",
+      "withoutIsbn": "Invullen zonder ISBN",
+      "duplicate": "Dit ISBN staat al in de catalogus. Misschien wil je daar een exemplaar toevoegen:",
+      "found": "Gegevens gevonden via {{source}}. Controleer en vul aan waar nodig.",
+      "lookupProblem": {
+        "notFound": "We vonden geen gegevens voor dit ISBN. Vul ze zelf in.",
+        "failed": "Opzoeken lukte nu niet. Vul de gegevens zelf in of probeer later opnieuw."
+      },
+      "save": "Titel opslaan",
+      "copies": "Aantal exemplaren",
+      "copiesHint": "Elk exemplaar krijgt automatisch een barcode.",
+      "copiesError": "Geef een aantal van 0 tot 20.",
+      "restart": "Opnieuw beginnen"
+    },
+    "edit": {
+      "viewPublic": "Bekijk in de catalogus",
+      "created_one": "Titel toegevoegd met {{count}} exemplaar.",
+      "created_other": "Titel toegevoegd met {{count}} exemplaren.",
+      "copiesMissing": "De titel is opgeslagen, maar er werden maar {{created}} van de {{requested}} exemplaren aangemaakt. Voeg de rest hieronder toe.",
+      "details": "Gegevens",
+      "save": "Wijzigingen opslaan",
+      "saved": "Wijzigingen opgeslagen.",
+      "reload": "Herladen"
+    },
+    "form": {
+      "sections": {
+        "main": "Titel",
+        "publication": "Uitgave",
+        "readers": "Voor wie"
+      },
+      "type": "Soort",
+      "isbn": "ISBN",
+      "title": "Titel",
+      "subtitle": "Ondertitel",
+      "authors": "Auteurs",
+      "authorsHint": "Eén naam per regel.",
+      "subjects": "Onderwerpen",
+      "subjectsHint": "Gescheiden door komma's, bv. dieren, vriendschap.",
+      "publisher": "Uitgeverij",
+      "year": "Jaar",
+      "language": "Taal",
+      "avi": "AVI-niveau",
+      "zizo": "ZIZO-niveau",
+      "ageMin": "Vanaf leeftijd",
+      "ageMax": "Tot leeftijd",
+      "summary": "Samenvatting",
+      "none": "Geen",
+      "saving": "Bezig met opslaan…",
+      "errors": {
+        "title": "Vul een titel in.",
+        "isbn": "Dit ISBN klopt niet. Controleer de cijfers.",
+        "year": "Geef een jaartal, bijvoorbeeld 2024.",
+        "age": "Geef een leeftijd van 0 tot 99.",
+        "ageOrder": "‘Tot leeftijd’ mag niet kleiner zijn dan ‘vanaf leeftijd’.",
+        "generic": "Controleer dit veld."
+      }
+    },
+    "copies": {
+      "heading_one": "{{count}} exemplaar",
+      "heading_other": "{{count}} exemplaren",
+      "none": "Nog geen exemplaren. Voeg er hieronder een toe.",
+      "barcode": "Barcode",
+      "location": "Plaats",
+      "status": "Status",
+      "note": "Opmerking",
+      "actions": "Acties",
+      "edit": "Wijzigen",
+      "editLabel": "Exemplaar {{barcode}} wijzigen",
+      "locationLabel": "Plaats van exemplaar {{barcode}}",
+      "statusLabel": "Status van exemplaar {{barcode}}",
+      "noteLabel": "Opmerking bij exemplaar {{barcode}}",
+      "onLoanLocked": "Uitgeleend",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "addHeading": "Exemplaar toevoegen",
+      "barcodeHint": "Leeg laten voor een nieuwe barcode.",
+      "barcodeInvalid": "3 tot 32 letters, cijfers of streepjes.",
+      "automatic": "Automatisch",
+      "add": "Toevoegen",
+      "added": "Exemplaar {{barcode}} toegevoegd. Plak het label op het boek."
+    }
+  }
+}

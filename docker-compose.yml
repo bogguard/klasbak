@@ -1,0 +1,14 @@
+# Local development only: DynamoDB Local with data kept between restarts.
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:3.3.2
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath /data
+    # The image's default user can't write to a fresh named volume.
+    user: root
+    ports:
+      - '8000:8000'
+    volumes:
+      - dynamodb-data:/data
+
+volumes:
+  dynamodb-data:

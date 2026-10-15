@@ -1,0 +1,225 @@
+{
+  "app": {
+    "skipToContent": "Skip to content",
+    "switchLanguage": "Schakel naar Nederlands",
+    "switchLanguageShort": "NL",
+    "privacy": "Privacy",
+    "navigation": "Main menu",
+    "manage": "Manage",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "search": {
+    "heading": "What would you like to read?",
+    "label": "Search the catalogue",
+    "placeholder": "Title, author, subject or ISBN",
+    "submit": "Search",
+    "catalogueSize_one": "Search {{count}} title",
+    "catalogueSize_other": "Search {{count}} titles",
+    "startHint": "Type a title, an author or a subject like ‘dinosaurs’.",
+    "resultCount_one": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "showMore": "Show more",
+    "filters": {
+      "type": "Type",
+      "allTypes": "All",
+      "avi": "AVI level",
+      "anyLevel": "All levels",
+      "clear": "Clear filters"
+    },
+    "noResults": {
+      "title": "Nothing found",
+      "hint": "Try another word, fewer words, or clear the filters."
+    },
+    "emptyCatalogue": {
+      "title": "The catalogue is still empty",
+      "hint": "Once books have been added, you can search them here."
+    },
+    "loadError": "The catalogue could not be loaded."
+  },
+  "types": {
+    "book": "Book",
+    "magazine": "Magazine",
+    "audio": "Audio",
+    "video": "Video",
+    "game": "Game",
+    "score": "Score",
+    "other": "Other"
+  },
+  "title": {
+    "back": "Back to search",
+    "by": "by {{authors}}",
+    "details": "Details",
+    "publisher": "Publisher",
+    "year": "Year",
+    "isbn": "ISBN",
+    "language": "Language",
+    "aviLevel": "AVI level",
+    "zizoLevel": "ZIZO level",
+    "age": "Age",
+    "ageRange": "{{min}} to {{max}} years",
+    "ageFrom": "from {{min}} years",
+    "ageUntil": "up to {{max}} years",
+    "subjects": "Subjects",
+    "copies": "Copies",
+    "availableCount": "{{available}} of {{total}} available",
+    "noneAvailable": "All copies are on loan",
+    "noCopies": "There are no copies of this title yet.",
+    "copyLabel": "Copy {{number}}"
+  },
+  "copyStatus": {
+    "available": "Available",
+    "onLoan": "On loan",
+    "lost": "Missing",
+    "damaged": "Damaged",
+    "withdrawn": "Withdrawn"
+  },
+  "errors": {
+    "NOT_FOUND": "We couldn't find this. It may have been removed.",
+    "INTERNAL": "Something went wrong on our side. Please try again later.",
+    "UNKNOWN": "Something went wrong. Check your internet connection and try again.",
+    "retry": "Try again",
+    "UNAUTHORIZED": "You are not signed in (anymore). Please sign in again.",
+    "FORBIDDEN": "You don't have permission to do this.",
+    "VALIDATION_FAILED": "Some details are not valid. Please check the form.",
+    "VERSION_CONFLICT": "Someone else changed this title in the meantime. Reload to see the latest version; your changes will be lost.",
+    "BARCODE_IN_USE": "This barcode is already used for another copy.",
+    "COPY_ON_LOAN": "This copy is on loan. Have it returned first.",
+    "COPY_CHANGED": "This copy was changed in the meantime. Reload the page and try again."
+  },
+  "notFound": {
+    "title": "This page doesn't exist",
+    "home": "Go to the catalogue"
+  },
+  "roles": {
+    "admin": "administrator",
+    "librarian": "librarian",
+    "teacher": "teacher",
+    "reader": "reader"
+  },
+  "auth": {
+    "heading": "Sign in",
+    "username": "Username",
+    "usernameHint": "Your member number or the username the school gave you.",
+    "password": "Password",
+    "submit": "Sign in",
+    "busy": "One moment…",
+    "dev": {
+      "notice": "Local development mode: choose a role to work with. On the real website you sign in with your username and password.",
+      "signInAs": "Sign in as {{role}}"
+    },
+    "newPassword": {
+      "explanation": "Welcome! Please choose your own password first.",
+      "label": "New password",
+      "hint": "At least 8 characters.",
+      "repeat": "Repeat the new password"
+    },
+    "totp": {
+      "label": "Code from your authenticator app",
+      "hint": "The 6 digits your app shows now."
+    },
+    "errors": {
+      "passwordsDiffer": "The two passwords are not the same.",
+      "unsupported": "Signing in doesn't work this way. Ask the administrator for help.",
+      "wrongCredentials": "Username or password is incorrect.",
+      "tooManyAttempts": "Too many attempts. Wait a moment and try again.",
+      "weakPassword": "This password is too short or too simple.",
+      "wrongCode": "That code is incorrect. Try the latest code."
+    },
+    "forbidden": {
+      "title": "No access",
+      "body": "This page is only for people who manage the library."
+    }
+  },
+  "manage": {
+    "heading": "Manage the collection",
+    "newTitle": "New title",
+    "backToList": "Back to the collection",
+    "new": {
+      "heading": "New title",
+      "isbnLabel": "Scan or type the ISBN",
+      "isbnHint": "Usually on the back, near the barcode.",
+      "lookup": "Look up details",
+      "searching": "Looking up…",
+      "withoutIsbn": "Enter without ISBN",
+      "duplicate": "This ISBN is already in the catalogue. You may want to add a copy there:",
+      "found": "Details found via {{source}}. Check and complete where needed.",
+      "lookupProblem": {
+        "notFound": "We found no details for this ISBN. Please enter them yourself.",
+        "failed": "Looking up didn't work right now. Enter the details yourself or try again later."
+      },
+      "save": "Save title",
+      "copies": "Number of copies",
+      "copiesHint": "Each copy gets a barcode automatically.",
+      "copiesError": "Enter a number from 0 to 20.",
+      "restart": "Start over"
+    },
+    "edit": {
+      "viewPublic": "View in the catalogue",
+      "created_one": "Title added with {{count}} copy.",
+      "created_other": "Title added with {{count}} copies.",
+      "copiesMissing": "The title was saved, but only {{created}} of the {{requested}} copies were created. Add the rest below.",
+      "details": "Details",
+      "save": "Save changes",
+      "saved": "Changes saved.",
+      "reload": "Reload"
+    },
+    "form": {
+      "sections": {
+        "main": "Title",
+        "publication": "Publication",
+        "readers": "Audience"
+      },
+      "type": "Type",
+      "isbn": "ISBN",
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "authors": "Authors",
+      "authorsHint": "One name per line.",
+      "subjects": "Subjects",
+      "subjectsHint": "Separated by commas, e.g. animals, friendship.",
+      "publisher": "Publisher",
+      "year": "Year",
+      "language": "Language",
+      "avi": "AVI level",
+      "zizo": "ZIZO level",
+      "ageMin": "From age",
+      "ageMax": "Up to age",
+      "summary": "Summary",
+      "none": "None",
+      "saving": "Saving…",
+      "errors": {
+        "title": "Please enter a title.",
+        "isbn": "This ISBN is not valid. Check the digits.",
+        "year": "Enter a year, for example 2024.",
+        "age": "Enter an age from 0 to 99.",
+        "ageOrder": "‘Up to age’ can't be lower than ‘from age’.",
+        "generic": "Please check this field."
+      }
+    },
+    "copies": {
+      "heading_one": "{{count}} copy",
+      "heading_other": "{{count}} copies",
+      "none": "No copies yet. Add one below.",
+      "barcode": "Barcode",
+      "location": "Location",
+      "status": "Status",
+      "note": "Note",
+      "actions": "Actions",
+      "edit": "Edit",
+      "editLabel": "Edit copy {{barcode}}",
+      "locationLabel": "Location of copy {{barcode}}",
+      "statusLabel": "Status of copy {{barcode}}",
+      "noteLabel": "Note for copy {{barcode}}",
+      "onLoanLocked": "On loan",
+      "save": "Save",
+      "cancel": "Cancel",
+      "addHeading": "Add a copy",
+      "barcodeHint": "Leave empty for a new barcode.",
+      "barcodeInvalid": "3 to 32 letters, digits or dashes.",
+      "automatic": "Automatic",
+      "add": "Add",
+      "added": "Copy {{barcode}} added. Stick the label on the book."
+    }
+  }
+}

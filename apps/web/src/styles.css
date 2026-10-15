@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Components use semantic names (surface, ink, muted, line, accent),
+ * never raw colours, so light/dark and future branding change in one place.
+ */
+:root {
+  --surface: #ffffff;
+  --surface-sunken: #f6f7f6;
+  --ink: #1c2421;
+  --muted: #5b6662;
+  --line: #e2e6e4;
+  --accent: #0f766e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6f4f2;
+  --success: #15803d;
+  --success-soft: #e8f6ec;
+  --warning: #a16207;
+  --warning-soft: #fdf5e1;
+  --danger: #b91c1c;
+  --danger-soft: #fdecec;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #151a18;
+    --surface-sunken: #0e1211;
+    --ink: #e8edeb;
+    --muted: #9aa6a1;
+    --line: #2a3330;
+    --accent: #2dd4bf;
+    --accent-ink: #062b27;
+    --accent-soft: #133631;
+    --success: #4ade80;
+    --success-soft: #12301d;
+    --warning: #facc15;
+    --warning-soft: #332a0c;
+    --danger: #f87171;
+    --danger-soft: #3a1515;
+  }
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+@layer base {
+  html {
+    @apply bg-surface-sunken text-ink antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}

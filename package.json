@@ -1,0 +1,46 @@
+{
+  "name": "library-app",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "npm run dev -w apps/web",
+    "dev:local": "docker compose up -d --wait && concurrently --kill-others-on-fail --names api,web --prefix-colors blue,green \"npm:dev:api\" \"npm:dev:web:local\"",
+    "dev:api": "tsx watch services/api/src/local/server.ts",
+    "dev:web:local": "VITE_PROXY_TARGET=http://localhost:3000 npm run dev -w apps/web",
+    "seed": "tsx services/api/src/local/seed.ts",
+    "build": "npm run build -w apps/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "validate:infra": "sam validate --lint --template infra/template.yaml",
+    "deploy:dev": "cd infra && sam build && sam deploy --config-env dev",
+    "deploy:prod": "cd infra && sam build && sam deploy --config-env prod"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  }
+}
