@@ -15,7 +15,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { formatDate } from '../../lib/format';
@@ -27,6 +27,20 @@ type Tone = 'success' | 'info' | 'danger';
 type Feedback = { id: number; tone: Tone; title: string; detail?: string };
 
 const SOUND_KEY = 'desk-sound';
+
+/** Without scans for this long, the reader is cleared so the next child can't borrow on their card. */
+const IDLE_MS = 60_000;
+/** The countdown becomes visible this long before clearing. */
+const WARN_MS = 20_000;
+
+function isEditable(element: Element | null): boolean {
+  return (
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement ||
+    (element instanceof HTMLElement && element.isContentEditable)
+  );
+}
 
 function storedSound(): boolean {
   try {
@@ -53,10 +67,21 @@ export function DeskPage() {
   const deskRef = useRef<ReaderAtDesk | undefined>(undefined);
   const [log, setLog] = useState<Feedback[]>([]);
   const [soundOn, setSoundOn] = useState(storedSound);
+  // Last scan or reader change; state for rendering the countdown, ref for the timer.
+  const [lastActivity, setLastActivity] = useState(() => Date.now());
+  const lastActivityRef = useRef(lastActivity);
+  const [now, setNow] = useState(() => Date.now());
+
+  function markActivity() {
+    const at = Date.now();
+    lastActivityRef.current = at;
+    setLastActivity(at);
+  }
 
   function updateDesk(next: ReaderAtDesk | undefined) {
     deskRef.current = next;
     setDesk(next);
+    markActivity();
   }
 
   function show(tone: Tone, title: string, detail?: string) {
@@ -69,12 +94,16 @@ export function DeskPage() {
   function handle(result: ScanResult) {
     const due = (date: string) => formatDate(date, i18n.language);
     switch (result.outcome) {
-      case 'reader':
+      case 'reader': {
         updateDesk(result);
-        if (result.reader.active)
-          show('info', t('desk.feedback.reader', { name: readerName(result.reader) }));
-        else show('danger', t('errors.READER_INACTIVE'), readerName(result.reader));
+        const name = readerName(result.reader);
+        const late = result.activeLoans.filter((loan) => isOverdue(loan, localDate())).length;
+        if (!result.reader.active) show('danger', t('errors.READER_INACTIVE'), name);
+        // Late books deserve attention before anything new is lent.
+        else if (late > 0) show('danger', t('desk.feedback.hasLateBooks', { name, count: late }));
+        else show('info', t('desk.feedback.reader', { name }));
         break;
+      }
       case 'checkedOut':
         updateDesk(result);
         show(
@@ -96,12 +125,18 @@ export function DeskPage() {
           });
         }
         const from = [result.loan.readerName, result.loan.readerGroup].filter(Boolean).join(', ');
+        const returned = result.wasOverdue
+          ? t('desk.feedback.returnedLate', { from, date: due(result.loan.dueDate) })
+          : t('desk.feedback.returnedFrom', { from });
+        // Someone else's book while a reader is at the desk: probably meant to be lent to them.
+        const lendHint =
+          current && current.reader.id !== result.loan.readerId
+            ? ` ${t('desk.feedback.scanAgainToLend', { name: readerName(current.reader) })}`
+            : '';
         show(
           'success',
           t('desk.feedback.returned', { title: result.loan.titleTitle }),
-          result.wasOverdue
-            ? t('desk.feedback.returnedLate', { from, date: due(result.loan.dueDate) })
-            : t('desk.feedback.returnedFrom', { from }),
+          returned + lendHint,
         );
         break;
       }
@@ -116,6 +151,7 @@ export function DeskPage() {
     busy.current = true;
     try {
       for (let next = queue.current.shift(); next; next = queue.current.shift()) {
+        markActivity();
         try {
           handle(await scan.mutateAsync({ code: next, readerId: deskRef.current?.reader.id }));
         } catch (error) {
@@ -141,22 +177,57 @@ export function DeskPage() {
     setCode('');
   }
 
-  function nextReader() {
-    updateDesk(undefined);
-    inputRef.current?.focus();
-  }
-
-  // Escape = "next reader", so the librarian never needs the mouse between pupils.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+  /**
+   * Frees the desk for the next reader, with a quiet message on top, so nobody still sees
+   * "… is at the desk" and thinks the previous reader is selected.
+   */
+  const clearDesk = useCallback(
+    (reason: 'manual' | 'idle') => {
+      if (!deskRef.current) return;
       deskRef.current = undefined;
       setDesk(undefined);
+      setLog((current) =>
+        [
+          {
+            id: Date.now() + Math.random(),
+            tone: 'info' as const,
+            title: t(`desk.cleared.${reason}`),
+          },
+          ...current,
+        ].slice(0, 8),
+      );
       inputRef.current?.focus();
+    },
+    [t],
+  );
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      // Escape = "next reader", so the librarian never needs the mouse between pupils.
+      if (event.key === 'Escape') {
+        clearDesk('manual');
+        return;
+      }
+      // A scanner "types" the code. If the focus is somewhere else (someone clicked the page),
+      // move it to the scan field first so the code lands there instead of getting lost.
+      const typing = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+      if (typing && !isEditable(document.activeElement)) inputRef.current?.focus();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [clearDesk]);
+
+  // Clear the reader after a minute without scans (with a visible countdown first).
+  useEffect(() => {
+    if (!desk) return;
+    const timer = window.setInterval(() => {
+      const at = Date.now();
+      setNow(at);
+      if (at - lastActivityRef.current >= IDLE_MS) clearDesk('idle');
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [desk, clearDesk]);
+  const remainingMs = IDLE_MS - (now - lastActivity);
 
   function toggleSound() {
     const next = !soundOn;
@@ -237,8 +308,15 @@ export function DeskPage() {
         </div>
 
         <ReaderPanel
+          secondsLeft={
+            remainingMs <= WARN_MS ? Math.max(0, Math.ceil(remainingMs / 1000)) : undefined
+          }
+          onStay={() => {
+            markActivity();
+            inputRef.current?.focus();
+          }}
           desk={desk}
-          onNextReader={nextReader}
+          onNextReader={() => clearDesk('manual')}
           onPickReader={(memberNumber) => enqueue(memberNumber)}
         />
       </div>
@@ -270,10 +348,15 @@ function FeedbackCard({ feedback, large = false }: { feedback: Feedback; large?:
 
 function ReaderPanel({
   desk,
+  secondsLeft,
+  onStay,
   onNextReader,
   onPickReader,
 }: {
   desk: ReaderAtDesk | undefined;
+  /** Set during the last seconds before the reader is cleared automatically. */
+  secondsLeft: number | undefined;
+  onStay: () => void;
   onNextReader: () => void;
   onPickReader: (memberNumber: string) => void;
 }) {
@@ -283,6 +366,7 @@ function ReaderPanel({
   if (!desk) return <ReaderSearch onPick={onPickReader} />;
 
   const { reader, activeLoans } = desk;
+  const late = activeLoans.filter((loan) => isOverdue(loan, today)).length;
   return (
     <aside
       aria-labelledby="desk-reader"
@@ -302,6 +386,13 @@ function ReaderPanel({
           {!reader.active && <Badge tone="danger">{t('readers.inactive')}</Badge>}
         </div>
       </div>
+
+      {late > 0 && (
+        <p className="flex items-center gap-2 rounded-lg bg-danger-soft px-3 py-2 font-medium text-danger">
+          <CircleAlert className="size-5 shrink-0" aria-hidden="true" />
+          {t('desk.lateBooks', { count: late })}
+        </p>
+      )}
 
       <div>
         <h3 className="mb-2 font-medium">{t('desk.onLoan', { count: activeLoans.length })}</h3>
@@ -328,6 +419,18 @@ function ReaderPanel({
           </ul>
         )}
       </div>
+
+      {secondsLeft !== undefined && (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-3 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning"
+        >
+          <span>{t('desk.autoClear', { count: secondsLeft })}</span>
+          <Button variant="secondary" onClick={onStay}>
+            {t('desk.stay')}
+          </Button>
+        </div>
+      )}
 
       <Button variant="secondary" className="w-full" onClick={onNextReader}>
         {t('desk.nextReader')}

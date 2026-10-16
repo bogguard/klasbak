@@ -363,7 +363,7 @@
     "soundOn": "Geluid aan",
     "soundOff": "Geluid uit",
     "scanLabel": "Scan een lezerskaart of een boek",
-    "scanHint": "Scan eerst de kaart, daarna de boeken. Een uitgeleend boek scannen = terugbrengen. Esc = volgende lezer.",
+    "scanHint": "Scan eerst de kaart, daarna de boeken. Een uitgeleend boek scannen = terugbrengen. Esc = volgende lezer (na 1 minuut zonder scans gebeurt dat vanzelf).",
     "start": "Klaar om te scannen.",
     "earlier": "Net gedaan",
     "onLoan_one": "{{count}} boek in bezit",
@@ -379,7 +379,19 @@
       "returned": "Teruggebracht: {{title}}",
       "returnedLate": "Van {{from}}. Te laat: moest terug op {{date}}.",
       "returnedFrom": "Van {{from}}.",
-      "alreadyReturned": "{{title}} was al teruggebracht."
+      "alreadyReturned": "{{title}} was al teruggebracht.",
+      "hasLateBooks_one": "{{name}} heeft {{count}} boek te laat",
+      "hasLateBooks_other": "{{name}} heeft {{count}} boeken te laat",
+      "scanAgainToLend": "Scan opnieuw om het uit te lenen aan {{name}}."
+    },
+    "lateBooks_one": "{{count}} boek is te laat. Eerst terugbrengen?",
+    "lateBooks_other": "{{count}} boeken zijn te laat. Eerst terugbrengen?",
+    "autoClear_one": "Nog {{count}} seconde, dan is de balie klaar voor de volgende lezer.",
+    "autoClear_other": "Nog {{count}} seconden, dan is de balie klaar voor de volgende lezer.",
+    "stay": "Blijven",
+    "cleared": {
+      "manual": "Klaar voor de volgende lezer.",
+      "idle": "Na 1 minuut zonder scans is de balie vrijgemaakt voor de volgende lezer."
     }
   },
   "settings": {
