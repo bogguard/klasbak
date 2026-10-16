@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { formatDate } from '../../lib/format';
 import { useReaders } from '../readers/api';
-import { useScan } from './api';
+import { useRenew, useScan } from './api';
 import { playFeedback } from './sound';
 
 type Tone = 'success' | 'info' | 'danger';
@@ -58,6 +58,7 @@ function storedSound(): boolean {
 export function DeskPage() {
   const { t, i18n } = useTranslation();
   const scan = useScan();
+  const renew = useRenew();
   const errorMessage = useErrorMessage();
   const inputRef = useRef<HTMLInputElement>(null);
   const queue = useRef<string[]>([]);
@@ -318,6 +319,25 @@ export function DeskPage() {
           desk={desk}
           onNextReader={() => clearDesk('manual')}
           onPickReader={(memberNumber) => enqueue(memberNumber)}
+          onRenew={(loanId) => {
+            const reader = deskRef.current?.reader;
+            if (!reader) return;
+            markActivity();
+            renew
+              .mutateAsync({ readerId: reader.id, loanId })
+              .then((result) => {
+                updateDesk({ reader: result.reader, activeLoans: result.activeLoans });
+                show(
+                  'success',
+                  t('desk.feedback.renewed', { title: result.loan.titleTitle }),
+                  t('desk.feedback.dueOn', {
+                    date: formatDate(result.loan.dueDate, i18n.language),
+                  }),
+                );
+              })
+              .catch((error: unknown) => show('danger', errorMessage(error)))
+              .finally(() => inputRef.current?.focus());
+          }}
         />
       </div>
     </div>
@@ -352,6 +372,7 @@ function ReaderPanel({
   onStay,
   onNextReader,
   onPickReader,
+  onRenew,
 }: {
   desk: ReaderAtDesk | undefined;
   /** Set during the last seconds before the reader is cleared automatically. */
@@ -359,6 +380,7 @@ function ReaderPanel({
   onStay: () => void;
   onNextReader: () => void;
   onPickReader: (memberNumber: string) => void;
+  onRenew: (loanId: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const today = localDate();
@@ -406,13 +428,28 @@ function ReaderPanel({
                   <BookUp className="mt-0.5 size-4 shrink-0 text-muted" aria-hidden="true" />
                   {loan.titleTitle}
                 </span>
-                <span className="shrink-0 text-right">
-                  {formatDate(loan.dueDate, i18n.language)}
-                  {isOverdue(loan, today) && (
-                    <span className="ml-1">
-                      <Badge tone="danger">{t('loans.late')}</Badge>
+                <span className="flex shrink-0 flex-col items-end gap-1 text-right">
+                  <span>
+                    {formatDate(loan.dueDate, i18n.language)}
+                    {isOverdue(loan, today) && (
+                      <span className="ml-1">
+                        <Badge tone="danger">{t('loans.late')}</Badge>
+                      </span>
+                    )}
+                  </span>
+                  {(loan.renewals ?? 0) > 0 && (
+                    <span className="text-xs text-muted">
+                      {t('loans.renewed', { count: loan.renewals })}
                     </span>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => onRenew(loan.id)}
+                    className="text-xs font-medium text-accent underline underline-offset-2"
+                    aria-label={t('desk.renewLabel', { title: loan.titleTitle })}
+                  >
+                    {t('desk.renew')}
+                  </button>
                 </span>
               </li>
             ))}

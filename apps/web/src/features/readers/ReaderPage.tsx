@@ -21,6 +21,7 @@ import {
 } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { formatDate, formatTimestampDate } from '../../lib/format';
+import { useRenew } from '../circulation/api';
 import { useCreateReader, useDeleteReader, useReader, useReaders, useUpdateReader } from './api';
 
 type Values = {
@@ -385,6 +386,8 @@ function ReaderForm({ reader }: { reader?: Reader }) {
 
 function LoansSection({ loans }: { loans: Loan[] }) {
   const { t, i18n } = useTranslation();
+  const renew = useRenew();
+  const errorMessage = useErrorMessage();
   const today = localDate();
   const active = loans.filter((loan) => !loan.returnedAt);
   const history = loans.filter((loan) => loan.returnedAt);
@@ -406,14 +409,26 @@ function LoansSection({ loans }: { loans: Loan[] }) {
               <Link to={`/manage/titles/${loan.titleId}`} className="font-medium hover:underline">
                 {loan.titleTitle}
               </Link>
-              <span className="flex items-center gap-2 text-sm">
+              <span className="flex flex-wrap items-center gap-2 text-sm">
                 {t('readers.loans.due', { date: formatDate(loan.dueDate, i18n.language) })}
                 {isOverdue(loan, today) && <Badge tone="danger">{t('loans.late')}</Badge>}
+                {(loan.renewals ?? 0) > 0 && (
+                  <span className="text-muted">{t('loans.renewed', { count: loan.renewals })}</span>
+                )}
+                <Button
+                  variant="secondary"
+                  disabled={renew.isPending}
+                  onClick={() => renew.mutate({ readerId: loan.readerId, loanId: loan.id })}
+                  aria-label={t('desk.renewLabel', { title: loan.titleTitle })}
+                >
+                  {t('desk.renew')}
+                </Button>
               </span>
             </li>
           ))}
         </ul>
       )}
+      {renew.isError && <Alert tone="danger">{errorMessage(renew.error)}</Alert>}
       {history.length > 0 && (
         <details className="rounded-xl border border-line bg-surface px-4 py-3">
           <summary className="cursor-pointer font-medium">

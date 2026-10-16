@@ -106,7 +106,9 @@
     "INVALID_IMAGE": "Dit is geen geldige afbeelding (JPEG, PNG of WebP, maximaal 2 MB).",
     "USERNAME_TAKEN": "Deze gebruikersnaam bestaat al. Kies een andere.",
     "CANNOT_CHANGE_SELF": "Je eigen account kan je hier niet wijzigen. Vraag het aan een andere beheerder.",
-    "LAST_ADMIN": "Er moet altijd minstens één actieve beheerder zijn."
+    "LAST_ADMIN": "Er moet altijd minstens één actieve beheerder zijn.",
+    "LOAN_NOT_ACTIVE": "Dit boek is al teruggebracht en kan niet meer verlengd worden.",
+    "RENEWAL_NOT_LONGER": "Dit boek mag al tot {{dueDate}} blijven; verlengen maakt dat niet langer."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -366,7 +368,9 @@
     "loanedOn": "Uitgeleend",
     "dueOn": "Terug op",
     "daysLate_one": "{{count}} dag te laat",
-    "daysLate_other": "{{count}} dagen te laat"
+    "daysLate_other": "{{count}} dagen te laat",
+    "renewed_one": "{{count}}× verlengd",
+    "renewed_other": "{{count}}× verlengd"
   },
   "desk": {
     "heading": "Uitleenbalie",
@@ -392,7 +396,8 @@
       "alreadyReturned": "{{title}} was al teruggebracht.",
       "hasLateBooks_one": "{{name}} heeft {{count}} boek te laat",
       "hasLateBooks_other": "{{name}} heeft {{count}} boeken te laat",
-      "scanAgainToLend": "Scan opnieuw om het uit te lenen aan {{name}}."
+      "scanAgainToLend": "Scan opnieuw om het uit te lenen aan {{name}}.",
+      "renewed": "Verlengd: {{title}}"
     },
     "lateBooks_one": "{{count}} boek is te laat. Eerst terugbrengen?",
     "lateBooks_other": "{{count}} boeken zijn te laat. Eerst terugbrengen?",
@@ -402,7 +407,9 @@
     "cleared": {
       "manual": "Klaar voor de volgende lezer.",
       "idle": "Na 1 minuut zonder scans is de balie vrijgemaakt voor de volgende lezer."
-    }
+    },
+    "renew": "Verlengen",
+    "renewLabel": "{{title}} verlengen"
   },
   "settings": {
     "heading": "Instellingen",

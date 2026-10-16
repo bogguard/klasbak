@@ -143,6 +143,47 @@ export async function checkOut(params: {
   }
 }
 
+/** Moves a loan's due date; returns false when the loan had already ended. */
+export async function renew(params: { loan: Loan; copy: Copy; dueDate: string; audit: Item }) {
+  const { loan, copy, dueDate, audit } = params;
+  try {
+    await db.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Update: {
+              TableName: env.tableName,
+              Key: loanKey(loan.readerId, loan.id),
+              // The overdue list is sorted by due date, so its index key moves along.
+              UpdateExpression: 'SET dueDate = :due, gsi1sk = :sort ADD renewals :one',
+              ConditionExpression: 'attribute_not_exists(returnedAt)',
+              ExpressionAttributeValues: {
+                ':due': dueDate,
+                ':sort': `${dueDate}#${loan.id}`,
+                ':one': 1,
+              },
+            },
+          },
+          {
+            Update: {
+              TableName: env.tableName,
+              Key: copyKey(copy.titleId, copy.id),
+              UpdateExpression: 'SET currentLoan.dueDate = :due',
+              ConditionExpression: 'currentLoan.loanId = :loanId',
+              ExpressionAttributeValues: { ':due': dueDate, ':loanId': loan.id },
+            },
+          },
+          { Put: { TableName: env.tableName, Item: audit } },
+        ],
+      }),
+    );
+    return true;
+  } catch (error) {
+    if (failedConditionAt(error, 0) || failedConditionAt(error, 1)) return false;
+    throw error;
+  }
+}
+
 /** Ends a loan; returns false when it had already ended (e.g. returned at another desk). */
 export async function checkIn(params: {
   loan: Loan;

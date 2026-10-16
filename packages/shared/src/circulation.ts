@@ -61,8 +61,12 @@ export type Loan = {
   barcode: string;
   loanedAt: string;
   dueDate: string;
+  /** How many times the loan was extended. */
+  renewals?: number;
   returnedAt?: string;
 };
+
+export const RenewRequestSchema = z.object({ readerId: z.string(), loanId: z.string() });
 
 export const ScanRequestSchema = z.object({
   code: CodeSchema,

@@ -106,7 +106,9 @@
     "INVALID_IMAGE": "This is not a valid image (JPEG, PNG or WebP, at most 2 MB).",
     "USERNAME_TAKEN": "This username already exists. Choose another one.",
     "CANNOT_CHANGE_SELF": "You can't change your own account here. Ask another administrator.",
-    "LAST_ADMIN": "There must always be at least one active administrator."
+    "LAST_ADMIN": "There must always be at least one active administrator.",
+    "LOAN_NOT_ACTIVE": "This book was already returned and can't be renewed.",
+    "RENEWAL_NOT_LONGER": "This book may already stay until {{dueDate}}; renewing wouldn't make that longer."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -366,7 +368,9 @@
     "loanedOn": "Lent",
     "dueOn": "Due",
     "daysLate_one": "{{count}} day late",
-    "daysLate_other": "{{count}} days late"
+    "daysLate_other": "{{count}} days late",
+    "renewed_one": "renewed {{count}}×",
+    "renewed_other": "renewed {{count}}×"
   },
   "desk": {
     "heading": "Lending desk",
@@ -392,7 +396,8 @@
       "alreadyReturned": "{{title}} was already returned.",
       "hasLateBooks_one": "{{name}} has {{count}} late book",
       "hasLateBooks_other": "{{name}} has {{count}} late books",
-      "scanAgainToLend": "Scan it again to lend it to {{name}}."
+      "scanAgainToLend": "Scan it again to lend it to {{name}}.",
+      "renewed": "Renewed: {{title}}"
     },
     "lateBooks_one": "{{count}} book is late. Return it first?",
     "lateBooks_other": "{{count}} books are late. Return them first?",
@@ -402,7 +407,9 @@
     "cleared": {
       "manual": "Ready for the next reader.",
       "idle": "After 1 minute without scans the desk was cleared for the next reader."
-    }
+    },
+    "renew": "Renew",
+    "renewLabel": "Renew {{title}}"
   },
   "settings": {
     "heading": "Settings",

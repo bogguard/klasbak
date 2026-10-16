@@ -1,4 +1,10 @@
-import type { LibrarySettings, LibrarySettingsInput, Loan, ScanResult } from '@library/shared';
+import type {
+  LibrarySettings,
+  LibrarySettingsInput,
+  Loan,
+  ReaderAtDesk,
+  ScanResult,
+} from '@library/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';
@@ -13,6 +19,21 @@ export function useScan() {
     onSuccess: () =>
       Promise.all(
         [['loans'], ['readers'], ['reader'], ['staff-title'], ['public-title']].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+      ),
+  });
+}
+
+export function useRenew() {
+  const api = useAuthorizedApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { readerId: string; loanId: string }) =>
+      api<{ loan: Loan } & ReaderAtDesk>('/api/circulation/renew', { method: 'POST', body: input }),
+    onSuccess: () =>
+      Promise.all(
+        [['loans'], ['reader'], ['staff-title']].map((queryKey) =>
           queryClient.invalidateQueries({ queryKey }),
         ),
       ),

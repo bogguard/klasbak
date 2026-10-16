@@ -9,7 +9,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from '../lib/auth';
 import { codeKey, copyKey, loanKey, readerKey, titleKey } from '../lib/keys';
-import { scan } from './service';
+import { renewLoan, scan } from './service';
 
 const ddb = mockClient(DynamoDBDocumentClient);
 const librarian: Actor = { userId: 'lib-1', roles: ['librarian'] };
@@ -143,6 +143,62 @@ describe('scanning at the desk', () => {
     await expect(scan(librarian, 'NOPE-123', 'R1', NOW)).rejects.toMatchObject({
       status: 404,
       code: 'UNKNOWN_CODE',
+    });
+  });
+});
+
+describe('renewing', () => {
+  const loan = {
+    id: 'LN1',
+    readerId: 'R1',
+    titleId: 'T1',
+    copyId: 'C1',
+    dueDate: '2026-10-20',
+    loanedAt: '2026-09-29T08:00:00Z',
+  };
+
+  it('extends from today with the normal rules and moves the copy and overdue list along', async () => {
+    givenItems([
+      [loanKey('R1', 'LN1'), loan],
+      [copyKey('T1', 'C1'), { ...copy, status: 'onLoan', currentLoan: { ...loan, loanId: 'LN1' } }],
+    ]);
+
+    const result = await renewLoan(librarian, 'R1', 'LN1', NOW);
+
+    // 15 October + 21 days = 5 November.
+    expect(result.loan).toMatchObject({ dueDate: '2026-11-05', renewals: 1 });
+    const items = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems;
+    expect(items?.[0]?.Update?.ExpressionAttributeValues).toMatchObject({
+      ':due': '2026-11-05',
+      ':sort': '2026-11-05#LN1',
+    });
+    expect(items?.[1]?.Update?.UpdateExpression).toBe('SET currentLoan.dueDate = :due');
+  });
+
+  it('says so when renewing would not give more time, and counts nothing', async () => {
+    givenItems([
+      [loanKey('R1', 'LN1'), { ...loan, dueDate: '2026-11-05' }],
+      [copyKey('T1', 'C1'), copy],
+    ]);
+    await expect(renewLoan(librarian, 'R1', 'LN1', NOW)).rejects.toMatchObject({
+      code: 'RENEWAL_NOT_LONGER',
+      details: { dueDate: '2026-11-05' },
+    });
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
+  });
+
+  it('refuses books that were returned and readers who are not active', async () => {
+    givenItems([[loanKey('R1', 'LN1'), { ...loan, returnedAt: '2026-10-14T10:00:00Z' }]]);
+    await expect(renewLoan(librarian, 'R1', 'LN1', NOW)).rejects.toMatchObject({
+      code: 'LOAN_NOT_ACTIVE',
+    });
+
+    givenItems([
+      [loanKey('R1', 'LN1'), loan],
+      [readerKey('R1'), { ...reader, active: false }],
+    ]);
+    await expect(renewLoan(librarian, 'R1', 'LN1', NOW)).rejects.toMatchObject({
+      code: 'READER_INACTIVE',
     });
   });
 });

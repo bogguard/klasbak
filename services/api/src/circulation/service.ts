@@ -156,6 +156,50 @@ async function checkIn(actor: Actor, copy: Copy, now: Date): Promise<ScanResult>
   return { outcome: 'returned', loan: { ...loan, returnedAt: now.toISOString() }, wasOverdue };
 }
 
+/**
+ * Extends a loan from today with the reader's normal loan period (closed days skipped).
+ * Refused when that wouldn't be later than the current due date. No maximum yet: the librarian decides; a limit
+ * belongs with reservations (someone else waiting for the book).
+ */
+export async function renewLoan(
+  actor: Actor,
+  readerId: string,
+  loanId: string,
+  now = new Date(),
+): Promise<{ loan: Loan } & ReaderAtDesk> {
+  const [reader, loan, settings] = await Promise.all([
+    getReader(readerId),
+    repository.getLoan(readerId, loanId),
+    repository.getSettings(),
+  ]);
+  if (!reader || !loan) throw new NotFoundError('Loan');
+  if (loan.returnedAt) throw new ConflictError('LOAN_NOT_ACTIVE', 'This book was already returned');
+  if (!reader.active) throw new AppError(409, 'READER_INACTIVE', 'This reader is not active');
+
+  const copy = await getItem<Copy>(copyKey(loan.titleId, loan.copyId));
+  if (!copy) throw new NotFoundError('Copy');
+  const dueDate = calculateDueDate(localDate(now), reader.category, settings);
+  if (dueDate <= loan.dueDate) {
+    // E.g. just lent: renewing wouldn't give more time, so don't pretend it did.
+    throw new AppError(409, 'RENEWAL_NOT_LONGER', 'The due date would not move', {
+      dueDate: loan.dueDate,
+    });
+  }
+
+  const renewed = await repository.renew({
+    loan,
+    copy,
+    dueDate,
+    audit: auditItem({ entity: `COPY#${copy.id}`, action: 'loan.renewed', actor }, now),
+  });
+  if (!renewed) throw new ConflictError('LOAN_NOT_ACTIVE', 'This book was already returned');
+  metrics.addMetric('LoanRenewed', MetricUnit.Count, 1);
+  return {
+    loan: { ...loan, dueDate, renewals: (loan.renewals ?? 0) + 1 },
+    ...(await readerAtDesk(readerId)),
+  };
+}
+
 export function listLoans(filter: { overdue: boolean }, now = new Date()): Promise<Loan[]> {
   return repository.listActiveLoans(filter.overdue ? localDate(now) : undefined);
 }

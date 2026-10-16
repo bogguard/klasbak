@@ -1,4 +1,8 @@
-import { ScanRequestSchema, UpdateSettingsRequestSchema } from '@library/shared';
+import {
+  RenewRequestSchema,
+  ScanRequestSchema,
+  UpdateSettingsRequestSchema,
+} from '@library/shared';
 import { requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as circulation from './service';
@@ -9,6 +13,12 @@ app.post('/scan', async (c) => {
   const actor = requireRole(getActor(c), STAFF);
   const { code, readerId } = parse(ScanRequestSchema, await readJson(c));
   return c.json(await circulation.scan(actor, code, readerId));
+});
+
+app.post('/renew', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  const { readerId, loanId } = parse(RenewRequestSchema, await readJson(c));
+  return c.json(await circulation.renewLoan(actor, readerId, loanId));
 });
 
 app.get('/loans', async (c) => {

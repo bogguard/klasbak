@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/api';
+import { formatDate } from '../../lib/format';
 
 /** A friendly, centred message for empty and error states, with an optional next step. */
 export function StatusMessage({
@@ -28,7 +29,7 @@ export function StatusMessage({
 
 /** Translates API error codes into a message a pupil or parent understands. */
 export function useErrorMessage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (error: unknown) => {
     if (!(error instanceof ApiError)) return t('errors.UNKNOWN');
     // Details like { maxLoans: 3 } or { status: 'lost' } fill in the message.
@@ -37,9 +38,12 @@ export function useErrorMessage() {
       unknown
     >;
     const status = typeof details.status === 'string' ? t(`copyStatus.${details.status}`) : '';
+    const dueDate =
+      typeof details.dueDate === 'string' ? formatDate(details.dueDate, i18n.language) : '';
     return t(`errors.${error.code}`, {
       ...details,
       status: status.toLocaleLowerCase(),
+      dueDate,
       defaultValue: t('errors.UNKNOWN'),
     });
   };
