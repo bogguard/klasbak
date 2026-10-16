@@ -282,6 +282,51 @@ Resources:
     Properties:
       RetentionInDays: !If [IsProd, 30, 7]
 
+  StaffFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Staff accounts (admins only) in Cognito
+      CodeUri: ../services/api/dist/staff
+      Handler: handler.handler
+      LoggingConfig:
+        LogGroup: !Ref StaffLogGroup
+      Policies:
+        # Audit entries are written to the table.
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminCreateUser
+                - cognito-idp:AdminAddUserToGroup
+                - cognito-idp:AdminRemoveUserFromGroup
+                - cognito-idp:AdminListGroupsForUser
+                - cognito-idp:ListUsersInGroup
+                - cognito-idp:AdminDisableUser
+                - cognito-idp:AdminEnableUser
+                - cognito-idp:AdminUserGlobalSignOut
+                - cognito-idp:AdminSetUserPassword
+                - cognito-idp:AdminSetUserMFAPreference
+              Resource: !GetAtt UserPool.Arn
+      Events:
+        Admin:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/staff/{proxy+}
+            Method: ANY
+        AdminRoot:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/staff
+            Method: ANY
+
+  StaffLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !If [IsProd, 30, 7]
+
   RetentionFunction:
     Type: AWS::Serverless::Function
     Properties:

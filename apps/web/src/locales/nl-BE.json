@@ -103,7 +103,10 @@
     "MFA_REQUIRED": "Stel eerst tweestapsverificatie in. Herlaad de pagina.",
     "READER_HAS_LOANS": "Deze lezer heeft nog boeken. Laat ze eerst terugbrengen.",
     "LOOKUP_UNAVAILABLE": "Opzoeken lukte nu niet. Vul de gegevens zelf in of probeer later opnieuw.",
-    "INVALID_IMAGE": "Dit is geen geldige afbeelding (JPEG, PNG of WebP, maximaal 2 MB)."
+    "INVALID_IMAGE": "Dit is geen geldige afbeelding (JPEG, PNG of WebP, maximaal 2 MB).",
+    "USERNAME_TAKEN": "Deze gebruikersnaam bestaat al. Kies een andere.",
+    "CANNOT_CHANGE_SELF": "Je eigen account kan je hier niet wijzigen. Vraag het aan een andere beheerder.",
+    "LAST_ADMIN": "Er moet altijd minstens één actieve beheerder zijn."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -247,7 +250,8 @@
     "collection": "Collectie",
     "readers": "Lezers",
     "settings": "Instellingen",
-    "labels": "Labels"
+    "labels": "Labels",
+    "staff": "Medewerkers"
   },
   "readers": {
     "heading": "Lezers",
@@ -501,5 +505,45 @@
     "busy": "Bezig…",
     "confirmRemove": "De omslag van deze titel verwijderen?",
     "unsupported": "Dit bestand kunnen we niet lezen. Kies een JPEG- of PNG-foto, of neem een nieuwe foto."
+  },
+  "staff": {
+    "heading": "Medewerkers",
+    "explanation": "Wie de bibliotheek mag beheren. Bibliothecarissen doen het dagelijkse werk, beheerders kunnen ook medewerkers toevoegen.",
+    "adminOnly": "Alleen beheerders kunnen medewerkers beheren.",
+    "name": "Naam",
+    "role": "Rol",
+    "roleOf": "Rol van {{name}}",
+    "roleHint": "Kies ‘beheerder’ alleen voor wie ook medewerkers moet kunnen beheren.",
+    "status": "Status",
+    "you": "jij",
+    "active": "Actief",
+    "invited": "Nog niet aangemeld",
+    "disabled": "Gedeactiveerd",
+    "noMfa": "Tweestapsverificatie nog niet ingesteld",
+    "newPassword": "Nieuw wachtwoord",
+    "resetMfa": "Tweestaps resetten",
+    "disable": "Deactiveren",
+    "enable": "Activeren",
+    "confirmPassword": "Een nieuw tijdelijk wachtwoord maken voor {{name}}? Het huidige wachtwoord werkt dan niet meer.",
+    "confirmMfa": "Tweestapsverificatie resetten voor {{name}}? Gebruik dit bij een verloren of nieuwe smartphone; bij de volgende aanmelding stelt {{name}} het opnieuw in.",
+    "confirmDisable": "{{name}} deactiveren? Die wordt meteen overal afgemeld en kan niet meer aanmelden tot je het account opnieuw activeert.",
+    "new": "Medewerker toevoegen",
+    "create": "Account aanmaken",
+    "usernameHint": "Waarmee je collega aanmeldt, bijvoorbeeld juf.an. Kleine letters, cijfers, punt of streepje.",
+    "emailHint": "Niet verplicht. Handig om later te weten wie het is.",
+    "temporaryPassword": "Tijdelijk wachtwoord",
+    "errors": {
+      "username": "Minstens 3 tekens: kleine letters, cijfers, punt, liggend streepje of koppelteken.",
+      "name": "Vul een naam in.",
+      "email": "Dit e-mailadres klopt niet.",
+      "role": "Kies een rol."
+    },
+    "credentials": {
+      "heading": "Geef deze gegevens door aan je collega",
+      "instructions": "Dit wachtwoord zie je maar één keer en is 14 dagen geldig. Bij de eerste aanmelding kiest je collega een eigen wachtwoord en stelt tweestapsverificatie in met een app op de smartphone.",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "done": "Klaar, doorgegeven"
+    }
   }
 }

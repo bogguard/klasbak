@@ -103,7 +103,10 @@
     "MFA_REQUIRED": "Set up two-step verification first. Reload the page.",
     "READER_HAS_LOANS": "This reader still has books. Have them returned first.",
     "LOOKUP_UNAVAILABLE": "Looking up didn't work right now. Enter the details yourself or try again later.",
-    "INVALID_IMAGE": "This is not a valid image (JPEG, PNG or WebP, at most 2 MB)."
+    "INVALID_IMAGE": "This is not a valid image (JPEG, PNG or WebP, at most 2 MB).",
+    "USERNAME_TAKEN": "This username already exists. Choose another one.",
+    "CANNOT_CHANGE_SELF": "You can't change your own account here. Ask another administrator.",
+    "LAST_ADMIN": "There must always be at least one active administrator."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -247,7 +250,8 @@
     "collection": "Collection",
     "readers": "Readers",
     "settings": "Settings",
-    "labels": "Labels"
+    "labels": "Labels",
+    "staff": "Staff"
   },
   "readers": {
     "heading": "Readers",
@@ -501,5 +505,45 @@
     "busy": "Working…",
     "confirmRemove": "Remove the cover of this title?",
     "unsupported": "We can't read this file. Choose a JPEG or PNG photo, or take a new photo."
+  },
+  "staff": {
+    "heading": "Staff",
+    "explanation": "Who may manage the library. Librarians do the daily work; administrators can also add staff.",
+    "adminOnly": "Only administrators can manage staff.",
+    "name": "Name",
+    "role": "Role",
+    "roleOf": "Role of {{name}}",
+    "roleHint": "Choose ‘administrator’ only for people who also need to manage staff.",
+    "status": "Status",
+    "you": "you",
+    "active": "Active",
+    "invited": "Not signed in yet",
+    "disabled": "Deactivated",
+    "noMfa": "Two-step verification not set up yet",
+    "newPassword": "New password",
+    "resetMfa": "Reset two-step",
+    "disable": "Deactivate",
+    "enable": "Activate",
+    "confirmPassword": "Create a new temporary password for {{name}}? Their current password will stop working.",
+    "confirmMfa": "Reset two-step verification for {{name}}? Use this for a lost or new phone; {{name}} sets it up again at the next sign-in.",
+    "confirmDisable": "Deactivate {{name}}? They are signed out everywhere right away and can't sign in until you activate the account again.",
+    "new": "Add a staff member",
+    "create": "Create account",
+    "usernameHint": "What your colleague signs in with, e.g. juf.an. Lowercase letters, digits, dot or dash.",
+    "emailHint": "Optional. Useful to know later who it is.",
+    "temporaryPassword": "Temporary password",
+    "errors": {
+      "username": "At least 3 characters: lowercase letters, digits, dot, underscore or dash.",
+      "name": "Please enter a name.",
+      "email": "This email address is not valid.",
+      "role": "Choose a role."
+    },
+    "credentials": {
+      "heading": "Pass these details on to your colleague",
+      "instructions": "You see this password only once and it is valid for 14 days. At the first sign-in your colleague chooses their own password and sets up two-step verification with an app on their phone.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "done": "Done, passed on"
+    }
   }
 }

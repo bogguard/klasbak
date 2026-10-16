@@ -78,15 +78,18 @@ skipped. Locally, set `GOOGLE_BOOKS_API_KEY` in the terminal before `npm run dev
 
 ## Running the library
 
-- **Staff sign-in** requires two-step verification. The first sign-in shows a QR code for an authenticator app.
-- **Lost phone?** An admin resets two-step verification for that person, who then sets it up again at the next sign-in:
+- **Staff accounts** are managed by administrators in the app, under Beheer → **Medewerkers**: add a
+  colleague (the app shows a temporary password once, to pass on), change their role, give a new
+  password, reset two-step verification after a lost or new phone, or deactivate the account.
+- **Staff sign-in** requires two-step verification. The first sign-in shows a QR code for an
+  authenticator app.
+- **No administrator left who can sign in?** Use the CLI (step 5 under "First deploy" creates a new
+  admin). To reset someone's two-step verification from the CLI:
 
   ```bash
   aws cognito-idp admin-set-user-mfa-preference --region eu-west-1 --user-pool-id <UserPoolId> \
     --username <name> --software-token-mfa-settings Enabled=false,PreferredMfa=false
   ```
-
-- **New staff member**: create the user as in step 5 above and add them to the `librarian` group.
 
 ## Local development
 

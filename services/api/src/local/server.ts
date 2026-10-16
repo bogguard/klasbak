@@ -7,6 +7,7 @@ import { ROLES, type Role } from '../lib/auth';
 import { app as catalog } from '../catalog/handler';
 import { app as circulation } from '../circulation/handler';
 import { app as readers } from '../readers/handler';
+import { app as staff } from '../staff/handler';
 import { logger } from '../lib/observability';
 import { rebuildSearchIndex } from '../search-indexer/rebuild';
 import { ensureLocalTable, migrateLocalData } from './table';
@@ -27,7 +28,11 @@ function fakeEvent(authorization: string | undefined): { event: LambdaEvent } {
   const role = authorization?.match(/^Dev (\w+)$/)?.[1] as Role | undefined;
   const authorizer =
     role && ROLES.includes(role)
-      ? { jwt: { claims: { sub: `dev-${role}`, 'cognito:groups': `[${role}]` } } }
+      ? {
+          jwt: {
+            claims: { sub: `dev-${role}`, username: `dev-${role}`, 'cognito:groups': `[${role}]` },
+          },
+        }
       : undefined;
   return {
     event: {
@@ -57,6 +62,8 @@ server.all('/api/readers/*', (c) =>
 server.all('/api/readers', (c) =>
   readers.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
 );
+server.all('/api/staff', (c) => staff.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))));
+server.all('/api/staff/*', (c) => staff.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))));
 server.all('/api/circulation/*', async (c) => {
   const response = await circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization')));
   // Loans change copy statuses, and availability is part of the search index.

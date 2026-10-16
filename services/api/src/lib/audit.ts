@@ -1,4 +1,6 @@
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { ulid } from 'ulid';
+import { db, env } from './aws';
 import type { Actor } from './auth';
 
 const RETENTION_DAYS = 730;
@@ -22,4 +24,9 @@ export function auditItem({ entity, action, actor, changedFields }: AuditEntry, 
     at: now.toISOString(),
     expiresAt: Math.floor(now.getTime() / 1000) + RETENTION_DAYS * 86_400,
   };
+}
+
+/** For changes outside DynamoDB (e.g. Cognito accounts), where there's no transaction to join. */
+export async function writeAudit(entry: AuditEntry, now = new Date()): Promise<void> {
+  await db.send(new PutCommand({ TableName: env.tableName, Item: auditItem(entry, now) }));
 }

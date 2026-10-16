@@ -234,6 +234,11 @@ export function useIsStaff(): boolean {
   return Boolean(session && isStaff(session.roles));
 }
 
+export function useIsAdmin(): boolean {
+  const { session } = useAuth();
+  return Boolean(session?.roles.includes('admin'));
+}
+
 /** API calls on behalf of the signed-in user. */
 export function useAuthorizedApi() {
   const { authorization } = useAuth();

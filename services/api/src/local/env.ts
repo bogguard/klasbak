@@ -7,6 +7,8 @@ const defaults: Record<string, string> = {
   DYNAMODB_ENDPOINT: 'http://localhost:8000',
   LOCAL_PUBLIC_DIR: '.local/public',
   WEB_BUCKET: 'unused-locally',
+  // No Cognito locally: staff accounts are kept in memory.
+  STAFF_DIRECTORY: 'memory',
   AWS_REGION: 'eu-west-1',
   // DynamoDB Local accepts any credentials; these keep your real AWS profile out of it.
   AWS_ACCESS_KEY_ID: 'local',
