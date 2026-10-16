@@ -8,6 +8,7 @@ import {
 import { ADMIN, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as branding from '../branding/service';
+import { exportPage } from '../export/service';
 import * as circulation from './service';
 
 export const app = createApp().basePath('/api/circulation');
@@ -56,6 +57,12 @@ app.put('/branding/logo', async (c) => {
 app.delete('/branding/logo', async (c) => {
   const actor = requireRole(getActor(c), ADMIN);
   return c.json(await branding.removeLogo(actor));
+});
+
+// Everything the school owns, page by page (administrators; see export/service.ts).
+app.get('/export', async (c) => {
+  const actor = requireRole(getActor(c), ADMIN);
+  return c.json(await exportPage(actor, c.req.query('cursor')));
 });
 
 export const handler = toLambdaHandler(app);

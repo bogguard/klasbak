@@ -449,6 +449,15 @@
       "addLogo": "Add logo",
       "replaceLogo": "Choose another logo",
       "logoHint": "A PNG with a transparent background looks best. Shown at the top of the website, on reader cards and as the browser tab icon."
+    },
+    "export": {
+      "heading": "Export data",
+      "explanation": "Download all the library's data in one ZIP file: titles, copies, readers and loans as CSV (opens in Excel) and everything together as JSON. The file contains pupils' personal data: keep it safe and delete it when you no longer need it.",
+      "button": "Export all data",
+      "busy_one": "Working… {{count}} record",
+      "busy_other": "Working… {{count}} records",
+      "done_one": "Done: {{count}} record exported.",
+      "done_other": "Done: {{count}} records exported."
     }
   },
   "labels": {

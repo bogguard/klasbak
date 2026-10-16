@@ -152,3 +152,15 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Design**: A warm "paper" palette instead of neutral greys, Fraunces for headings and Nunito for text (both open-source and served from our own site, not Google Fonts), and a cover-first catalogue: a grid of covers with filter chips. Titles without a cover get a generated cloth-style cover in one of eight colours (same title, same colour) with the title in the display face, so the catalogue never looks empty.
 - **Branding**: Administrators set the library's name and upload the school logo (PNG/JPEG/WebP, max 1 MB, scaled to 512 px PNG in the browser; SVG refused because it can carry scripts). Stored as `SETTINGS/BRANDING` and published as `branding/branding.json` (no-cache) plus an immutable logo file, so pages read it without an API call. Shown in the header, as the browser tab icon and on reader cards.
 - **Consequences**: About 60 kB of fonts (cached long-term). The name in `config.json` from the deploy script is now only a fallback.
+
+## 026 — The school's own web address
+
+- **Context**: A `*.cloudfront.net` address looks untrustworthy to parents and staff. CloudFront needs a certificate from ACM in us-east-1 for any other address, and school domains are rarely managed in Route 53.
+- **Decision**: The template takes the address and certificate ARN from Parameter Store (`/library/domain-name`, `/library/certificate-arn`; `none` = CloudFront address) and sets the distribution's alias and certificate only when both are set. `scripts/request-certificate.sh` requests a DNS-validated certificate in us-east-1, prints the one validation record for the school's DNS, waits for it and stores both settings. The `AppUrl` output switches to the own address; `CloudFrontDomain` is what the school's CNAME points to.
+- **Consequences**: No school details in the repository, works with any DNS provider, certificates renew automatically while the validation record stays in place. Every installation needs the two parameters (`none` is fine).
+
+## 027 — Full data export for the school
+
+- **Context**: The data processing agreement promises the school a complete copy of its data at the end of the service, and schools ask "can we take our data elsewhere?".
+- **Decision**: Administrators export everything from Instellingen: `GET /api/circulation/export` returns the school's records (titles, copies, readers, loans, settings; not counters, code pointers, audit or statistics) one DynamoDB scan page at a time with an opaque cursor, so every response stays under Lambda's 6 MB limit. The browser builds a ZIP (fflate, loaded on demand) with one CSV per kind (semicolons and a byte-order mark for Belgian Excel) plus everything as JSON. Each export is written to the audit trail.
+- **Consequences**: Works at any library size without temporary files in S3. The export contains personal data, which the page says plainly.

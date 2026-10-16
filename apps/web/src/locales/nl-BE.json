@@ -449,6 +449,15 @@
       "addLogo": "Logo toevoegen",
       "replaceLogo": "Ander logo kiezen",
       "logoHint": "PNG met doorzichtige achtergrond werkt het mooist. Verschijnt bovenaan de website, op lezerskaarten en als icoontje in de browser."
+    },
+    "export": {
+      "heading": "Gegevens exporteren",
+      "explanation": "Download alle gegevens van de bibliotheek in één ZIP-bestand: titels, exemplaren, lezers en uitleningen als CSV (opent in Excel) en alles samen als JSON. Het bestand bevat persoonsgegevens van leerlingen: bewaar het veilig en verwijder het als je het niet meer nodig hebt.",
+      "button": "Alle gegevens exporteren",
+      "busy_one": "Bezig… {{count}} record",
+      "busy_other": "Bezig… {{count}} records",
+      "done_one": "Klaar: {{count}} record geëxporteerd.",
+      "done_other": "Klaar: {{count}} records geëxporteerd."
     }
   },
   "labels": {

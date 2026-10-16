@@ -16,6 +16,7 @@ import { AdminOnly } from '../../app/AdminOnly';
 import { useConfig } from '../../lib/config';
 import { formatDate } from '../../lib/format';
 import { useSettings, useUpdateSettings } from './api';
+import { ExportSection } from '../export/ExportSection';
 import { BrandingSection } from './BrandingSection';
 
 // Monday first, as on a Belgian calendar; values follow Date.getUTCDay().
@@ -40,6 +41,8 @@ function Settings() {
       <h1 className="text-3xl font-semibold tracking-tight">{t('settings.heading')}</h1>
       {/* Remount once the configuration is loaded, so the name field starts with the real name. */}
       <BrandingSection key={String(loaded)} />
+      <hr className="border-line" />
+      <ExportSection />
       <hr className="border-line" />
       {settings.isPending ? (
         <Skeleton className="h-96 w-full" />
