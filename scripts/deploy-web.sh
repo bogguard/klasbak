@@ -30,7 +30,11 @@ EOF
 
 # Hashed assets never change, so browsers may cache them for a year.
 aws s3 sync apps/web/dist/assets "s3://${bucket}/assets" --region "$region" \
-  --cache-control "public, max-age=31536000, immutable" --delete
+  --cache-control "public, max-age=31536000, immutable" --delete --exclude "*.wasm"
+# WebAssembly (camera barcode reader) needs its exact media type to start efficiently.
+aws s3 cp apps/web/dist/assets "s3://${bucket}/assets" --region "$region" --recursive \
+  --exclude "*" --include "*.wasm" --content-type application/wasm \
+  --cache-control "public, max-age=31536000, immutable"
 
 # Everything else must be revalidated so new releases show up immediately.
 # --delete is safe here only because covers/ and search/ are excluded: they are written by the API.

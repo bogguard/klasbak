@@ -152,7 +152,8 @@
     "forbidden": {
       "title": "Geen toegang",
       "body": "Deze pagina is alleen voor wie de bibliotheek beheert."
-    }
+    },
+    "adminOnly": "Dit is voorbehouden aan beheerders. Vraag het aan een beheerder van de bibliotheek."
   },
   "manage": {
     "heading": "Beheer van de collectie",
@@ -555,7 +556,6 @@
   "staff": {
     "heading": "Medewerkers",
     "explanation": "Wie de bibliotheek mag beheren. Bibliothecarissen doen het dagelijkse werk, beheerders kunnen ook medewerkers toevoegen.",
-    "adminOnly": "Alleen beheerders kunnen medewerkers beheren.",
     "name": "Naam",
     "role": "Rol",
     "roleOf": "Rol van {{name}}",
@@ -590,6 +590,23 @@
       "copy": "Kopiëren",
       "copied": "Gekopieerd",
       "done": "Klaar, doorgegeven"
+    }
+  },
+  "camera": {
+    "open": "Camera",
+    "scanIsbn": "Scannen met camera",
+    "title": "Scannen met de camera",
+    "hint": {
+      "label": "Houd het label van het boek of de lezerskaart in het kader.",
+      "isbn": "Houd de streepjescode op de achterkant van het boek in het kader."
+    },
+    "done": "Klaar",
+    "cancel": "Annuleren",
+    "read": "Gelezen: {{code}}",
+    "problem": {
+      "denied": "De camera mag niet gebruikt worden. Geef de browser toestemming voor de camera (meestal via het slotje naast het webadres) en probeer opnieuw.",
+      "noCamera": "We vinden geen camera op dit toestel.",
+      "other": "De camera kon niet starten. Sluit andere apps die de camera gebruiken en probeer opnieuw."
     }
   }
 }

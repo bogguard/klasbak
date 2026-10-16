@@ -8,6 +8,7 @@ import {
 import {
   Barcode,
   BookCheck,
+  Camera,
   BookUp,
   CircleAlert,
   Info,
@@ -20,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { formatDate } from '../../lib/format';
 import { useReaders } from '../readers/api';
+import { CameraScanner } from '../../components/CameraScanner';
+import { cameraAvailable } from '../../lib/barcodeScanner';
 import { useRenew, useScan } from './api';
 import { playFeedback } from './sound';
 
@@ -68,6 +71,7 @@ export function DeskPage() {
   const deskRef = useRef<ReaderAtDesk | undefined>(undefined);
   const [log, setLog] = useState<Feedback[]>([]);
   const [soundOn, setSoundOn] = useState(storedSound);
+  const [cameraOpen, setCameraOpen] = useState(false);
   // Last scan or reader change; state for rendering the countdown, ref for the timer.
   const [lastActivity, setLastActivity] = useState(() => Date.now());
   const lastActivityRef = useRef(lastActivity);
@@ -262,27 +266,53 @@ export function DeskPage() {
             <label htmlFor="scan" className="mb-1.5 block font-medium">
               {t('desk.scanLabel')}
             </label>
-            <div className="relative">
-              <Barcode
-                className="pointer-events-none absolute left-4 top-1/2 size-6 -translate-y-1/2 text-muted"
-                aria-hidden="true"
-              />
-              <input
-                ref={inputRef}
-                id="scan"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                autoFocus
-                autoComplete="off"
-                spellCheck={false}
-                aria-describedby="scan-hint"
-                className="h-16 w-full rounded-xl border-2 border-accent bg-surface pl-14 pr-4 font-mono text-2xl tracking-wide"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Barcode
+                  className="pointer-events-none absolute left-4 top-1/2 size-6 -translate-y-1/2 text-muted"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={inputRef}
+                  id="scan"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  autoFocus
+                  autoComplete="off"
+                  spellCheck={false}
+                  aria-describedby="scan-hint"
+                  className="h-16 w-full rounded-xl border-2 border-accent bg-surface pl-14 pr-4 font-mono text-2xl tracking-wide"
+                />
+              </div>
+              {cameraAvailable() && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="h-16"
+                  onClick={() => setCameraOpen(true)}
+                >
+                  <Camera className="size-5" aria-hidden="true" />
+                  <span className="hidden sm:inline">{t('camera.open')}</span>
+                </Button>
+              )}
             </div>
             <p id="scan-hint" className="mt-1.5 text-sm text-muted">
               {t('desk.scanHint')}
             </p>
           </form>
+
+          {cameraOpen && (
+            <CameraScanner
+              // Only our labels and reader cards; the ISBN on the back of a book is ignored.
+              formats={['code_128']}
+              mode="continuous"
+              onCode={enqueue}
+              onClose={() => {
+                setCameraOpen(false);
+                inputRef.current?.focus();
+              }}
+            />
+          )}
 
           <div aria-live="polite" aria-atomic="true">
             {latest ? (

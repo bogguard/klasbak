@@ -12,6 +12,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, inputHeight } from '../../components/ui/Form';
+import { AdminOnly } from '../../app/AdminOnly';
 import { formatDate } from '../../lib/format';
 import { useSettings, useUpdateSettings } from './api';
 
@@ -19,6 +20,14 @@ import { useSettings, useUpdateSettings } from './api';
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 
 export function SettingsPage() {
+  return (
+    <AdminOnly>
+      <Settings />
+    </AdminOnly>
+  );
+}
+
+function Settings() {
   const { t } = useTranslation();
   const settings = useSettings();
   const errorMessage = useErrorMessage();

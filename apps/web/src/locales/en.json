@@ -152,7 +152,8 @@
     "forbidden": {
       "title": "No access",
       "body": "This page is only for people who manage the library."
-    }
+    },
+    "adminOnly": "This is for administrators only. Ask one of the library's administrators."
   },
   "manage": {
     "heading": "Manage the collection",
@@ -555,7 +556,6 @@
   "staff": {
     "heading": "Staff",
     "explanation": "Who may manage the library. Librarians do the daily work; administrators can also add staff.",
-    "adminOnly": "Only administrators can manage staff.",
     "name": "Name",
     "role": "Role",
     "roleOf": "Role of {{name}}",
@@ -590,6 +590,23 @@
       "copy": "Copy",
       "copied": "Copied",
       "done": "Done, passed on"
+    }
+  },
+  "camera": {
+    "open": "Camera",
+    "scanIsbn": "Scan with camera",
+    "title": "Scanning with the camera",
+    "hint": {
+      "label": "Hold the book's label or the reader card inside the frame.",
+      "isbn": "Hold the barcode on the back of the book inside the frame."
+    },
+    "done": "Done",
+    "cancel": "Cancel",
+    "read": "Read: {{code}}",
+    "problem": {
+      "denied": "The camera may not be used. Allow the browser to use the camera (usually via the lock next to the web address) and try again.",
+      "noCamera": "We can't find a camera on this device.",
+      "other": "The camera couldn't start. Close other apps using the camera and try again."
     }
   }
 }

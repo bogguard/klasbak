@@ -3,7 +3,7 @@ import {
   ReaderInputSchema,
   UpdateReaderRequestSchema,
 } from '@library/shared';
-import { requireRole, STAFF } from '../lib/auth';
+import { ADMIN, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, IdSchema, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as readers from './service';
 
@@ -25,7 +25,7 @@ app.post('/', async (c) => {
 });
 
 app.post('/import', async (c) => {
-  const actor = requireRole(getActor(c), STAFF);
+  const actor = requireRole(getActor(c), ADMIN);
   const { rows } = parse(ImportReadersRequestSchema, await readJson(c));
   return c.json(await readers.importReaders(actor, rows));
 });
@@ -44,7 +44,7 @@ app.put('/:id', async (c) => {
 
 // Right to erasure: removes the reader, their card number and their reading history.
 app.delete('/:id', async (c) => {
-  const actor = requireRole(getActor(c), STAFF);
+  const actor = requireRole(getActor(c), ADMIN);
   await readers.deleteReader(actor, parse(IdSchema, c.req.param('id')));
   return c.body(null, 204);
 });

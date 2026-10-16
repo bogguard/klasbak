@@ -21,6 +21,7 @@ import {
 } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { formatDate, formatTimestampDate } from '../../lib/format';
+import { useIsAdmin } from '../../lib/auth';
 import { useRenew } from '../circulation/api';
 import { useCreateReader, useDeleteReader, useReader, useReaders, useUpdateReader } from './api';
 
@@ -89,6 +90,7 @@ export function ReaderPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const existing = useReader(id ?? '');
+  const isAdmin = useIsAdmin();
   const errorMessage = useErrorMessage();
 
   const back = (
@@ -148,7 +150,7 @@ export function ReaderPage() {
         </h2>
         <ReaderForm reader={reader} />
       </section>
-      <PrivacyActions reader={reader} loans={loans} />
+      {isAdmin && <PrivacyActions reader={reader} loans={loans} />}
     </div>
   );
 }

@@ -9,6 +9,12 @@ export type Actor = { userId: string; username?: string; roles: Role[] };
 export const STAFF = STAFF_ROLES;
 
 /**
+ * Tasks with wide impact: library settings (loan rules, retention), bulk imports, deleting a
+ * reader with their history, and staff accounts. Daily work stays open to librarians.
+ */
+export const ADMIN: readonly Role[] = ['admin'];
+
+/**
  * Builds the actor from JWT claims that the API Gateway authorizer already verified.
  * HTTP APIs flatten array claims into a string like "[admin librarian]", so both forms are accepted.
  */

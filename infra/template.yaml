@@ -480,10 +480,11 @@ Resources:
           ContentSecurityPolicy:
             Override: true
             # Inline styles are allowed because UI libraries set positioning via style attributes.
+            # 'wasm-unsafe-eval' lets the camera barcode reader run WebAssembly (no JS eval).
             # The extra image hosts are only used by staff to preview a cover found by ISBN
             # lookup; the public catalogue only shows covers from our own bucket (decision 008).
             ContentSecurityPolicy: !Sub >-
-              default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
+              default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline';
               img-src 'self' data: https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com;
               font-src 'self';
               connect-src 'self' https://cognito-idp.${AWS::Region}.amazonaws.com;

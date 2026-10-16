@@ -140,3 +140,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Labels were printed per title or by barcode range, which wastes label sheets and means remembering numbers.
 - **Decision**: Copies with a generated barcode are marked `labelPending` and listed in a sparse index (`gsi1`: `LABELS#PENDING` / barcode); typed barcodes are assumed to have a sticker already. The labels page prints the whole queue in one PDF, then asks whether it printed correctly; only on "yes" are the copies taken off the queue and the next free position on the sheet is remembered per sheet type (on that computer). All copy writes go through one item builder, so edits keep the index entry.
 - **Consequences**: One sheet for a whole batch of new books, no counting. A failed print loses nothing.
+
+## 024 — Administrator-only tasks, and scanning with a camera
+
+- **Roles**: library settings (loan rules, holidays, retention), CSV import of readers, deleting or exporting a reader, and staff accounts are for administrators; the API refuses librarians (403) and the screens hide these actions. Daily work (catalogue, desk, readers, labels) stays open to librarians.
+- **Camera scanning**: desks without a barcode scanner can use the device camera. The browser's own BarcodeDetector is used where available; otherwise the `barcode-detector` ponyfill with ZXing WebAssembly, bundled and served from our own site (no CDN), which needs `'wasm-unsafe-eval'` in the CSP. The desk reads only Code 128 (our labels and cards), so the ISBN on a book's back is ignored; adding books reads only EAN-13 (ISBN). The camera needs HTTPS, which CloudFront provides (and localhost for development).
+- **Consequences**: About 460 kB extra download, only when the camera is opened in a browser without built-in detection. `zxing-wasm` is pinned to the version `barcode-detector` uses.

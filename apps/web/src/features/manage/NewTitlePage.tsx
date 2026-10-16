@@ -1,11 +1,13 @@
 import { isValidIsbn, toIsbn13, type IsbnLookupResult } from '@library/shared';
-import { ArrowLeft, Barcode, PenLine, Plus, Search } from 'lucide-react';
+import { ArrowLeft, Barcode, Camera, PenLine, Plus, Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
+import { CameraScanner } from '../../components/CameraScanner';
 import { ApiError } from '../../lib/api';
+import { cameraAvailable } from '../../lib/barcodeScanner';
 import { findByIsbn, useSearchIndex } from '../catalog/useSearchIndex';
 import { useAddCopyToTitle, useCreateTitle, useIsbnLookup } from './api';
 import { TitleForm } from './TitleForm';
@@ -134,6 +136,7 @@ function IsbnStep({
   const index = useSearchIndex();
   const [isbn, setIsbn] = useState('');
   const [error, setError] = useState<string>();
+  const [cameraOpen, setCameraOpen] = useState(false);
   // An ISBN that's already in the catalogue: offer a copy instead of a duplicate title.
   const [known, setKnown] = useState<{ isbn13: string; id: string; title: string }>();
 
@@ -157,12 +160,16 @@ function IsbnStep({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    await check(isbn);
+  }
+
+  async function check(value: string) {
     setKnown(undefined);
-    if (!isValidIsbn(isbn)) {
+    if (!isValidIsbn(value)) {
       setError(t('manage.form.errors.isbn'));
       return;
     }
-    const isbn13 = toIsbn13(isbn);
+    const isbn13 = toIsbn13(value);
     const [existing] = index.data ? findByIsbn(index.data, isbn13) : [];
     if (existing) setKnown({ isbn13, ...existing });
     else await lookUp(isbn13);
@@ -211,11 +218,31 @@ function IsbnStep({
             </div>
           )}
         </Field>
-        <Button type="submit" disabled={lookup.isPending}>
-          <Search className="size-4" aria-hidden="true" />
-          {lookup.isPending ? t('manage.new.searching') : t('manage.new.lookup')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="submit" disabled={lookup.isPending}>
+            <Search className="size-4" aria-hidden="true" />
+            {lookup.isPending ? t('manage.new.searching') : t('manage.new.lookup')}
+          </Button>
+          {cameraAvailable() && (
+            <Button type="button" variant="secondary" onClick={() => setCameraOpen(true)}>
+              <Camera className="size-4" aria-hidden="true" />
+              {t('camera.scanIsbn')}
+            </Button>
+          )}
+        </div>
       </form>
+      {cameraOpen && (
+        <CameraScanner
+          formats={['ean_13']}
+          mode="single"
+          onCode={(code) => {
+            setIsbn(code);
+            setError(undefined);
+            void check(code);
+          }}
+          onClose={() => setCameraOpen(false)}
+        />
+      )}
 
       {known && (
         <section

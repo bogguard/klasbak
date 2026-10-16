@@ -17,7 +17,7 @@ const items = [
   { to: '/manage', key: 'collection', icon: BookCopy, end: true },
   { to: '/manage/readers', key: 'readers', icon: Users },
   { to: '/manage/labels', key: 'labels', icon: Tags },
-  { to: '/manage/settings', key: 'settings', icon: Settings2 },
+  { to: '/manage/settings', key: 'settings', icon: Settings2, adminOnly: true },
   { to: '/manage/staff', key: 'staff', icon: UserCog, adminOnly: true },
 ] as const;
 

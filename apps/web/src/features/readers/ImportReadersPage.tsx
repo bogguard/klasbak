@@ -3,6 +3,7 @@ import { ArrowLeft, FileUp, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { AdminOnly } from '../../app/AdminOnly';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert } from '../../components/ui/Form';
 import { useImportReaders } from './api';
@@ -15,6 +16,14 @@ type Outcome = { line: number; result: ImportRowResult };
  * Nothing is saved before the librarian has seen exactly what will happen.
  */
 export function ImportReadersPage() {
+  return (
+    <AdminOnly>
+      <ImportReaders />
+    </AdminOnly>
+  );
+}
+
+function ImportReaders() {
   const { t } = useTranslation();
   const importReaders = useImportReaders();
   const errorMessage = useErrorMessage();

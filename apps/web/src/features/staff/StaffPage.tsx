@@ -5,7 +5,7 @@ import {
   type StaffRole,
   type TemporaryCredentials,
 } from '@library/shared';
-import { Copy, KeyRound, ShieldOff, ShieldX, TriangleAlert, UserPlus } from 'lucide-react';
+import { Copy, KeyRound, ShieldOff, TriangleAlert, UserPlus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,25 +16,25 @@ import {
   useErrorMessage,
 } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
-import { useAuth, useIsAdmin } from '../../lib/auth';
+import { AdminOnly } from '../../app/AdminOnly';
+import { useAuth } from '../../lib/auth';
 import { useCreateStaff, useResetMfa, useResetPassword, useStaff, useUpdateStaff } from './api';
 
 /** Admins add and manage the people who run the library. */
 export function StaffPage() {
+  return (
+    <AdminOnly>
+      <Staff />
+    </AdminOnly>
+  );
+}
+
+function Staff() {
   const { t } = useTranslation();
-  const isAdmin = useIsAdmin();
   const staff = useStaff();
   const errorMessage = useErrorMessage();
   // Shown once after creating an account or resetting a password.
   const [credentials, setCredentials] = useState<TemporaryCredentials>();
-
-  if (!isAdmin) {
-    return (
-      <StatusMessage icon={<ShieldX className="size-6" />} title={t('auth.forbidden.title')}>
-        {t('staff.adminOnly')}
-      </StatusMessage>
-    );
-  }
 
   return (
     <div className="space-y-8">

@@ -10,6 +10,7 @@ import {
   StatusMessage,
   useErrorMessage,
 } from '../../components/ui/Feedback';
+import { useIsAdmin } from '../../lib/auth';
 import { useReaders } from './api';
 
 const linkButton = 'inline-flex min-h-11 items-center gap-2 rounded-lg px-4 font-medium transition';
@@ -17,6 +18,7 @@ const linkButton = 'inline-flex min-h-11 items-center gap-2 rounded-lg px-4 font
 export function ReadersPage() {
   const { t } = useTranslation();
   const readers = useReaders();
+  const isAdmin = useIsAdmin();
   const errorMessage = useErrorMessage();
   const [params, setParams] = useSearchParams();
   const group = params.get('group') ?? '';
@@ -45,13 +47,15 @@ export function ReadersPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">{t('readers.heading')}</h1>
         <div className="flex flex-wrap gap-2">
-          <Link
-            to="/manage/readers/import"
-            className={`${linkButton} border border-line bg-surface hover:bg-surface-sunken`}
-          >
-            <FileUp className="size-4" aria-hidden="true" />
-            {t('readers.import')}
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/manage/readers/import"
+              className={`${linkButton} border border-line bg-surface hover:bg-surface-sunken`}
+            >
+              <FileUp className="size-4" aria-hidden="true" />
+              {t('readers.import')}
+            </Link>
+          )}
           <Link
             to="/manage/readers/new"
             className={`${linkButton} bg-accent text-accent-ink hover:opacity-90`}

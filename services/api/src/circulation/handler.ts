@@ -3,7 +3,7 @@ import {
   ScanRequestSchema,
   UpdateSettingsRequestSchema,
 } from '@library/shared';
-import { requireRole, STAFF } from '../lib/auth';
+import { ADMIN, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as circulation from './service';
 
@@ -32,7 +32,7 @@ app.get('/settings', async (c) => {
 });
 
 app.put('/settings', async (c) => {
-  const actor = requireRole(getActor(c), STAFF);
+  const actor = requireRole(getActor(c), ADMIN);
   const body = parse(UpdateSettingsRequestSchema, await readJson(c));
   return c.json(await circulation.updateSettings(actor, body.settings, body.version));
 });
