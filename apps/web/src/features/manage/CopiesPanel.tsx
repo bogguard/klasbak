@@ -85,6 +85,11 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
                       <Badge tone={STATUS_TONES[copy.status]}>
                         {t(`copyStatus.${copy.status}`)}
                       </Badge>
+                      {copy.labelPending && (
+                        <span className="ml-2">
+                          <Badge>{t('labels.pending.badge')}</Badge>
+                        </span>
+                      )}
                       {copy.currentLoan && (
                         <span className="ml-2 text-muted">
                           {t('readers.loans.due', {

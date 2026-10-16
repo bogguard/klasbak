@@ -431,7 +431,9 @@
     "which": "Welke exemplaren?",
     "source": {
       "range": "Een reeks barcodes",
-      "codes": "Bepaalde barcodes"
+      "codes": "Bepaalde barcodes",
+      "pending_one": "Nog af te drukken ({{count}})",
+      "pending_other": "Nog af te drukken ({{count}})"
     },
     "from": "Van",
     "to": "Tot en met",
@@ -450,12 +452,11 @@
     },
     "makePdf": "PDF maken",
     "busy": "Bezig…",
-    "done_one": "PDF met {{count}} label gedownload.",
-    "done_other": "PDF met {{count}} labels gedownload.",
     "unknown": "Niet gevonden en overgeslagen: {{codes}}.",
     "errors": {
       "range": "Geef een reeks cijfers, van laag naar hoog, van maximaal {{max}} labels.",
-      "codes": "Geef minstens één en maximaal {{max}} barcodes."
+      "codes": "Geef minstens één en maximaal {{max}} barcodes.",
+      "nothingPending": "Er wacht niets om af te drukken."
     },
     "cardsCount_one": "{{count}} lezerskaart (alleen actieve lezers).",
     "cardsCount_other": "{{count}} lezerskaarten (alleen actieve lezers).",
@@ -464,7 +465,23 @@
     "printTip": "Druk de PDF af op ‘werkelijke grootte’ (100%), niet ‘passend maken’. Test eerst op gewoon papier en leg het tegen een etiketvel.",
     "printForCopies": "Labels afdrukken",
     "printOne": "Label afdrukken",
-    "printCard": "Lezerskaart afdrukken"
+    "printCard": "Lezerskaart afdrukken",
+    "pending": {
+      "empty": "Alle labels zijn afgedrukt. Nieuwe exemplaren komen hier vanzelf bij.",
+      "summary_one": "{{count}} label: {{first}}",
+      "summary_other": "{{count}} labels: {{first}} tot {{last}}",
+      "more": "en nog {{count}} andere titels",
+      "badge": "Label nog afdrukken"
+    },
+    "confirm": {
+      "question_one": "Is het label goed afgedrukt?",
+      "question_other": "Zijn de {{count}} labels goed afgedrukt?",
+      "explanation": "Dan halen we ze uit de lijst ‘Nog af te drukken’ en onthouden we waar je vel nu staat. Mislukt? Dan blijven ze in de lijst en kan je opnieuw afdrukken.",
+      "yes": "Ja, goed afgedrukt",
+      "no": "Nee, later opnieuw",
+      "done_one": "{{count}} label gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}.",
+      "done_other": "{{count}} labels gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}."
+    }
   },
   "mfa": {
     "heading": "Beveilig je account met tweestapsverificatie",

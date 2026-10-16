@@ -134,3 +134,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: New books showed up in search only after a minute or more, which confused staff: the stream waited up to 60 s, the index was cached for 60 s, and the app kept its copy for 5 minutes.
 - **Decision**: No batching window on the stream (changes during a rebuild still coalesce into the next one), `Cache-Control: no-cache` on the index (revalidated each time, a cheap 304 when unchanged), and after a staff change the app puts the fresh title straight into its own copy of the index.
 - **Consequences**: Staff see their change immediately; visitors within seconds. During busy desk hours the index is rebuilt more often, still a fraction of a cent per day at school scale.
+
+## 023 — A print queue for barcode labels
+
+- **Context**: Labels were printed per title or by barcode range, which wastes label sheets and means remembering numbers.
+- **Decision**: Copies with a generated barcode are marked `labelPending` and listed in a sparse index (`gsi1`: `LABELS#PENDING` / barcode); typed barcodes are assumed to have a sticker already. The labels page prints the whole queue in one PDF, then asks whether it printed correctly; only on "yes" are the copies taken off the queue and the next free position on the sheet is remembered per sheet type (on that computer). All copy writes go through one item builder, so edits keep the index entry.
+- **Consequences**: One sheet for a whole batch of new books, no counting. A failed print loses nothing.

@@ -3,6 +3,7 @@ import {
   CoverUploadRequestSchema,
   CreateTitleRequestSchema,
   LabelLookupRequestSchema,
+  MarkLabelsPrintedRequestSchema,
   UpdateCopyRequestSchema,
   UpdateTitleRequestSchema,
   isValidIsbn,
@@ -59,6 +60,17 @@ app.post('/titles/:id/copies', async (c) => {
   const id = parse(IdSchema, c.req.param('id'));
   const input = parse(CopyInputSchema, await readJson(c));
   return c.json(await catalog.addCopy(actor, id, input), 201);
+});
+
+app.get('/labels/pending', async (c) => {
+  requireRole(getActor(c), STAFF);
+  return c.json(await catalog.pendingLabels());
+});
+
+app.post('/labels/printed', async (c) => {
+  requireRole(getActor(c), STAFF);
+  const { codes } = parse(MarkLabelsPrintedRequestSchema, await readJson(c));
+  return c.json({ marked: await catalog.markLabelsPrinted(codes) });
 });
 
 // POST because a sheet can hold hundreds of codes, too many for a URL.

@@ -1,4 +1,10 @@
-import { ScanCommand, TransactWriteCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
+import {
+  ScanCommand,
+  TransactWriteCommand,
+  UpdateCommand,
+  type ScanCommandOutput,
+} from '@aws-sdk/lib-dynamodb';
 import type { Copy, CopyLabel, Title, TitleWithCopies } from '@library/shared';
 import { db, env } from '../lib/aws';
 import {
@@ -13,7 +19,26 @@ import {
   type Item,
 } from '../lib/dynamo';
 import { ConflictError, NotFoundError } from '../lib/errors';
-import { codeKey, copyKey, titleKey, type CodePointer } from '../lib/keys';
+import {
+  codeKey,
+  copyKey,
+  GSI1,
+  PENDING_LABELS_INDEX_PK,
+  titleKey,
+  type CodePointer,
+} from '../lib/keys';
+
+/**
+ * The stored form of a copy. Copies waiting for a printed label are also in the index, so the
+ * print queue is one cheap query. Always write copies through this, or the queue loses them.
+ */
+function copyItem(copy: Copy): Item {
+  return {
+    ...copyKey(copy.titleId, copy.id),
+    ...(copy.labelPending ? { gsi1pk: PENDING_LABELS_INDEX_PK, gsi1sk: copy.barcode } : {}),
+    ...copy,
+  };
+}
 
 export async function getTitleWithCopies(titleId: string): Promise<TitleWithCopies | undefined> {
   const items = await queryAll({
@@ -143,7 +168,7 @@ export async function putNewCopy(copy: Copy, audit: Item): Promise<void> {
             },
           },
           {
-            Put: { TableName: env.tableName, Item: { ...copyKey(copy.titleId, copy.id), ...copy } },
+            Put: { TableName: env.tableName, Item: copyItem(copy) },
           },
           { Put: { TableName: env.tableName, Item: audit } },
         ],
@@ -206,7 +231,7 @@ export async function replaceCopy(
           {
             Put: {
               TableName: env.tableName,
-              Item: { ...copyKey(copy.titleId, copy.id), ...copy },
+              Item: copyItem(copy),
               ConditionExpression: '#status = :statusWhenRead',
               ExpressionAttributeNames: { '#status': 'status' },
               ExpressionAttributeValues: { ':statusWhenRead': statusWhenRead },
@@ -254,4 +279,47 @@ export async function scanCatalogue(): Promise<TitleWithCopies[]> {
     startKey = page.LastEvaluatedKey;
   } while (startKey);
   return [...titles].map(([pk, title]) => ({ ...title, copies: copies.get(pk) ?? [] }));
+}
+
+/** Copies whose label still has to be printed, with their title, in barcode order. */
+export async function pendingLabels(): Promise<CopyLabel[]> {
+  const copies = (
+    await queryAll({
+      IndexName: GSI1,
+      KeyConditionExpression: 'gsi1pk = :pk',
+      ExpressionAttributeValues: { ':pk': PENDING_LABELS_INDEX_PK },
+    })
+  ).map((item) => stripKeys<Copy>(item));
+  const titles = await batchGetItems<Title>(copies.map((copy) => titleKey(copy.titleId)));
+  return copies.flatMap((copy) => {
+    const title = titles.get(keyId(titleKey(copy.titleId)));
+    return title
+      ? [{ barcode: copy.barcode, titleId: title.id, title: title.title, authors: title.authors }]
+      : [];
+  });
+}
+
+/** Takes printed copies out of the queue. Codes that weren't waiting are simply skipped. */
+export async function markLabelsPrinted(codes: string[]): Promise<number> {
+  const pointers = await batchGetItems<CodePointer>(codes.map(codeKey));
+  let marked = 0;
+  for (const pointer of pointers.values()) {
+    if ((pointer.kind ?? 'copy') !== 'copy') continue;
+    const { titleId, copyId } = pointer as Extract<CodePointer, { kind: 'copy' }>;
+    try {
+      await db.send(
+        new UpdateCommand({
+          TableName: env.tableName,
+          Key: copyKey(titleId, copyId),
+          UpdateExpression: 'REMOVE labelPending, gsi1pk, gsi1sk',
+          ConditionExpression: 'labelPending = :true',
+          ExpressionAttributeValues: { ':true': true },
+        }),
+      );
+      marked++;
+    } catch (error) {
+      if (!(error instanceof ConditionalCheckFailedException)) throw error;
+    }
+  }
+  return marked;
 }

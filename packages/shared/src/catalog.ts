@@ -117,6 +117,8 @@ export type Copy = {
   status: CopyStatus;
   location?: string;
   note?: string;
+  /** True until its barcode label has been printed (the label print queue). */
+  labelPending?: boolean;
   /** Set while the copy is on loan; maintained by circulation only. */
   currentLoan?: { loanId: string; readerId: string; dueDate: string; loanedAt: string };
   createdAt: string;
@@ -153,4 +155,8 @@ export const COVER_MAX_BYTES = 2 * 1024 * 1024;
 export const CoverUploadRequestSchema = z.object({
   // Base64 grows data by a third; allow the full 2 MB after decoding.
   image: z.base64().max(Math.ceil((COVER_MAX_BYTES * 4) / 3) + 4),
+});
+
+export const MarkLabelsPrintedRequestSchema = z.object({
+  codes: z.array(CodeSchema).min(1).max(LABEL_LOOKUP_MAX),
 });

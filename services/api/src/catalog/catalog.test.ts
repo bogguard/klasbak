@@ -1,4 +1,7 @@
-import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
+import {
+  ConditionalCheckFailedException,
+  TransactionCanceledException,
+} from '@aws-sdk/client-dynamodb';
 import {
   BatchGetCommand,
   DynamoDBDocumentClient,
@@ -284,5 +287,86 @@ describe('uploaded covers', () => {
     expect(res.status).toBe(204);
     const update = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems?.[0];
     expect(update?.Update?.UpdateExpression).toBe('SET updatedAt = :now REMOVE coverImageKey');
+  });
+});
+
+describe('label print queue', () => {
+  const putCopyItem = () =>
+    ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems?.[2]?.Put?.Item;
+
+  it('queues copies with a generated barcode, not ones with a typed barcode', async () => {
+    ddb.on(UpdateCommand).resolves({ Attributes: { value: 43 } });
+    ddb.on(TransactWriteCommand).resolves({});
+
+    await request('POST', `/api/catalog/titles/${TITLE_ID}/copies`, '[librarian]', {});
+    expect(putCopyItem()).toMatchObject({
+      labelPending: true,
+      gsi1pk: 'LABELS#PENDING',
+      gsi1sk: '00000043',
+    });
+
+    ddb.resetHistory();
+    await request('POST', `/api/catalog/titles/${TITLE_ID}/copies`, '[librarian]', {
+      barcode: 'OLD-0042',
+    });
+    expect(putCopyItem()).toMatchObject({ labelPending: false });
+    expect(putCopyItem()).not.toHaveProperty('gsi1pk');
+  });
+
+  it('keeps a waiting copy in the queue when it is edited', async () => {
+    ddb
+      .on(GetCommand)
+      .resolvesOnce({ Item: { titleId: TITLE_ID, copyId: 'C1' } })
+      .resolvesOnce({ Item: { ...copyItem, labelPending: true } });
+    ddb.on(TransactWriteCommand).resolves({});
+
+    await request('PATCH', '/api/catalog/copies/00000001', '[librarian]', {
+      location: 'Klasbib 3B',
+    });
+
+    const put = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems?.[0]?.Put;
+    expect(put?.Item).toMatchObject({ gsi1pk: 'LABELS#PENDING', location: 'Klasbib 3B' });
+  });
+
+  it('lists waiting labels with their titles', async () => {
+    ddb.on(QueryCommand).resolves({
+      Items: [{ ...copyItem, labelPending: true, gsi1pk: 'LABELS#PENDING', gsi1sk: '00000001' }],
+    });
+    ddb.on(BatchGetCommand).resolves({ Responses: { 'test-table': [titleItem] } });
+
+    const res = await request('GET', '/api/catalog/labels/pending', '[librarian]');
+
+    expect(await res.json()).toEqual([
+      {
+        barcode: '00000001',
+        titleId: TITLE_ID,
+        title: 'Dolfje Weerwolfje',
+        authors: ['Paul van Loon'],
+      },
+    ]);
+  });
+
+  it('takes printed labels out of the queue and skips copies that were not waiting', async () => {
+    ddb.on(BatchGetCommand).resolves({
+      Responses: {
+        'test-table': [
+          { pk: 'CODE#00000001', sk: 'CODE', kind: 'copy', titleId: TITLE_ID, copyId: 'C1' },
+          { pk: 'CODE#00000002', sk: 'CODE', kind: 'copy', titleId: TITLE_ID, copyId: 'C2' },
+        ],
+      },
+    });
+    ddb
+      .on(UpdateCommand)
+      .resolvesOnce({})
+      .rejectsOnce(new ConditionalCheckFailedException({ message: 'no', $metadata: {} }));
+
+    const res = await request('POST', '/api/catalog/labels/printed', '[librarian]', {
+      codes: ['00000001', '00000002'],
+    });
+
+    expect(await res.json()).toEqual({ marked: 1 });
+    expect(ddb.commandCalls(UpdateCommand)[0]?.args[0].input.UpdateExpression).toBe(
+      'REMOVE labelPending, gsi1pk, gsi1sk',
+    );
   });
 });

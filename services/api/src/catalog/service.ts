@@ -101,6 +101,8 @@ export async function addCopy(
     titleId,
     barcode,
     status: 'available',
+    // A generated barcode needs a printed label; a typed one usually has a sticker already.
+    labelPending: input.barcode === undefined,
     location: input.location,
     note: input.note,
     createdAt: now.toISOString(),
@@ -211,4 +213,13 @@ export async function removeCover(actor: Actor, titleId: string, now = new Date(
     auditItem({ entity: `TITLE#${titleId}`, action: 'title.coverRemoved', actor }, now),
   );
   await deleteCover(previous);
+}
+
+/** The label print queue: copies whose barcode label hasn't been printed yet. */
+export function pendingLabels() {
+  return repository.pendingLabels();
+}
+
+export function markLabelsPrinted(codes: string[]) {
+  return repository.markLabelsPrinted([...new Set(codes)]);
 }

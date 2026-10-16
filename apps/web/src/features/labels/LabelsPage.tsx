@@ -1,5 +1,5 @@
-import { LABEL_LOOKUP_MAX, type LabelLookupResult } from '@library/shared';
-import { Download, IdCard, Tags } from 'lucide-react';
+import { LABEL_LOOKUP_MAX, type CopyLabel, type LabelLookupResult } from '@library/shared';
+import { Check, Download, IdCard, Tags } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
@@ -8,11 +8,38 @@ import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { useAuthorizedApi } from '../../lib/auth';
 import { useConfig } from '../../lib/config';
 import { useReaders } from '../readers/api';
+import { useMarkLabelsPrinted, usePendingLabels } from './api';
 import { expandRange } from './barcode';
 import { bookLabelsPdf, readerCardsPdf } from './pdf';
 import { LABEL_SHEETS } from './sheets';
 
 const OFFSET_KEY = 'label-offset';
+const NEXT_START_KEY = 'label-next-start';
+
+/** Where the next label goes on a partly used sheet, remembered per sheet type on this computer. */
+function storedStart(sheetId: string): string {
+  try {
+    const value = JSON.parse(localStorage.getItem(NEXT_START_KEY) ?? '{}') as Record<
+      string,
+      number
+    >;
+    return String(value[sheetId] ?? 1);
+  } catch {
+    return '1';
+  }
+}
+
+function rememberStart(sheetId: string, next: number) {
+  try {
+    const value = JSON.parse(localStorage.getItem(NEXT_START_KEY) ?? '{}') as Record<
+      string,
+      number
+    >;
+    localStorage.setItem(NEXT_START_KEY, JSON.stringify({ ...value, [sheetId]: next }));
+  } catch {
+    // Not remembered; fine.
+  }
+}
 
 function storedOffset(): { x: number; y: number } {
   try {
@@ -70,16 +97,23 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
   const { t } = useTranslation();
   const api = useAuthorizedApi();
   const errorMessage = useErrorMessage();
-  const [source, setSource] = useState<'codes' | 'range'>(initialCodes ? 'codes' : 'range');
+  const pending = usePendingLabels();
+  const markPrinted = useMarkLabelsPrinted();
+  // The print queue is the usual starting point; links from a title page bring specific codes.
+  const [source, setSource] = useState<'pending' | 'codes' | 'range'>(
+    initialCodes ? 'codes' : 'pending',
+  );
   const [codes, setCodes] = useState(initialCodes.split(',').join('\n'));
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [sheetId, setSheetId] = useState(LABEL_SHEETS[0]?.id ?? '');
-  const [startAt, setStartAt] = useState('1');
+  const [startAt, setStartAt] = useState(() => storedStart(LABEL_SHEETS[0]?.id ?? ''));
   const [offset, setOffset] = useState(storedOffset);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string>();
-  const [result, setResult] = useState<{ printed: number; unknown: string[] }>();
+  // After a PDF: which codes it held, until the librarian confirms the print went well.
+  const [result, setResult] = useState<{ codes: string[]; unknown: string[]; startAt: number }>();
+  const [confirmed, setConfirmed] = useState<number>();
 
   const sheet = LABEL_SHEETS.find((s) => s.id === sheetId) ?? LABEL_SHEETS[0];
   const perSheet = sheet ? sheet.columns * sheet.rows : 1;
@@ -88,6 +122,20 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
     event.preventDefault();
     setProblem(undefined);
     setResult(undefined);
+    setConfirmed(undefined);
+    if (!sheet) return;
+    const start = Math.min(Math.max(1, Number(startAt) || 1), perSheet);
+
+    if (source === 'pending') {
+      const labels = pending.data ?? [];
+      if (labels.length === 0) {
+        setProblem(t('labels.errors.nothingPending'));
+        return;
+      }
+      await makePdf(labels, [], start);
+      return;
+    }
+
     const list =
       source === 'range'
         ? expandRange(from.trim(), to.trim())
@@ -107,26 +155,41 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
       );
       return;
     }
-    if (!sheet) return;
-
-    setBusy(true);
     try {
+      setBusy(true);
       const { labels, unknown } = await api<LabelLookupResult>('/api/catalog/copies/labels', {
         method: 'POST',
         body: { codes: list },
       });
-      if (labels.length > 0) {
-        const doc = await bookLabelsPdf(labels, sheet, {
-          startAt: Math.min(Math.max(1, Number(startAt) || 1), perSheet),
-          offset,
-        });
-        doc.save(`labels-${labels[0]?.barcode}.pdf`);
-      }
-      setResult({ printed: labels.length, unknown });
+      await makePdf(labels, unknown, start);
     } catch (error) {
       setProblem(errorMessage(error));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function makePdf(labels: CopyLabel[], unknown: string[], start: number) {
+    if (!sheet) return;
+    if (labels.length > 0) {
+      const doc = await bookLabelsPdf(labels, sheet, { startAt: start, offset });
+      doc.save(`labels-${labels[0]?.barcode}.pdf`);
+    }
+    setResult({ codes: labels.map((label) => label.barcode), unknown, startAt: start });
+  }
+
+  /** The print went well: take these copies out of the queue and remember where the sheet is. */
+  async function confirmPrinted() {
+    if (!result || !sheet) return;
+    try {
+      await markPrinted.mutateAsync(result.codes);
+      const next = ((result.startAt - 1 + result.codes.length) % perSheet) + 1;
+      rememberStart(sheet.id, next);
+      setStartAt(String(next));
+      setConfirmed(result.codes.length);
+      setResult(undefined);
+    } catch (error) {
+      setProblem(errorMessage(error));
     }
   }
 
@@ -145,7 +208,7 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
       <fieldset className="space-y-3">
         <legend className="mb-2 font-semibold">{t('labels.which')}</legend>
         <div className="flex flex-wrap gap-4">
-          {(['range', 'codes'] as const).map((value) => (
+          {(['pending', 'range', 'codes'] as const).map((value) => (
             <label key={value} className="flex min-h-11 items-center gap-2">
               <input
                 type="radio"
@@ -154,11 +217,15 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
                 onChange={() => setSource(value)}
                 className="size-4 accent-[var(--accent)]"
               />
-              {t(`labels.source.${value}`)}
+              {value === 'pending'
+                ? t('labels.source.pending', { count: pending.data?.length ?? 0 })
+                : t(`labels.source.${value}`)}
             </label>
           ))}
         </div>
-        {source === 'range' ? (
+        {source === 'pending' ? (
+          <PendingSummary labels={pending.data} />
+        ) : source === 'range' ? (
           <div className="flex flex-wrap gap-3">
             <Field label={t('labels.from')} className="w-44">
               {(props) => (
@@ -208,7 +275,10 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
               {...props}
               className={`${props.className} ${inputHeight}`}
               value={sheetId}
-              onChange={(e) => setSheetId(e.target.value)}
+              onChange={(e) => {
+                setSheetId(e.target.value);
+                setStartAt(storedStart(e.target.value));
+              }}
             >
               {LABEL_SHEETS.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -257,10 +327,36 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
       </details>
 
       {problem && <Alert tone="danger">{problem}</Alert>}
-      {result && (
-        <Alert tone={result.unknown.length ? 'danger' : 'success'}>
-          {result.printed > 0 && t('labels.done', { count: result.printed })}{' '}
-          {result.unknown.length > 0 && t('labels.unknown', { codes: result.unknown.join(', ') })}
+      {result?.unknown.length ? (
+        <Alert tone="danger">{t('labels.unknown', { codes: result.unknown.join(', ') })}</Alert>
+      ) : null}
+      {result && result.codes.length > 0 && (
+        <section
+          role="status"
+          className="space-y-3 rounded-xl border border-accent bg-accent-soft p-4"
+        >
+          <p className="font-medium">
+            {t('labels.confirm.question', { count: result.codes.length })}
+          </p>
+          <p className="text-sm text-muted">{t('labels.confirm.explanation')}</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => void confirmPrinted()}
+              disabled={markPrinted.isPending}
+            >
+              <Check className="size-4" aria-hidden="true" />
+              {t('labels.confirm.yes')}
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => setResult(undefined)}>
+              {t('labels.confirm.no')}
+            </Button>
+          </div>
+        </section>
+      )}
+      {confirmed !== undefined && (
+        <Alert tone="success">
+          {t('labels.confirm.done', { count: confirmed, next: startAt })}
         </Alert>
       )}
 
@@ -269,6 +365,29 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
         {busy ? t('labels.busy') : t('labels.makePdf')}
       </Button>
     </form>
+  );
+}
+
+/** What's waiting in the print queue, in short. */
+function PendingSummary({ labels }: { labels: CopyLabel[] | undefined }) {
+  const { t } = useTranslation();
+  if (!labels) return <p className="text-sm text-muted">{t('labels.busy')}</p>;
+  if (labels.length === 0) return <p className="text-sm text-muted">{t('labels.pending.empty')}</p>;
+  const titles = [...new Set(labels.map((label) => label.title))];
+  return (
+    <div className="rounded-xl border border-line bg-surface p-4 text-sm">
+      <p className="font-medium">
+        {t('labels.pending.summary', {
+          count: labels.length,
+          first: labels[0]?.barcode,
+          last: labels.at(-1)?.barcode,
+        })}
+      </p>
+      <p className="mt-1 text-muted">
+        {titles.slice(0, 5).join(' · ')}
+        {titles.length > 5 && ` ${t('labels.pending.more', { count: titles.length - 5 })}`}
+      </p>
+    </div>
   );
 }
 

@@ -431,7 +431,9 @@
     "which": "Which copies?",
     "source": {
       "range": "A range of barcodes",
-      "codes": "Specific barcodes"
+      "codes": "Specific barcodes",
+      "pending_one": "Still to print ({{count}})",
+      "pending_other": "Still to print ({{count}})"
     },
     "from": "From",
     "to": "Up to and including",
@@ -450,12 +452,11 @@
     },
     "makePdf": "Make PDF",
     "busy": "Working…",
-    "done_one": "PDF with {{count}} label downloaded.",
-    "done_other": "PDF with {{count}} labels downloaded.",
     "unknown": "Not found and skipped: {{codes}}.",
     "errors": {
       "range": "Enter a range of numbers, low to high, of at most {{max}} labels.",
-      "codes": "Enter at least one and at most {{max}} barcodes."
+      "codes": "Enter at least one and at most {{max}} barcodes.",
+      "nothingPending": "Nothing is waiting to be printed."
     },
     "cardsCount_one": "{{count}} reader card (active readers only).",
     "cardsCount_other": "{{count}} reader cards (active readers only).",
@@ -464,7 +465,23 @@
     "printTip": "Print the PDF at ‘actual size’ (100%), not ‘fit to page’. Test on plain paper first and hold it against a label sheet.",
     "printForCopies": "Print labels",
     "printOne": "Print label",
-    "printCard": "Print reader card"
+    "printCard": "Print reader card",
+    "pending": {
+      "empty": "All labels are printed. New copies are added here automatically.",
+      "summary_one": "{{count}} label: {{first}}",
+      "summary_other": "{{count}} labels: {{first}} to {{last}}",
+      "more": "and {{count}} more titles",
+      "badge": "Label to print"
+    },
+    "confirm": {
+      "question_one": "Did the label print correctly?",
+      "question_other": "Did the {{count}} labels print correctly?",
+      "explanation": "Then we take them off the ‘Still to print’ list and remember where your sheet is now. Did it fail? Then they stay on the list and you can print again.",
+      "yes": "Yes, printed fine",
+      "no": "No, later again",
+      "done_one": "{{count}} label marked as printed. Next time you start at label {{next}}.",
+      "done_other": "{{count}} labels marked as printed. Next time you start at label {{next}}."
+    }
   },
   "mfa": {
     "heading": "Protect your account with two-step verification",

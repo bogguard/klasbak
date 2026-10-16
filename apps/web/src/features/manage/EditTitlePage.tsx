@@ -73,7 +73,8 @@ export function EditTitlePage() {
           action={
             title.data.copies.length > 0 && (
               <Link
-                to={`/manage/labels?codes=${title.data.copies.map((c) => c.barcode).join(',')}`}
+                // The new copies are in the print queue, together with any others still waiting.
+                to="/manage/labels"
                 className="font-medium underline underline-offset-4"
               >
                 {t('labels.printForCopies')}
