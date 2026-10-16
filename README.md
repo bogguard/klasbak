@@ -23,10 +23,13 @@ Run from the project folder, in one terminal session:
    aws sts get-caller-identity
    ```
 
-2. Store the address that receives alarms, once per AWS account (it stays out of git):
+2. Store the installation's settings, once per AWS account (they stay out of git): the address
+   that receives alarms, and the web address (`none` for now; see "Own web address" below):
 
    ```bash
    aws ssm put-parameter --region eu-west-1 --name /library/alarm-email --type String --value you@example.com
+   aws ssm put-parameter --region eu-west-1 --name /library/domain-name --type String --value none
+   aws ssm put-parameter --region eu-west-1 --name /library/certificate-arn --type String --value none
    ```
 
 3. Deploy the backend and infrastructure (5–10 minutes the first time, mostly CloudFront):
@@ -56,6 +59,22 @@ Run from the project folder, in one terminal session:
    ```
 
    At the first sign-in the app asks for a new password.
+
+## Own web address
+
+By default the library lives at an address like `d1234abcd.cloudfront.net`. To use the school's
+own address, e.g. `bib.schoolnaam.be` (a subdomain: the bare `schoolnaam.be` can't point to
+CloudFront with a normal DNS record):
+
+1. `scripts/request-certificate.sh bib.schoolnaam.be` requests a free certificate and shows one DNS
+   record for whoever manages the school's domain. It waits until AWS sees that record, then stores
+   the settings.
+2. `npm run deploy:dev` (or `deploy:prod`).
+3. Add a second DNS record: `CNAME bib.schoolnaam.be → <CloudFrontDomain output>`.
+4. `scripts/deploy-web.sh dev "<library name>"`; it prints the new address.
+
+To go back to the CloudFront address, set both `/library/domain-name` and
+`/library/certificate-arn` to `none` and deploy.
 
 ## Book data (ISBN lookup)
 

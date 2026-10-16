@@ -18,10 +18,22 @@ Parameters:
     Type: Number
     Default: 0
     Description: Monthly AWS cost budget for the whole account; 0 creates no budget.
+  # The school's own web address (e.g. bib.school.be) and its certificate in us-east-1, kept in
+  # Parameter Store so no school details live in this repository. "none" = use the
+  # CloudFront address. Set them with scripts/request-certificate.sh.
+  DomainName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /library/domain-name
+  CertificateArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /library/certificate-arn
 
 Conditions:
   IsProd: !Equals [!Ref Environment, prod]
   HasBudget: !Not [!Equals [!Ref MonthlyBudgetUsd, 0]]
+  HasCustomDomain: !And
+    - !Not [!Equals [!Ref DomainName, none]]
+    - !Not [!Equals [!Ref CertificateArn, none]]
 
 Globals:
   Function:
@@ -512,6 +524,13 @@ Resources:
         # Europe and North America edge locations only: cheapest, and our users are in Belgium.
         PriceClass: PriceClass_100
         DefaultRootObject: index.html
+        Aliases: !If [HasCustomDomain, [!Ref DomainName], !Ref AWS::NoValue]
+        ViewerCertificate: !If
+          - HasCustomDomain
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
         Origins:
           - Id: web
             DomainName: !GetAtt WebBucket.RegionalDomainName
@@ -648,7 +667,13 @@ Resources:
 
 Outputs:
   AppUrl:
-    Value: !Sub https://${Distribution.DomainName}
+    Value: !If
+      - HasCustomDomain
+      - !Sub https://${DomainName}
+      - !Sub https://${Distribution.DomainName}
+  # The school's DNS points its own address here (a CNAME record).
+  CloudFrontDomain:
+    Value: !GetAtt Distribution.DomainName
   DistributionId:
     Value: !Ref Distribution
   WebBucketName:
