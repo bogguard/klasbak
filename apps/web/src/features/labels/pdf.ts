@@ -87,7 +87,33 @@ export async function bookLabelsPdf(
   return doc;
 }
 
-export async function readerCardsPdf(readers: Reader[], libraryName: string): Promise<jsPDF> {
+export type PdfLogo = { dataUrl: string; width: number; height: number };
+
+/** Loads the school logo for use in a PDF; without a logo (or if it fails) cards simply have none. */
+export async function loadLogo(logoKey: string | undefined): Promise<PdfLogo | undefined> {
+  if (!logoKey) return undefined;
+  try {
+    const blob = await (await fetch(`/${logoKey}`)).blob();
+    const bitmap = await createImageBitmap(blob);
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error ?? new Error('read failed'));
+      reader.readAsDataURL(blob);
+    });
+    const logo = { dataUrl, width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return logo;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function readerCardsPdf(
+  readers: Reader[],
+  libraryName: string,
+  logo?: PdfLogo,
+): Promise<jsPDF> {
   const doc = await newDocument();
   const sheet = CARD_SHEET;
   const positions = labelPositions(sheet, readers.length);
@@ -102,11 +128,27 @@ export async function readerCardsPdf(readers: Reader[], libraryName: string): Pr
     doc.setDrawColor(200, 200, 200).setLineWidth(0.2);
     doc.roundedRect(x, y, sheet.labelWidth, sheet.labelHeight, 3, 3, 'S');
 
+    // The school logo top right (at most 10 mm high, in proportion), the name next to it.
+    let nameWidth = inner;
+    if (logo) {
+      const height = Math.min(10, (logo.height / logo.width) * 24);
+      const width = (logo.width / logo.height) * height;
+      const format = logo.dataUrl.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(
+        logo.dataUrl,
+        format,
+        x + sheet.labelWidth - padding - width,
+        y + padding - 1,
+        width,
+        height,
+      );
+      nameWidth = inner - width - 2;
+    }
     doc
       .setFont('helvetica', 'bold')
       .setFontSize(10)
       .setTextColor(...ACCENT);
-    doc.text(fit(doc, libraryName, inner), x + padding, y + padding + 10 * PT);
+    doc.text(fit(doc, libraryName, nameWidth), x + padding, y + padding + 10 * PT);
 
     doc.setFontSize(15).setTextColor(0, 0, 0);
     doc.text(fit(doc, readerName(reader), inner), x + padding, y + 19);

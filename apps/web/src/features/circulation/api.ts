@@ -1,4 +1,5 @@
 import type {
+  Branding,
   LibrarySettings,
   LibrarySettingsInput,
   Loan,
@@ -8,6 +9,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';
+import { configKey } from '../../lib/config';
 
 export function useScan() {
   const api = useAuthorizedApi();
@@ -66,4 +68,27 @@ export function useUpdateSettings() {
       api<LibrarySettings>('/api/circulation/settings', { method: 'PUT', body: input }),
     onSuccess: (settings) => queryClient.setQueryData(['settings'], settings),
   });
+}
+
+/** Name and logo; afterwards the configuration is reloaded so the header updates at once. */
+export function useBranding() {
+  const api = useAuthorizedApi();
+  const queryClient = useQueryClient();
+  const refresh = () => queryClient.invalidateQueries({ queryKey: configKey });
+  return {
+    rename: useMutation({
+      mutationFn: (libraryName: string) =>
+        api<Branding>('/api/circulation/branding', { method: 'PUT', body: { libraryName } }),
+      onSuccess: refresh,
+    }),
+    uploadLogo: useMutation({
+      mutationFn: (image: string) =>
+        api<Branding>('/api/circulation/branding/logo', { method: 'PUT', body: { image } }),
+      onSuccess: refresh,
+    }),
+    removeLogo: useMutation({
+      mutationFn: () => api<Branding>('/api/circulation/branding/logo', { method: 'DELETE' }),
+      onSuccess: refresh,
+    }),
+  };
 }

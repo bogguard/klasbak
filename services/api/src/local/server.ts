@@ -50,6 +50,7 @@ const server = new Hono();
 server.get('/config.json', (c) => c.json({ libraryName: 'Bibliotheek (lokaal)', devAuth: true }));
 server.use('/search/*', serveStatic({ root: publicDir }));
 server.use('/covers/*', serveStatic({ root: publicDir }));
+server.use('/branding/*', serveStatic({ root: publicDir }));
 
 server.all('/api/catalog/*', async (c) => {
   const response = await catalog.fetch(c.req.raw, fakeEvent(c.req.header('authorization')));

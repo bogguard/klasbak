@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './branding';
 export * from './catalog';
 export * from './circulation';
 export * from './isbn';

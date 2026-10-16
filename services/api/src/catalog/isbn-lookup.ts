@@ -72,7 +72,12 @@ async function openLibrary(isbn: string): Promise<IsbnLookupResult | undefined> 
       publisher: parsed.publishers?.[0]?.name,
       publishedYear: extractYear(parsed.publish_date),
       isbn,
-      subjects: parsed.subjects?.slice(0, 10).map((s) => s.name) ?? [],
+      // Skip machine tags like "series:Harry_Potter"; they aren't subjects for readers.
+      subjects:
+        parsed.subjects
+          ?.map((s) => s.name)
+          .filter((name) => !name.includes(':'))
+          .slice(0, 10) ?? [],
     },
     coverUrl: parsed.cover?.large ?? parsed.cover?.medium,
   };

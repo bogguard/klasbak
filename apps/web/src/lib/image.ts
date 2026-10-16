@@ -9,7 +9,18 @@ const QUALITY = 0.85;
 
 export class UnsupportedImageError extends Error {}
 
-export async function prepareCover(file: File): Promise<string> {
+export function prepareCover(file: File): Promise<string> {
+  return prepareImage(file, { maxSide: MAX_SIDE, type: 'image/jpeg' });
+}
+
+/**
+ * Scales an image down (never up), turns it upright and re-saves it, dropping metadata.
+ * PNG keeps transparency (logos); JPEG is smaller (photos).
+ */
+export async function prepareImage(
+  file: File,
+  options: { maxSide: number; type: 'image/jpeg' | 'image/png' },
+): Promise<string> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
@@ -17,7 +28,7 @@ export async function prepareCover(file: File): Promise<string> {
     // e.g. HEIC photos in a browser that can't read them.
     throw new UnsupportedImageError();
   }
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, options.maxSide / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
@@ -27,7 +38,7 @@ export async function prepareCover(file: File): Promise<string> {
   bitmap.close();
 
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/jpeg', QUALITY),
+    canvas.toBlob(resolve, options.type, QUALITY),
   );
   if (!blob) throw new UnsupportedImageError();
   return toBase64(new Uint8Array(await blob.arrayBuffer()));

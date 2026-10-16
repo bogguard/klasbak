@@ -4,8 +4,8 @@ import MiniSearch, { type SearchResult } from 'minisearch';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
-import { Badge, Button, Skeleton, StatusMessage } from '../../components/ui/Feedback';
-import { TitleCover } from './TitleCover';
+import { Button, Skeleton, StatusMessage } from '../../components/ui/Feedback';
+import { TitleCover, TypeIcon } from './TitleCover';
 import { useSearchIndex } from './useSearchIndex';
 
 const PAGE_SIZE = 30;
@@ -58,6 +58,18 @@ export function SearchPage({
     // With words the best matches come first; when browsing, the chosen order.
     return browsing ? [...found].sort(SORTS[sort] ?? SORTS.new) : found;
   }, [index.data, query, type, avi, onlyAvailable, sort, browsing]);
+
+  // Offer only filters that match something in this library (no empty "Partituur" chip).
+  const facets = useMemo(() => {
+    const all = (index.data?.search(MiniSearch.wildcard) ?? []) as Result[];
+    const present = <T,>(values: (T | undefined)[]) => new Set(values.filter(Boolean));
+    const types = present(all.map((r) => r.type));
+    const levels = present(all.map((r) => r.aviLevel));
+    return {
+      types: TITLE_TYPES.filter((value) => types.has(value)),
+      aviLevels: AVI_LEVELS.filter((value) => levels.has(value)),
+    };
+  }, [index.data]);
 
   // Load more titles automatically when the end of the list scrolls into view.
   const sentinel = useRef<HTMLDivElement>(null);
@@ -119,25 +131,70 @@ export function SearchPage({
               className="h-14 w-full rounded-xl border border-line bg-surface pl-12 pr-4 text-lg shadow-sm placeholder:text-muted"
             />
           </div>
-          <div className="flex flex-wrap gap-3">
-            <FilterSelect
-              label={t('search.filters.type')}
-              value={type}
-              onChange={(v) => update('type', v)}
-              options={[
-                { value: '', label: t('search.filters.allTypes') },
-                ...TITLE_TYPES.map((value) => ({ value, label: t(`types.${value}`) })),
-              ]}
-            />
-            <FilterSelect
-              label={t('search.filters.avi')}
-              value={avi}
-              onChange={(v) => update('avi', v)}
-              options={[
-                { value: '', label: t('search.filters.anyLevel') },
-                ...AVI_LEVELS.map((value) => ({ value, label: value })),
-              ]}
-            />
+          <div className="-mx-4 overflow-x-auto px-4 pb-1">
+            <div role="group" aria-label={t('search.filters.type')} className="flex w-max gap-2">
+              <Chip pressed={!type} onClick={() => update('type', '')}>
+                {t('search.filters.allTypes')}
+              </Chip>
+              {facets.types.map((value) => (
+                <Chip
+                  key={value}
+                  pressed={type === value}
+                  onClick={() => update('type', type === value ? '' : value)}
+                >
+                  <TypeIcon type={value} className="size-4" />
+                  {t(`types.${value}`)}
+                </Chip>
+              ))}
+              <span className="mx-1 w-px self-stretch bg-line" aria-hidden="true" />
+              <Chip
+                pressed={onlyAvailable}
+                onClick={() => update('available', onlyAvailable ? '' : '1')}
+              >
+                <span className="size-2 rounded-full bg-success" aria-hidden="true" />
+                {t('search.filters.onlyAvailable')}
+              </Chip>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      {index.data && index.data.documentCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+          <p className="text-sm text-muted" aria-live="polite">
+            {results &&
+              (browsing
+                ? t('search.browseCount', { count: results.length })
+                : t('search.resultCount', { count: results.length }))}
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={() =>
+                  setParams(() => {
+                    const keep = new URLSearchParams();
+                    if (query) keep.set('q', query);
+                    if (params.get('sort')) keep.set('sort', sort);
+                    return keep;
+                  })
+                }
+                className="ml-3 font-medium text-accent underline underline-offset-4"
+              >
+                {t('search.filters.clear')}
+              </button>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {facets.aviLevels.length > 0 && (
+              <FilterSelect
+                label={t('search.filters.avi')}
+                value={avi}
+                onChange={(v) => update('avi', v)}
+                options={[
+                  { value: '', label: t('search.filters.anyLevel') },
+                  ...facets.aviLevels.map((value) => ({ value, label: `AVI ${value}` })),
+                ]}
+              />
+            )}
             {browsing && (
               <FilterSelect
                 label={t('search.sort.label')}
@@ -149,36 +206,11 @@ export function SearchPage({
                 }))}
               />
             )}
-            <label className="flex min-h-11 items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={onlyAvailable}
-                onChange={(e) => update('available', e.target.checked ? '1' : '')}
-                className="size-4 accent-[var(--accent)]"
-              />
-              {t('search.filters.onlyAvailable')}
-            </label>
-            {hasFilters && (
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() =>
-                  setParams(() => {
-                    const keep = new URLSearchParams();
-                    if (query) keep.set('q', query);
-                    if (params.get('sort')) keep.set('sort', sort);
-                    return keep;
-                  })
-                }
-              >
-                {t('search.filters.clear')}
-              </Button>
-            )}
           </div>
-        </form>
-      </section>
+        </div>
+      )}
 
-      <section aria-live="polite" aria-busy={index.isPending}>
+      <section aria-busy={index.isPending}>
         {index.isPending ? (
           <ResultsSkeleton />
         ) : index.isError ? (
@@ -200,14 +232,9 @@ export function SearchPage({
           </StatusMessage>
         ) : (
           <>
-            <p className="mb-3 text-sm text-muted">
-              {browsing
-                ? t('search.browseCount', { count: results.length })
-                : t('search.resultCount', { count: results.length })}
-            </p>
-            <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {results.slice(0, visible).map((result) => (
-                <ResultItem key={result.id} result={result} to={titleLink(result.id)} />
+                <ResultCard key={result.id} result={result} to={titleLink(result.id)} />
               ))}
             </ul>
             {hasMore && (
@@ -224,39 +251,68 @@ export function SearchPage({
   );
 }
 
-function ResultItem({ result, to }: { result: Result; to: string }) {
+function ResultCard({ result, to }: { result: Result; to: string }) {
   const { t } = useTranslation();
   return (
     <li>
-      <Link to={to} className="flex gap-4 p-4 hover:bg-surface-sunken">
-        <TitleCover
-          coverImageKey={result.coverImageKey}
-          type={result.type as TitleType}
-          size="small"
-        />
-        <div className="min-w-0 space-y-1">
-          <p className="font-semibold leading-snug">
+      <Link to={to} className="group block space-y-2 rounded-lg focus-visible:outline-offset-4">
+        <div className="relative transition duration-200 group-hover:-translate-y-1">
+          <TitleCover
+            coverImageKey={result.coverImageKey}
+            type={result.type as TitleType}
+            title={result.title}
+            authors={result.authors}
+          />
+          {result.aviLevel && (
+            <span className="absolute bottom-1.5 right-1.5 rounded-full bg-surface/95 px-2 py-0.5 text-xs font-bold text-ink shadow-sm">
+              AVI {result.aviLevel}
+            </span>
+          )}
+        </div>
+        <div className="space-y-0.5">
+          <p className="line-clamp-2 font-semibold leading-snug group-hover:text-accent">
             {result.title}
-            {result.subtitle && (
-              <span className="font-normal text-muted"> · {result.subtitle}</span>
-            )}
           </p>
-          {result.authors && <p className="text-muted">{result.authors}</p>}
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Badge>{t(`types.${result.type}`)}</Badge>
-            {result.aviLevel && <Badge>AVI {result.aviLevel}</Badge>}
-            {result.publishedYear && <Badge>{result.publishedYear}</Badge>}
-            {result.copies > 0 &&
-              (result.available > 0 ? (
-                <Badge tone="success">{t('copyStatus.available')}</Badge>
-              ) : (
-                // On loan, lost or damaged: for a visitor it's simply not on the shelf.
-                <Badge tone="warning">{t('search.notAvailable')}</Badge>
-              ))}
-          </div>
+          {result.authors && <p className="line-clamp-1 text-sm text-muted">{result.authors}</p>}
+          {result.copies > 0 && (
+            <p className="flex items-center gap-1.5 text-sm">
+              <span
+                className={`size-2 rounded-full ${result.available > 0 ? 'bg-success' : 'bg-warning'}`}
+                aria-hidden="true"
+              />
+              <span className={result.available > 0 ? 'text-success' : 'text-warning'}>
+                {result.available > 0 ? t('copyStatus.available') : t('search.notAvailable')}
+              </span>
+            </p>
+          )}
         </div>
       </Link>
     </li>
+  );
+}
+
+function Chip({
+  pressed,
+  onClick,
+  children,
+}: {
+  pressed: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={`inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition ${
+        pressed
+          ? 'border-accent bg-accent text-accent-ink'
+          : 'border-line bg-surface text-ink hover:border-accent'
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -273,11 +329,12 @@ function FilterSelect({
 }) {
   return (
     <label className="flex items-center gap-2 text-sm text-muted">
-      {label}
+      <span className="sr-only sm:not-sr-only">{label}</span>
       <select
+        aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-11 rounded-lg border border-line bg-surface px-3 text-base text-ink"
+        className="min-h-10 rounded-lg border border-line bg-surface px-3 text-sm font-semibold text-ink"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -291,14 +348,12 @@ function FilterSelect({
 
 function ResultsSkeleton() {
   return (
-    <div className="space-y-4">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="flex gap-4">
-          <Skeleton className="h-24 w-16" />
-          <div className="flex-1 space-y-2 py-1">
-            <Skeleton className="h-5 w-2/3" />
-            <Skeleton className="h-4 w-1/3" />
-          </div>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {Array.from({ length: 10 }, (_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="aspect-[2/3] w-full" />
+          <Skeleton className="h-4 w-4/5" />
+          <Skeleton className="h-3 w-1/2" />
         </div>
       ))}
     </div>

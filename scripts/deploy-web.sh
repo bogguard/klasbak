@@ -37,10 +37,10 @@ aws s3 cp apps/web/dist/assets "s3://${bucket}/assets" --region "$region" --recu
   --cache-control "public, max-age=31536000, immutable"
 
 # Everything else must be revalidated so new releases show up immediately.
-# --delete is safe here only because covers/ and search/ are excluded: they are written by the API.
+# --delete is safe here only because covers/, search/ and branding/ are excluded: the API writes them.
 aws s3 sync apps/web/dist "s3://${bucket}" --region "$region" \
   --cache-control "no-cache" --delete \
-  --exclude "assets/*" --exclude "covers/*" --exclude "search/*"
+  --exclude "assets/*" --exclude "covers/*" --exclude "search/*" --exclude "branding/*"
 
 aws cloudfront create-invalidation --distribution-id "$distribution" \
   --paths "/index.html" "/config.json" --query "Invalidation.Id" --output text

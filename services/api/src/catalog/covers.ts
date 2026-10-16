@@ -1,6 +1,7 @@
 import { logger } from '../lib/observability';
 import { ulid } from 'ulid';
 import { AppError } from '../lib/errors';
+import { detectImageType, IMAGE_EXTENSIONS } from '../lib/images';
 import { deletePublicFile, putPublicFile } from '../lib/public-files';
 
 /*
@@ -73,16 +74,6 @@ export async function storeCover(titleId: string, url: string): Promise<string |
   }
 }
 
-/** Recognises the image type from the file's first bytes; the declared type isn't trusted. */
-export function detectImageType(bytes: Uint8Array): keyof typeof ALLOWED_TYPES | undefined {
-  const starts = (...values: number[]) => values.every((v, i) => bytes[i] === v);
-  if (starts(0xff, 0xd8, 0xff)) return 'image/jpeg';
-  if (starts(0x89, 0x50, 0x4e, 0x47)) return 'image/png';
-  const ascii = (from: number, to: number) => String.fromCharCode(...bytes.slice(from, to));
-  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
-  return undefined;
-}
-
 /**
  * Stores a cover a librarian uploaded (a photo of the book, usually). Every upload gets a new
  * file name, so browsers and CloudFront never show a cached older cover.
@@ -92,7 +83,7 @@ export async function storeUploadedCover(titleId: string, bytes: Uint8Array): Pr
   if (!type || bytes.byteLength > MAX_BYTES) {
     throw new AppError(400, 'INVALID_IMAGE', 'Upload a JPEG, PNG or WebP image of at most 2 MB');
   }
-  const key = `covers/${titleId}-${ulid().toLowerCase()}.${ALLOWED_TYPES[type]}`;
+  const key = `covers/${titleId}-${ulid().toLowerCase()}.${IMAGE_EXTENSIONS[type]}`;
   await putPublicFile(key, bytes, type, 'public, max-age=604800, immutable');
   return key;
 }

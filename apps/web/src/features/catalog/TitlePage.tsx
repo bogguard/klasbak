@@ -50,15 +50,23 @@ function TitleDetails({ title }: { title: PublicTitle }) {
   const languageName = new Intl.DisplayNames([i18n.language], { type: 'language' }).of(
     title.language,
   );
+  // Some sources add machine tags like "series:Harry_Potter"; they mean nothing to readers.
+  const subjects = title.subjects.filter((subject) => !subject.includes(':'));
 
   return (
     <article className="grid gap-8 md:grid-cols-[14rem_1fr]">
-      <TitleCover coverImageKey={title.coverImageKey} type={title.type} size="large" />
+      <TitleCover
+        coverImageKey={title.coverImageKey}
+        type={title.type}
+        title={title.title}
+        authors={title.authors.join(', ')}
+        className="w-36 sm:w-48 md:w-full md:max-w-60"
+      />
 
       <div className="space-y-6">
         <header className="space-y-2">
-          <Badge>{t(`types.${title.type}`)}</Badge>
-          <h1 className="text-3xl font-semibold tracking-tight">{title.title}</h1>
+          {title.type !== 'book' && <Badge>{t(`types.${title.type}`)}</Badge>}
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{title.title}</h1>
           {title.subtitle && <p className="text-xl text-muted">{title.subtitle}</p>}
           {title.authors.length > 0 && (
             <p className="text-lg">{t('title.by', { authors: title.authors.join(', ') })}</p>
@@ -86,13 +94,13 @@ function TitleDetails({ title }: { title: PublicTitle }) {
           </dl>
         </section>
 
-        {title.subjects.length > 0 && (
+        {subjects.length > 0 && (
           <section aria-labelledby="subjects-heading">
             <h2 id="subjects-heading" className="mb-2 font-semibold">
               {t('title.subjects')}
             </h2>
             <ul className="flex flex-wrap gap-2">
-              {title.subjects.map((subject) => (
+              {subjects.map((subject) => (
                 <li key={subject}>
                   <Link
                     to={`/?q=${encodeURIComponent(subject)}`}
@@ -198,7 +206,7 @@ function TitleError({ error, onRetry }: { error: unknown; onRetry: () => void })
 function TitleSkeleton() {
   return (
     <div className="grid gap-8 md:grid-cols-[14rem_1fr]">
-      <Skeleton className="aspect-[2/3] w-full max-w-56" />
+      <Skeleton className="aspect-[2/3] w-full max-w-60" />
       <div className="space-y-4">
         <Skeleton className="h-9 w-3/4" />
         <Skeleton className="h-5 w-1/3" />

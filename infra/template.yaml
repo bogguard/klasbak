@@ -265,6 +265,11 @@ Resources:
         LogGroup: !Ref CirculationLogGroup
       Policies:
         - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        # The library's name and logo, published as public files.
+        - Statement:
+            - Effect: Allow
+              Action: [s3:PutObject, s3:DeleteObject]
+              Resource: !Sub ${WebBucket.Arn}/branding/*
         - Statement:
             - Effect: Allow
               Action: cognito-idp:AdminGetUser

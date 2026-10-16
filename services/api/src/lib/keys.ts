@@ -12,6 +12,7 @@
  *   Reader        pk READER#<readerId>  sk READER        gsi1: READERS / <group>#<name>#<id>
  *   Loan          pk READER#<readerId>  sk LOAN#<loanId> gsi1 while active: LOANS#ACTIVE / <dueDate>#<loanId>
  *   Settings      pk SETTINGS           sk LIBRARY
+ *   Branding      pk SETTINGS           sk BRANDING      name and logo, also published as a file
  *   Counter       pk COUNTER            sk <name>        last generated number
  *   Audit         pk AUDIT#<entity>     sk <timestamp>#<ulid>   (expires via TTL)
  */
@@ -33,6 +34,7 @@ export const loanKey = (readerId: string, loanId: string) => ({
 });
 
 export const settingsKey = { pk: 'SETTINGS', sk: 'LIBRARY' };
+export const brandingKey = { pk: 'SETTINGS', sk: 'BRANDING' };
 
 export const READERS_INDEX_PK = 'READERS';
 export const ACTIVE_LOANS_INDEX_PK = 'LOANS#ACTIVE';

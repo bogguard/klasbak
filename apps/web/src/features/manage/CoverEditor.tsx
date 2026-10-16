@@ -49,7 +49,8 @@ export function CoverEditor({ title }: { title: TitleWithCopies }) {
           key={title.coverImageKey}
           coverImageKey={title.coverImageKey}
           type={title.type}
-          size="large"
+          title={title.title}
+          authors={title.authors.join(', ')}
         />
       </div>
       <label

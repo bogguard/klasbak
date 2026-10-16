@@ -9,6 +9,8 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/nunito": "^5.3.0",
     "@library/shared": "*",
     "@tanstack/react-query": "^5.104.3",
     "aws-amplify": "^6.22.2",

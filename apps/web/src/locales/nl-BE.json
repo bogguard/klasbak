@@ -439,6 +439,16 @@
       "heading": "Privacy",
       "retention": "Leesgeschiedenis bewaren (dagen)",
       "retentionHint": "Teruggebrachte uitleningen worden daarna gewist; alleen anonieme aantallen blijven over. Tussen 30 en 3650 dagen."
+    },
+    "branding": {
+      "heading": "Huisstijl",
+      "name": "Naam van de bibliotheek",
+      "nameHint": "Staat bovenaan elke pagina en op de lezerskaarten.",
+      "saveName": "Naam opslaan",
+      "logoAlt": "Logo van de school",
+      "addLogo": "Logo toevoegen",
+      "replaceLogo": "Ander logo kiezen",
+      "logoHint": "PNG met doorzichtige achtergrond werkt het mooist. Verschijnt bovenaan de website, op lezerskaarten en als icoontje in de browser."
     }
   },
   "labels": {

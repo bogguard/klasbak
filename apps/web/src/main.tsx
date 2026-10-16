@@ -10,6 +10,8 @@ import { SearchPage } from './features/catalog/SearchPage';
 import { TitlePage } from './features/catalog/TitlePage';
 import { AuthProvider } from './lib/auth';
 import './lib/i18n';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/nunito';
 import './styles.css';
 
 const queryClient = new QueryClient({

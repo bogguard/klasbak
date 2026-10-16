@@ -5,39 +5,46 @@
  * never raw colours, so light/dark and future branding change in one place.
  */
 :root {
-  --surface: #ffffff;
-  --surface-sunken: #f6f7f6;
-  --ink: #1c2421;
-  --muted: #5b6662;
-  --line: #e2e6e4;
-  --accent: #0f766e;
+  /* Warm paper tones: a library, not an admin panel. */
+  --surface: #fffdf9;
+  --surface-sunken: #f5f1ea;
+  --ink: #1f2a27;
+  --muted: #5c6661;
+  --line: #e5ddd0;
+  --accent: #0f6e66;
   --accent-ink: #ffffff;
-  --accent-soft: #e6f4f2;
+  --accent-soft: #e2f0ec;
   --success: #15803d;
-  --success-soft: #e8f6ec;
-  --warning: #a16207;
-  --warning-soft: #fdf5e1;
+  --success-soft: #e6f4e9;
+  --warning: #a15c07;
+  --warning-soft: #fcf1dc;
   --danger: #b91c1c;
-  --danger-soft: #fdecec;
+  --danger-soft: #fbe9e7;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: #151a18;
-    --surface-sunken: #0e1211;
-    --ink: #e8edeb;
-    --muted: #9aa6a1;
-    --line: #2a3330;
-    --accent: #2dd4bf;
-    --accent-ink: #062b27;
-    --accent-soft: #133631;
+    --surface: #1b201e;
+    --surface-sunken: #131715;
+    --ink: #ece8e1;
+    --muted: #a7a39b;
+    --line: #2f3633;
+    --accent: #5fd3c2;
+    --accent-ink: #0b2b27;
+    --accent-soft: #163631;
     --success: #4ade80;
     --success-soft: #12301d;
-    --warning: #facc15;
-    --warning-soft: #332a0c;
+    --warning: #f5b544;
+    --warning-soft: #332712;
     --danger: #f87171;
-    --danger-soft: #3a1515;
+    --danger-soft: #3a1717;
   }
+}
+
+@theme {
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Headings and generated covers: a bookish typeface. */
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
 }
 
 @theme inline {
@@ -60,6 +67,12 @@
 @layer base {
   html {
     @apply bg-surface-sunken text-ink antialiased;
+  }
+  h1,
+  h2,
+  legend {
+    @apply font-display;
+    font-optical-sizing: auto;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;

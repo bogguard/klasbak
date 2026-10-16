@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const { VITE_PROXY_TARGET: target } = loadEnv(mode, process.cwd(), '');
   const proxy = target
     ? Object.fromEntries(
-        ['/api', '/search', '/covers', '/config.json'].map((path) => [
+        ['/api', '/search', '/covers', '/branding', '/config.json'].map((path) => [
           path,
           { target, changeOrigin: true },
         ]),

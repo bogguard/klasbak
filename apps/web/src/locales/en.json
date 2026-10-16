@@ -439,6 +439,16 @@
       "heading": "Privacy",
       "retention": "Keep reading history (days)",
       "retentionHint": "Returned loans are deleted after this; only anonymous counts remain. Between 30 and 3650 days."
+    },
+    "branding": {
+      "heading": "Branding",
+      "name": "Name of the library",
+      "nameHint": "Shown at the top of every page and on reader cards.",
+      "saveName": "Save name",
+      "logoAlt": "School logo",
+      "addLogo": "Add logo",
+      "replaceLogo": "Choose another logo",
+      "logoHint": "A PNG with a transparent background looks best. Shown at the top of the website, on reader cards and as the browser tab icon."
     }
   },
   "labels": {

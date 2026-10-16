@@ -13,8 +13,10 @@ import { useTranslation } from 'react-i18next';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, inputHeight } from '../../components/ui/Form';
 import { AdminOnly } from '../../app/AdminOnly';
+import { useConfig } from '../../lib/config';
 import { formatDate } from '../../lib/format';
 import { useSettings, useUpdateSettings } from './api';
+import { BrandingSection } from './BrandingSection';
 
 // Monday first, as on a Belgian calendar; values follow Date.getUTCDay().
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
@@ -29,12 +31,16 @@ export function SettingsPage() {
 
 function Settings() {
   const { t } = useTranslation();
+  const { loaded } = useConfig();
   const settings = useSettings();
   const errorMessage = useErrorMessage();
 
   return (
     <div className="max-w-3xl space-y-6">
       <h1 className="text-3xl font-semibold tracking-tight">{t('settings.heading')}</h1>
+      {/* Remount once the configuration is loaded, so the name field starts with the real name. */}
+      <BrandingSection key={String(loaded)} />
+      <hr className="border-line" />
       {settings.isPending ? (
         <Skeleton className="h-96 w-full" />
       ) : settings.isError ? (

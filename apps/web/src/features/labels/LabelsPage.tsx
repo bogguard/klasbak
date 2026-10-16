@@ -10,7 +10,7 @@ import { useConfig } from '../../lib/config';
 import { useReaders } from '../readers/api';
 import { useMarkLabelsPrinted, usePendingLabels } from './api';
 import { expandRange } from './barcode';
-import { bookLabelsPdf, readerCardsPdf } from './pdf';
+import { bookLabelsPdf, loadLogo, readerCardsPdf } from './pdf';
 import { LABEL_SHEETS } from './sheets';
 
 const OFFSET_KEY = 'label-offset';
@@ -394,7 +394,7 @@ function PendingSummary({ labels }: { labels: CopyLabel[] | undefined }) {
 function ReaderCards({ readerIds }: { readerIds: string | null }) {
   const { t } = useTranslation();
   const readers = useReaders();
-  const { libraryName } = useConfig();
+  const { libraryName, logoKey } = useConfig();
   const [group, setGroup] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<number>();
@@ -414,7 +414,7 @@ function ReaderCards({ readerIds }: { readerIds: string | null }) {
   async function makePdf() {
     setBusy(true);
     try {
-      const doc = await readerCardsPdf(selected, libraryName);
+      const doc = await readerCardsPdf(selected, libraryName, await loadLogo(logoKey));
       doc.save(`lezerskaarten${group ? `-${group}` : ''}.pdf`);
       setDone(selected.length);
     } finally {

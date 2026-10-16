@@ -11,7 +11,7 @@ const navItem =
 
 export function Layout() {
   const { t, i18n } = useTranslation();
-  const { libraryName } = useConfig();
+  const { libraryName, logoKey } = useConfig();
   const { session, signOut } = useAuth();
   const staff = useIsStaff();
   const navigate = useNavigate();
@@ -19,6 +19,14 @@ export function Layout() {
   useEffect(() => {
     document.title = libraryName;
   }, [libraryName]);
+
+  // The school's logo as the browser tab icon, so the site feels like theirs.
+  useEffect(() => {
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!icon) return;
+    icon.href = logoKey ? `/${logoKey}` : '/favicon.svg';
+    icon.type = logoKey ? '' : 'image/svg+xml';
+  }, [logoKey]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -32,8 +40,13 @@ export function Layout() {
       <header className="border-b border-line bg-surface print:hidden">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-2 px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2 text-lg font-semibold">
-            <Library className="size-6 shrink-0 text-accent" aria-hidden="true" />
-            <span className="truncate">{libraryName}</span>
+            {logoKey ? (
+              // The name is right next to it, so the logo itself is decorative.
+              <img src={`/${logoKey}`} alt="" className="h-9 w-auto max-w-28 object-contain" />
+            ) : (
+              <Library className="size-6 shrink-0 text-accent" aria-hidden="true" />
+            )}
+            <span className="truncate font-display text-xl">{libraryName}</span>
           </Link>
           <nav aria-label={t('app.navigation')} className="flex items-center gap-1">
             {staff && (
