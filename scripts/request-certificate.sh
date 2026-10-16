@@ -8,6 +8,26 @@ domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. bib.school
 region="eu-west-1"       # where the library stack and its settings live
 cert_region="us-east-1"  # CloudFront only accepts certificates from this region
 
+# Fail early and clearly when the terminal isn't signed in to AWS (e.g. AWS_PROFILE not set).
+if ! account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)"; then
+  echo "Not signed in to AWS. Run first: export AWS_PROFILE=<your profile>  (and aws sso login if needed)" >&2
+  exit 1
+fi
+echo "AWS account ${account} (profile: ${AWS_PROFILE:-default}), certificate for ${domain}"
+
+# A CNAME on the address itself (e.g. already pointing to CloudFront) makes Amazon check the
+# CAA rules of the CNAME's target instead of the school's domain, and issuance fails (CAA_ERROR).
+# It's only needed after the deploy, so remove it until the certificate is issued.
+existing_cname="$(dig +short CNAME "$domain" 2>/dev/null || true)"
+if [[ -n "$existing_cname" ]]; then
+  cat >&2 <<CNAME
+${domain} is now a CNAME to ${existing_cname%.}.
+Remove that DNS record for now (keep the validation record), wait a few minutes and run this
+script again. Add it back after the certificate is issued and the stack is deployed.
+CNAME
+  exit 1
+fi
+
 # Reuse a certificate requested earlier for this address.
 arn="$(aws acm list-certificates --region "$cert_region" \
   --certificate-statuses PENDING_VALIDATION ISSUED \
@@ -63,6 +83,9 @@ The domain's CAA record doesn't allow Amazon to issue certificates. Add this DNS
 ${zone} (keep any existing CAA records, e.g. for Let's Encrypt), then run this script again:
 
   Type: CAA   Name: (the domain itself)   Flags: 0   Tag: issue   Value: amazon.com
+
+Already there? Then check that ${domain} itself has no CNAME record (e.g. to CloudFront):
+Amazon would check the CAA rules of that target instead. Remove it until the certificate is issued.
 CAA
     else
       echo "Validation stopped (${reason}). Check the DNS record above and run this script again."
