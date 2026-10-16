@@ -27,6 +27,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });
   if (!response.ok) throw await toApiError(response);
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 

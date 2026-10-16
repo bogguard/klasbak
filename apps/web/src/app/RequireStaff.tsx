@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { Skeleton, StatusMessage } from '../components/ui/Feedback';
 import { useAuth, useIsStaff } from '../lib/auth';
+import { MfaSetup } from '../features/auth/MfaSetup';
 import { ManageNav } from './ManageNav';
 
 /**
@@ -27,6 +28,8 @@ export function RequireStaff() {
       </StatusMessage>
     );
   }
+  // The API refuses staff without two-step verification, so set it up first.
+  if (!session.mfaEnabled) return <MfaSetup />;
   return (
     <>
       <ManageNav />

@@ -6,7 +6,8 @@ import { ConflictError } from '../lib/errors';
 import { ACTIVE_LOANS_INDEX_PK, copyKey, GSI1, loanKey, readerKey, settingsKey } from '../lib/keys';
 
 export async function getSettings(): Promise<LibrarySettings> {
-  return (await getItem<LibrarySettings>(settingsKey)) ?? DEFAULT_SETTINGS;
+  // Defaults first, so settings saved before a new option existed still get a value for it.
+  return { ...DEFAULT_SETTINGS, ...(await getItem<LibrarySettings>(settingsKey)) };
 }
 
 export async function saveSettings(

@@ -8,7 +8,7 @@ import {
   type Reader,
   type ReaderInput,
 } from '@library/shared';
-import { ArrowLeft, IdCard, Lock, Save, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Download, IdCard, Lock, Save, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -21,7 +21,7 @@ import {
 } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { formatDate, formatTimestampDate } from '../../lib/format';
-import { useCreateReader, useReader, useReaders, useUpdateReader } from './api';
+import { useCreateReader, useDeleteReader, useReader, useReaders, useUpdateReader } from './api';
 
 type Values = {
   firstName: string;
@@ -147,7 +147,63 @@ export function ReaderPage() {
         </h2>
         <ReaderForm reader={reader} />
       </section>
+      <PrivacyActions reader={reader} loans={loans} />
     </div>
+  );
+}
+
+/** The reader's rights: a copy of their data, and erasure. */
+function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const remove = useDeleteReader(reader.id);
+  const errorMessage = useErrorMessage();
+  const hasBooks = loans.some((loan) => !loan.returnedAt);
+
+  function download() {
+    const data = JSON.stringify({ reader, loans }, null, 2);
+    const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `lezer-${reader.memberNumber}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function erase() {
+    if (!window.confirm(t('readers.privacy.confirmDelete', { name: readerName(reader) }))) return;
+    try {
+      await remove.mutateAsync();
+      void navigate('/manage/readers', { replace: true });
+    } catch {
+      // Shown below.
+    }
+  }
+
+  return (
+    <section aria-labelledby="reader-privacy" className="space-y-3 border-t border-line pt-6">
+      <h2 id="reader-privacy" className="text-xl font-semibold">
+        {t('readers.privacy.heading')}
+      </h2>
+      <p className="text-sm text-muted">{t('readers.privacy.explanation')}</p>
+      <div className="flex flex-wrap gap-3">
+        <Button variant="secondary" onClick={download}>
+          <Download className="size-4" aria-hidden="true" />
+          {t('readers.privacy.export')}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => void erase()}
+          disabled={hasBooks || remove.isPending}
+          className="text-danger"
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+          {t('readers.privacy.delete')}
+        </Button>
+      </div>
+      {hasBooks && <p className="text-sm text-muted">{t('readers.privacy.hasBooks')}</p>}
+      {remove.isError && <Alert tone="danger">{errorMessage(remove.error)}</Alert>}
+    </section>
   );
 }
 

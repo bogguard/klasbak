@@ -77,6 +77,15 @@ export function Layout() {
       <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
         <Outlet />
       </main>
+
+      <footer className="border-t border-line print:hidden">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted">
+          <span>{libraryName}</span>
+          <Link to="/privacy" className="hover:text-ink hover:underline">
+            {t('app.privacy')}
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

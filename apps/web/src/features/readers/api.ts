@@ -58,3 +58,15 @@ export function useImportReaders() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: readersKey }),
   });
 }
+
+export function useDeleteReader(id: string) {
+  const api = useAuthorizedApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<undefined>(`/api/readers/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: readerKey(id) });
+      return queryClient.invalidateQueries({ queryKey: readersKey });
+    },
+  });
+}

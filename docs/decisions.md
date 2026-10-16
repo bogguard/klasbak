@@ -93,3 +93,15 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Labels must land exactly on standard label sheets, and schools print on whatever printer they have.
 - **Decision**: The web app builds PDFs with jsPDF (loaded only on the labels page) in millimetres for known sheet layouts (Avery L7651, L7159, L7160, Zweckform 3474) and credit-card-size reader cards, 10 per A4. Barcodes are Code 128, encoded by JsBarcode's encoder (rather than our own copy of the encoding table) and drawn as vector bars. People can start on a partly used sheet and nudge the alignment by a few millimetres (remembered per computer).
 - **Consequences**: No server work or cost, and a PDF printed at 100% is far more exact than printing a web page. The built-in PDF font covers Western European characters; names in other scripts (e.g. Arabic) would need an embedded font.
+
+## 016 — Two-step verification required for staff, enforced by the API
+
+- **Context**: Staff can change the collection and see pupils' data. Cognito can make TOTP optional or required for the whole pool, not per group, and pupils won't have authenticator apps.
+- **Decision**: The pool keeps MFA optional. The API refuses requests from admins and librarians whose account has no TOTP (`MFA_REQUIRED`), checked with Cognito `AdminGetUser` and cached for 15 minutes once enabled. The web app shows a setup screen (QR code) before the management pages. Locally (dev sign-in) the check is off.
+- **Consequences**: A stolen staff password alone is not enough. One extra Cognito call per staff member per Lambda container every 15 minutes. A lost phone is reset by an admin (see README).
+
+## 017 — Reading history is deleted after a retention period
+
+- **Context**: Which child read which book is personal data; GDPR requires keeping it no longer than needed.
+- **Decision**: A daily job (03:00 Brussels time) deletes returned loans older than `historyRetentionDays` (library setting, default 365). Each deleted loan first adds 1 to anonymous monthly counters (`STATS#<yyyy-mm>`: total and per title) in the same transaction. Staff can also export a reader's data (JSON) and delete a reader with their full history when no books are out. A public privacy page explains all this in plain Dutch.
+- **Consequences**: Statistics remain possible without personal data. Overdue and current loans are never deleted. An alarm fires if the job fails.

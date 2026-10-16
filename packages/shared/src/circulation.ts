@@ -24,6 +24,8 @@ export const LibrarySettingsInputSchema = z
     closedWeekdays: z.array(z.number().int().min(0).max(6)).max(7),
     closedPeriods: z.array(ClosedPeriodSchema).max(100),
     loanPolicies: z.object({ pupil: LoanPolicySchema, teacher: LoanPolicySchema }),
+    /** Returned loans are removed (anonymised) after this many days: reading history is personal. */
+    historyRetentionDays: z.number().int().min(30).max(3650),
   })
   .strict();
 export type LibrarySettingsInput = z.infer<typeof LibrarySettingsInputSchema>;
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: LibrarySettings = {
     pupil: { loanDays: 21, maxLoans: 3 },
     teacher: { loanDays: 28, maxLoans: 10 },
   },
+  historyRetentionDays: 365,
   version: 0,
 };
 

@@ -92,7 +92,9 @@
     "COPY_NOT_LENDABLE": "Dit exemplaar staat als ‘{{status}}’ en kan niet uitgeleend worden.",
     "MAX_LOANS_REACHED": "Deze lezer heeft al {{maxLoans}} boeken. Eerst iets terugbrengen.",
     "READER_INACTIVE": "Deze lezer is niet (meer) actief en kan niets lenen.",
-    "COPY_NOT_AVAILABLE": "Dit exemplaar werd net uitgeleend of gewijzigd. Scan opnieuw."
+    "COPY_NOT_AVAILABLE": "Dit exemplaar werd net uitgeleend of gewijzigd. Scan opnieuw.",
+    "MFA_REQUIRED": "Stel eerst tweestapsverificatie in. Herlaad de pagina.",
+    "READER_HAS_LOANS": "Deze lezer heeft nog boeken. Laat ze eerst terugbrengen."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -314,6 +316,14 @@
       "summary": "{{created}} nieuw, {{updated}} bijgewerkt, {{failed}} mislukt.",
       "failedLine": "Regel {{line}}:",
       "toList": "Naar de lezers"
+    },
+    "privacy": {
+      "heading": "Privacy van deze lezer",
+      "explanation": "Een lezer (of de ouders) mag een kopie van zijn gegevens vragen, of vragen om alles te wissen.",
+      "export": "Gegevens downloaden",
+      "delete": "Lezer verwijderen",
+      "hasBooks": "Verwijderen kan pas als alle boeken terug zijn.",
+      "confirmDelete": "{{name}} en de volledige leesgeschiedenis definitief verwijderen? Dit kan niet ongedaan gemaakt worden."
     }
   },
   "loans": {
@@ -381,7 +391,12 @@
       "add": "Periode toevoegen"
     },
     "invalid": "Controleer de instellingen: dagen en aantallen moeten getallen zijn, en een periode moet eindigen na de start.",
-    "save": "Instellingen opslaan"
+    "save": "Instellingen opslaan",
+    "privacy": {
+      "heading": "Privacy",
+      "retention": "Leesgeschiedenis bewaren (dagen)",
+      "retentionHint": "Teruggebrachte uitleningen worden daarna gewist; alleen anonieme aantallen blijven over. Tussen 30 en 3650 dagen."
+    }
   },
   "labels": {
     "heading": "Labels en lezerskaarten",
@@ -425,5 +440,49 @@
     "printForCopies": "Labels afdrukken",
     "printOne": "Label afdrukken",
     "printCard": "Lezerskaart afdrukken"
+  },
+  "mfa": {
+    "heading": "Beveilig je account met tweestapsverificatie",
+    "why": "Je beheert de bibliotheek en kan gegevens van leerlingen zien. Daarom vragen we bij het aanmelden, naast je wachtwoord, ook een code uit een app op je smartphone. Dit stel je één keer in.",
+    "step1": "Installeer een authenticator-app op je smartphone, als je er nog geen hebt.",
+    "apps": "Bijvoorbeeld Microsoft Authenticator, Google Authenticator of de app van je wachtwoordbeheerder.",
+    "step2": "Scan deze QR-code met de app.",
+    "qrAlt": "QR-code om je account aan je authenticator-app toe te voegen",
+    "manual": "Lukt scannen niet? Typ dan deze sleutel in de app.",
+    "step3": "Typ de code van 6 cijfers die de app nu toont.",
+    "confirm": "Bevestigen",
+    "wrongCode": "Die code klopt niet of is verlopen. Probeer de nieuwste code."
+  },
+  "privacy": {
+    "heading": "Privacy",
+    "intro": "Hoe {{library}} omgaat met je gegevens, in gewone taal.",
+    "who": {
+      "heading": "Wie is verantwoordelijk?",
+      "body": "De school is verantwoordelijk voor de gegevens in deze bibliotheek. Heb je een vraag over je gegevens? Neem dan contact op met de school."
+    },
+    "what": {
+      "heading": "Welke gegevens bewaren we?",
+      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. We vragen geen geboortedatum, adres of foto."
+    },
+    "why": {
+      "heading": "Waarvoor gebruiken we ze?",
+      "body": "Om boeken uit te lenen, eraan te herinneren als ze terug moeten en de bibliotheek goed te beheren. Niet voor reclame. We verkopen of delen je gegevens met niemand."
+    },
+    "retention": {
+      "heading": "Hoe lang bewaren we ze?",
+      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Daarna blijft alleen een anoniem aantal over, zoals ‘in oktober werden 120 boeken uitgeleend’. Verlaat je de school, dan kan de school al je gegevens wissen."
+    },
+    "where": {
+      "heading": "Waar staan de gegevens?",
+      "body": "Versleuteld bij Amazon Web Services, in een datacenter in Ierland (Europese Unie). Alleen wie de bibliotheek beheert, kan ze bekijken, en hun toegang is beveiligd met tweestapsverificatie. Boekomslagen bewaren we zelf, zodat wie de catalogus bekijkt niet bij andere bedrijven terechtkomt."
+    },
+    "cookies": {
+      "heading": "Cookies",
+      "body": "We gebruiken geen tracking- of reclamecookies. Je browser onthoudt alleen je taalkeuze en, als je aanmeldt, dat je aangemeld bent."
+    },
+    "rights": {
+      "heading": "Jouw rechten",
+      "body": "Je mag (of je ouders mogen) vragen welke gegevens we over je hebben, ze laten verbeteren of laten wissen. Vraag het aan de school. Ben je niet tevreden, dan kan je een klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be)."
+    }
   }
 }

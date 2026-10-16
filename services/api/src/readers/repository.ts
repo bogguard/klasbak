@@ -1,4 +1,4 @@
-import { TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
+import { BatchWriteCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import type { Loan, Reader } from '@library/shared';
 import { db, env } from '../lib/aws';
 import {
@@ -10,7 +10,7 @@ import {
   type Item,
 } from '../lib/dynamo';
 import { ConflictError } from '../lib/errors';
-import { codeKey, GSI1, READERS_INDEX_PK, readerKey } from '../lib/keys';
+import { codeKey, GSI1, loanKey, READERS_INDEX_PK, readerKey } from '../lib/keys';
 
 /** Sorts the reader list by class, then last name, then first name. */
 function readerIndexKeys(reader: Reader) {
@@ -148,5 +148,56 @@ export async function updateReaderDetails(
       throw new ConflictError('VERSION_CONFLICT', 'This reader was changed by someone else');
     }
     throw error;
+  }
+}
+
+/**
+ * Removes a reader, their card number and their loan history (right to erasure). Refused while
+ * they still have books: the loan counter must be 0 at the moment of deleting.
+ */
+export async function deleteReaderAndHistory(reader: Reader, loans: Loan[], audit: Item) {
+  try {
+    await db.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Delete: {
+              TableName: env.tableName,
+              Key: readerKey(reader.id),
+              ConditionExpression:
+                'attribute_not_exists(activeLoanCount) OR activeLoanCount = :zero',
+              ExpressionAttributeValues: { ':zero': 0 },
+            },
+          },
+          {
+            Delete: {
+              TableName: env.tableName,
+              Key: codeKey(reader.memberNumber),
+              ConditionExpression: 'readerId = :id',
+              ExpressionAttributeValues: { ':id': reader.id },
+            },
+          },
+          { Put: { TableName: env.tableName, Item: audit } },
+        ],
+      }),
+    );
+  } catch (error) {
+    if (failedConditionAt(error, 0)) {
+      throw new ConflictError('READER_HAS_LOANS', 'This reader still has books on loan');
+    }
+    throw error;
+  }
+
+  // The reader is gone; now their history. If this is interrupted, the daily retention job
+  // removes the rest once it's older than the retention period.
+  const keys = loans.map((loan) => loanKey(reader.id, loan.id));
+  for (let start = 0; start < keys.length; start += 25) {
+    let pending = keys.slice(start, start + 25).map((Key) => ({ DeleteRequest: { Key } }));
+    for (let attempt = 0; pending.length > 0 && attempt < 5; attempt++) {
+      const result = await db.send(
+        new BatchWriteCommand({ RequestItems: { [env.tableName]: pending } }),
+      );
+      pending = (result.UnprocessedItems?.[env.tableName] ?? []) as typeof pending;
+    }
   }
 }

@@ -162,6 +162,28 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
       </fieldset>
 
       <fieldset className="space-y-3">
+        <legend className="mb-2 text-xl font-semibold">{t('settings.privacy.heading')}</legend>
+        <label className="block space-y-1.5">
+          <span className="block text-sm font-medium">{t('settings.privacy.retention')}</span>
+          <input
+            value={Number.isNaN(values.historyRetentionDays) ? '' : values.historyRetentionDays}
+            onChange={(e) =>
+              change({
+                ...values,
+                historyRetentionDays: e.target.value === '' ? Number.NaN : Number(e.target.value),
+              })
+            }
+            inputMode="numeric"
+            aria-describedby="retention-hint"
+            className={`${inputHeight} w-28 rounded-lg border border-line bg-surface px-3`}
+          />
+          <span id="retention-hint" className="block text-sm text-muted">
+            {t('settings.privacy.retentionHint')}
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset className="space-y-3">
         <legend className="mb-2 text-xl font-semibold">{t('settings.closedDays.heading')}</legend>
         <p className="text-sm text-muted">{t('settings.closedDays.explanation')}</p>
         <div className="flex flex-wrap gap-2">

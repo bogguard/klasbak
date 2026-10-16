@@ -57,6 +57,18 @@ Run from the project folder, in one terminal session:
 
    At the first sign-in the app asks for a new password.
 
+## Running the library
+
+- **Staff sign-in** requires two-step verification. The first sign-in shows a QR code for an authenticator app.
+- **Lost phone?** An admin resets two-step verification for that person, who then sets it up again at the next sign-in:
+
+  ```bash
+  aws cognito-idp admin-set-user-mfa-preference --region eu-west-1 --user-pool-id <UserPoolId> \
+    --username <name> --software-token-mfa-settings Enabled=false,PreferredMfa=false
+  ```
+
+- **New staff member**: create the user as in step 5 above and add them to the `librarian` group.
+
 ## Local development
 
 Everything runs on your machine; no AWS account is needed. Requires Docker Desktop.

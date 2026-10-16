@@ -12,6 +12,7 @@ Features a school library needs, from cataloguing to lending to reading promotio
 | Readers: list, add/edit, CSV import                                      | Built; runs locally            |
 | Lending desk, overdue/loan lists (printable), loan rules and closed days | Built and tested; runs locally |
 | Barcode labels and reader cards (PDF)                                    | Built; runs locally            |
+| Staff two-step verification, privacy page, history retention, erasure    | Built; runs locally            |
 
 ## Phase 1 — MVP: run a school library
 

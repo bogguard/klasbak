@@ -10,7 +10,7 @@ import { ulid } from 'ulid';
 import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
 import { getCodePointer } from '../lib/dynamo';
-import { AppError, NotFoundError } from '../lib/errors';
+import { AppError, ConflictError, NotFoundError } from '../lib/errors';
 import { metrics } from '../lib/observability';
 import * as repository from './repository';
 
@@ -77,6 +77,23 @@ export async function updateReader(
     ),
   );
   return updated;
+}
+
+export async function deleteReader(
+  actor: Actor,
+  readerId: string,
+  now = new Date(),
+): Promise<void> {
+  const { reader, loans } = await getReader(readerId);
+  if (loans.some((loan) => !loan.returnedAt)) {
+    throw new ConflictError('READER_HAS_LOANS', 'This reader still has books on loan');
+  }
+  await repository.deleteReaderAndHistory(
+    reader,
+    loans,
+    auditItem({ entity: `READER#${readerId}`, action: 'reader.deleted', actor }, now),
+  );
+  metrics.addMetric('ReaderDeleted', MetricUnit.Count, 1);
 }
 
 /**

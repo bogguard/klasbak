@@ -38,6 +38,9 @@ Globals:
       Variables:
         TABLE_NAME: !Ref Table
         WEB_BUCKET: !Ref WebBucket
+        USER_POOL_ID: !Ref UserPool
+        # Staff must use two-step verification; the API checks it (services/api/src/lib/mfa.ts).
+        STAFF_MFA_REQUIRED: 'true'
         POWERTOOLS_SERVICE_NAME: library
         POWERTOOLS_METRICS_NAMESPACE: Library
         NODE_OPTIONS: --enable-source-maps
@@ -186,6 +189,10 @@ Resources:
         - DynamoDBCrudPolicy: { TableName: !Ref Table }
         - Statement:
             - Effect: Allow
+              Action: cognito-idp:AdminGetUser
+              Resource: !GetAtt UserPool.Arn
+        - Statement:
+            - Effect: Allow
               Action: s3:PutObject
               Resource: !Sub ${WebBucket.Arn}/covers/*
       Events:
@@ -221,6 +228,10 @@ Resources:
         LogGroup: !Ref ReadersLogGroup
       Policies:
         - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: cognito-idp:AdminGetUser
+              Resource: !GetAtt UserPool.Arn
       Events:
         Staff:
           Type: HttpApi
@@ -250,6 +261,10 @@ Resources:
         LogGroup: !Ref CirculationLogGroup
       Policies:
         - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: cognito-idp:AdminGetUser
+              Resource: !GetAtt UserPool.Arn
       Events:
         Staff:
           Type: HttpApi
@@ -259,6 +274,31 @@ Resources:
             Method: ANY
 
   CirculationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !If [IsProd, 30, 7]
+
+  RetentionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Daily removal of old reading history (privacy), kept as anonymous counts
+      CodeUri: ../services/api/dist/retention
+      Handler: handler.handler
+      Timeout: 300
+      LoggingConfig:
+        LogGroup: !Ref RetentionLogGroup
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+      Events:
+        Nightly:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 3 * * ? *)
+            ScheduleExpressionTimezone: Europe/Brussels
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+
+  RetentionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: !If [IsProd, 30, 7]
@@ -486,6 +526,22 @@ Resources:
         - { Name: FunctionName, Value: !Ref SearchIndexerFunction }
       Statistic: Sum
       Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+
+  RetentionErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Removing old reading history failed; personal data may be kept too long.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - { Name: FunctionName, Value: !Ref RetentionFunction }
+      Statistic: Sum
+      Period: 3600
       EvaluationPeriods: 1
       Threshold: 1
       ComparisonOperator: GreaterThanOrEqualToThreshold

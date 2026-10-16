@@ -42,4 +42,11 @@ app.put('/:id', async (c) => {
   return c.json(await readers.updateReader(actor, id, body.reader, body.version));
 });
 
+// Right to erasure: removes the reader, their card number and their reading history.
+app.delete('/:id', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  await readers.deleteReader(actor, parse(IdSchema, c.req.param('id')));
+  return c.body(null, 204);
+});
+
 export const handler = toLambdaHandler(app);

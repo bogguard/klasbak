@@ -4,6 +4,7 @@ import { handle, type ApiGatewayRequestContextV2, type LambdaEvent } from 'hono/
 import { z, type ZodType } from 'zod';
 import { actorFromClaims, type Actor } from './auth';
 import { AppError, ValidationError } from './errors';
+import { assertStaffMfa } from './mfa';
 import { logger, metrics } from './observability';
 
 // We only sit behind an HTTP API, which always sends payload format 2.0.
@@ -25,6 +26,13 @@ export function createApp(): Hono<Env> {
       status: c.res.status,
       durationMs: Date.now() - started,
     });
+  });
+
+  // Staff without two-step verification may not use the API (see mfa.ts).
+  app.use(async (c, next) => {
+    const actor = getActor(c);
+    if (actor) await assertStaffMfa(actor);
+    await next();
   });
 
   app.onError((error, c) => {

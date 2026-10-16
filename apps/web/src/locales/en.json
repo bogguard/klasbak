@@ -92,7 +92,9 @@
     "COPY_NOT_LENDABLE": "This copy is marked as ‘{{status}}’ and can't be lent.",
     "MAX_LOANS_REACHED": "This reader already has {{maxLoans}} books. Return something first.",
     "READER_INACTIVE": "This reader is not active (anymore) and can't borrow.",
-    "COPY_NOT_AVAILABLE": "This copy was just lent or changed. Please scan again."
+    "COPY_NOT_AVAILABLE": "This copy was just lent or changed. Please scan again.",
+    "MFA_REQUIRED": "Set up two-step verification first. Reload the page.",
+    "READER_HAS_LOANS": "This reader still has books. Have them returned first."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -314,6 +316,14 @@
       "summary": "{{created}} new, {{updated}} updated, {{failed}} failed.",
       "failedLine": "Line {{line}}:",
       "toList": "Go to readers"
+    },
+    "privacy": {
+      "heading": "Privacy of this reader",
+      "explanation": "A reader (or their parents) may ask for a copy of their data, or ask for everything to be deleted.",
+      "export": "Download data",
+      "delete": "Delete reader",
+      "hasBooks": "You can delete the reader once all books are returned.",
+      "confirmDelete": "Permanently delete {{name}} and their full reading history? This can't be undone."
     }
   },
   "loans": {
@@ -381,7 +391,12 @@
       "add": "Add period"
     },
     "invalid": "Please check the settings: days and numbers must be numbers, and a period must end after it starts.",
-    "save": "Save settings"
+    "save": "Save settings",
+    "privacy": {
+      "heading": "Privacy",
+      "retention": "Keep reading history (days)",
+      "retentionHint": "Returned loans are deleted after this; only anonymous counts remain. Between 30 and 3650 days."
+    }
   },
   "labels": {
     "heading": "Labels and reader cards",
@@ -425,5 +440,49 @@
     "printForCopies": "Print labels",
     "printOne": "Print label",
     "printCard": "Print reader card"
+  },
+  "mfa": {
+    "heading": "Protect your account with two-step verification",
+    "why": "You manage the library and can see pupils' data. So when you sign in we ask, besides your password, for a code from an app on your phone. You set this up once.",
+    "step1": "Install an authenticator app on your phone, if you don't have one yet.",
+    "apps": "For example Microsoft Authenticator, Google Authenticator or your password manager's app.",
+    "step2": "Scan this QR code with the app.",
+    "qrAlt": "QR code to add your account to your authenticator app",
+    "manual": "Can't scan? Type this key into the app instead.",
+    "step3": "Type the 6-digit code the app shows now.",
+    "confirm": "Confirm",
+    "wrongCode": "That code is wrong or expired. Try the latest code."
+  },
+  "privacy": {
+    "heading": "Privacy",
+    "intro": "How {{library}} handles your data, in plain language.",
+    "who": {
+      "heading": "Who is responsible?",
+      "body": "The school is responsible for the data in this library. Questions about your data? Please contact the school."
+    },
+    "what": {
+      "heading": "What data do we keep?",
+      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. We don't ask for a date of birth, address or photo."
+    },
+    "why": {
+      "heading": "What do we use it for?",
+      "body": "To lend books, remind you when they're due and run the library well. Not for advertising. We don't sell or share your data with anyone."
+    },
+    "retention": {
+      "heading": "How long do we keep it?",
+      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). After that only an anonymous count remains, like ‘120 books were lent in October’. When you leave the school, the school can delete all your data."
+    },
+    "where": {
+      "heading": "Where is the data?",
+      "body": "Encrypted at Amazon Web Services, in a data centre in Ireland (European Union). Only the people who run the library can see it, and their access is protected with two-step verification. We store book covers ourselves, so browsing the catalogue doesn't reach other companies."
+    },
+    "cookies": {
+      "heading": "Cookies",
+      "body": "We use no tracking or advertising cookies. Your browser only remembers your language and, if you sign in, that you're signed in."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "body": "You (or your parents) may ask which data we have about you, have it corrected or have it deleted. Ask the school. Not satisfied? You can file a complaint with the Belgian Data Protection Authority (dataprotectionauthority.be)."
+    }
   }
 }

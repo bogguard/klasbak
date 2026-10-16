@@ -3,7 +3,8 @@ import { ForbiddenError, UnauthorizedError } from './errors';
 
 export { ROLES, type Role };
 
-export type Actor = { userId: string; roles: Role[] };
+/** `username` is what Cognito's admin APIs need; `userId` (sub) never changes. */
+export type Actor = { userId: string; username?: string; roles: Role[] };
 
 export const STAFF = STAFF_ROLES;
 
@@ -14,7 +15,12 @@ export const STAFF = STAFF_ROLES;
 export function actorFromClaims(claims: Record<string, unknown> | undefined): Actor | undefined {
   const userId = claims?.sub;
   if (typeof userId !== 'string') return undefined;
-  return { userId, roles: parseGroups(claims?.['cognito:groups']) };
+  const username = claims?.username ?? claims?.['cognito:username'];
+  return {
+    userId,
+    username: typeof username === 'string' ? username : undefined,
+    roles: parseGroups(claims?.['cognito:groups']),
+  };
 }
 
 export function requireRole(actor: Actor | undefined, allowed: readonly Role[]): Actor {

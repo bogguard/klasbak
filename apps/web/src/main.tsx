@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Layout } from './app/Layout';
 import { NotFoundPage } from './app/NotFoundPage';
+import { PrivacyPage } from './app/PrivacyPage';
 import { RequireStaff } from './app/RequireStaff';
 import { SearchPage } from './features/catalog/SearchPage';
 import { TitlePage } from './features/catalog/TitlePage';
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <SearchPage /> },
       { path: 'titles/:id', element: <TitlePage /> },
+      { path: 'privacy', element: <PrivacyPage /> },
       {
         path: 'login',
         lazy: async () => ({ Component: (await import('./features/auth/LoginPage')).LoginPage }),

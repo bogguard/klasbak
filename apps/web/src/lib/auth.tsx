@@ -12,7 +12,12 @@ import type * as AmplifyAuth from 'aws-amplify/auth';
  *  - dev: only on the local server; pick a role, sent as "Authorization: Dev <role>".
  */
 
-export type Session = { username: string; roles: Role[] };
+export type Session = {
+  username: string;
+  roles: Role[];
+  /** Whether an authenticator app is linked; staff must have one (the API enforces it). */
+  mfaEnabled: boolean;
+};
 
 /** What Cognito wants next during sign-in. */
 export type SignInStep = 'done' | 'newPassword' | 'totp' | 'unsupported';
@@ -25,6 +30,10 @@ type AuthContextValue = {
   confirmSignIn: (response: string) => Promise<SignInStep>;
   signInAsDevRole: (role: Role) => void;
   signOut: () => Promise<void>;
+  /** Starts linking an authenticator app: returns what to put in a QR code. */
+  startTotpSetup: () => Promise<{ uri: string; secret: string }>;
+  /** Confirms the link with a code from the app and turns two-step verification on. */
+  finishTotpSetup: (code: string) => Promise<void>;
   /** Value for the Authorization header, refreshed tokens included. */
   authorization: () => Promise<string | undefined>;
 };
@@ -66,19 +75,26 @@ async function readCognitoSession(auth: typeof AmplifyAuth): Promise<Session | n
     const payload = tokens?.accessToken.payload;
     if (!payload) return null;
     const groups = Array.isArray(payload['cognito:groups']) ? payload['cognito:groups'] : [];
+    const mfa = await auth.fetchMFAPreference();
     return {
       username: String(payload.username ?? ''),
       roles: groups.filter((g): g is Role => ROLES.includes(g as Role)),
+      mfaEnabled: Boolean(mfa.enabled?.includes('TOTP')),
     };
   } catch {
     return null;
   }
 }
 
+// Local development has no Cognito, so two-step verification counts as done.
+function devSessionFor(role: Role): Session {
+  return { username: `dev-${role}`, roles: [role], mfaEnabled: true };
+}
+
 function readDevSession(): Session | null {
   try {
     const role = sessionStorage.getItem(DEV_STORAGE_KEY) as Role | null;
-    return role && ROLES.includes(role) ? { username: `dev-${role}`, roles: [role] } : null;
+    return role && ROLES.includes(role) ? devSessionFor(role) : null;
   } catch {
     return null;
   }
@@ -135,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Without storage the dev session lasts until reload; fine for local use.
     }
-    setDevSession({ username: `dev-${role}`, roles: [role] });
+    setDevSession(devSessionFor(role));
   }, []);
 
   const signOut = useCallback(async () => {
@@ -151,6 +167,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   }, [config, mode, setSession]);
 
+  const startTotpSetup = useCallback(async () => {
+    const details = await (await loadAmplify(config)).setUpTOTP();
+    const account = cognitoSession?.username ?? '';
+    return {
+      uri: details.getSetupUri(config.libraryName, account).toString(),
+      secret: details.sharedSecret,
+    };
+  }, [config, cognitoSession]);
+
+  const finishTotpSetup = useCallback(
+    async (code: string) => {
+      const auth = await loadAmplify(config);
+      await auth.verifyTOTPSetup({ code });
+      await auth.updateMFAPreference({ totp: 'PREFERRED' });
+      setCognitoSession(await readCognitoSession(auth));
+    },
+    [config],
+  );
+
   const authorization = useCallback(async () => {
     if (mode === 'dev') {
       const role = readDevSession()?.roles[0];
@@ -161,8 +196,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [config, mode]);
 
   const value = useMemo(
-    () => ({ mode, session, signIn, confirmSignIn, signInAsDevRole, signOut, authorization }),
-    [mode, session, signIn, confirmSignIn, signInAsDevRole, signOut, authorization],
+    () => ({
+      mode,
+      session,
+      signIn,
+      confirmSignIn,
+      signInAsDevRole,
+      signOut,
+      startTotpSetup,
+      finishTotpSetup,
+      authorization,
+    }),
+    [
+      mode,
+      session,
+      signIn,
+      confirmSignIn,
+      signInAsDevRole,
+      signOut,
+      startTotpSetup,
+      finishTotpSetup,
+      authorization,
+    ],
   ) satisfies AuthContextValue;
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -185,7 +240,7 @@ export function useAuthorizedApi() {
   return useCallback(
     async <T,>(
       path: string,
-      options: { method?: 'GET' | 'POST' | 'PUT' | 'PATCH'; body?: unknown } = {},
+      options: { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; body?: unknown } = {},
     ) => apiRequest<T>(path, { ...options, authorization: await authorization() }),
     [authorization],
   );

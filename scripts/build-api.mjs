@@ -9,6 +9,7 @@ const functions = {
   'search-indexer': 'services/api/src/search-indexer/handler.ts',
   readers: 'services/api/src/readers/handler.ts',
   circulation: 'services/api/src/circulation/handler.ts',
+  retention: 'services/api/src/retention/handler.ts',
 };
 
 await rm('services/api/dist', { recursive: true, force: true });
