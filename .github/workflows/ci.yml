@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Weekly run so new vulnerabilities (npm audit) surface even when nobody pushes.
+  schedule:
+    - cron: '0 6 * * 1'
 
 permissions:
   contents: read
@@ -12,9 +15,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      # Pin actions to a commit SHA before going to production (supply-chain safety).
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Actions are pinned to a commit SHA (supply-chain safety); Dependabot proposes updates.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -24,7 +29,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
-      - uses: aws-actions/setup-sam@v2
+      - uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
         with:
           use-installer: true
       - run: npm run validate:infra
