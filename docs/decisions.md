@@ -105,3 +105,15 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Which child read which book is personal data; GDPR requires keeping it no longer than needed.
 - **Decision**: A daily job (03:00 Brussels time) deletes returned loans older than `historyRetentionDays` (library setting, default 365). Each deleted loan first adds 1 to anonymous monthly counters (`STATS#<yyyy-mm>`: total and per title) in the same transaction. Staff can also export a reader's data (JSON) and delete a reader with their full history when no books are out. A public privacy page explains all this in plain Dutch.
 - **Consequences**: Statistics remain possible without personal data. Overdue and current loans are never deleted. An alarm fires if the job fails.
+
+## 018 — Three ISBN sources, including the Dutch libraries' open data
+
+- **Context**: Open Library has few Dutch and Flemish books, and Google Books refuses requests without an API key and still misses many recent Dutch children's books (e.g. 9789043933728, 2024).
+- **Decision**: Look up in order: Open Library, Google Books (optional API key in SSM `/library/google-books-api-key`), and the Dutch public libraries' catalogue at data.bibliotheken.nl (SPARQL, CC0 open data, no key). The first hit wins. When a source fails and none finds the ISBN, the API says "unavailable" (502) instead of "not found".
+- **Consequences**: Much better coverage for a Flemish school. The Dutch catalogue has no covers; covers can be added later by hand. Only the ISBN is sent to these services.
+
+## 019 — Covers can be uploaded by staff
+
+- **Context**: Many Dutch books are found without a cover (decision 018), and new books aren't in any free source yet.
+- **Decision**: Staff upload a photo or image on the title page. The browser turns it upright, scales it to at most 900 px and re-saves it as JPEG, which also strips photo metadata such as GPS location. The API accepts only real JPEG/PNG/WebP files (checked by their first bytes, at most 2 MB), sent as base64 JSON, and stores each upload under a new name (`covers/<titleId>-<id>.jpg`) so caches never show an old cover. Changing the cover doesn't change the title's version, so editing details at the same time doesn't conflict.
+- **Consequences**: No presigned uploads or S3 CORS to manage. Replaced and removed covers are deleted from the bucket.

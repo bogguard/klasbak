@@ -1,5 +1,5 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { env, s3 } from './aws';
 
@@ -29,4 +29,13 @@ export async function putPublicFile(
       CacheControl: cacheControl,
     }),
   );
+}
+
+export async function deletePublicFile(key: string): Promise<void> {
+  const localDir = process.env.LOCAL_PUBLIC_DIR;
+  if (localDir) {
+    await rm(join(localDir, key), { force: true });
+    return;
+  }
+  await s3.send(new DeleteObjectCommand({ Bucket: env.webBucket, Key: key }));
 }

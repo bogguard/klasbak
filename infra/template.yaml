@@ -193,8 +193,12 @@ Resources:
               Resource: !GetAtt UserPool.Arn
         - Statement:
             - Effect: Allow
-              Action: s3:PutObject
+              Action: [s3:PutObject, s3:DeleteObject]
               Resource: !Sub ${WebBucket.Arn}/covers/*
+            # Optional Google Books API key for ISBN lookups (README, "Book data").
+            - Effect: Allow
+              Action: ssm:GetParameter
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/library/google-books-api-key
       Events:
         PublicTitle:
           Type: HttpApi

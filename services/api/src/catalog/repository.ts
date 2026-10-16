@@ -47,6 +47,44 @@ export async function putNewTitle(title: Title, audit: Item): Promise<void> {
 }
 
 /** Replaces a title only if nobody else saved it in the meantime (optimistic locking). */
+/**
+ * Changes only the cover. It deliberately leaves `version` alone: a librarian editing the
+ * title's details at the same time can still save without a conflict.
+ */
+export async function setCoverImageKey(
+  titleId: string,
+  coverImageKey: string | undefined,
+  updatedAt: string,
+  audit: Item,
+): Promise<void> {
+  try {
+    await db.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Update: {
+              TableName: env.tableName,
+              Key: titleKey(titleId),
+              UpdateExpression: coverImageKey
+                ? 'SET coverImageKey = :key, updatedAt = :now'
+                : 'SET updatedAt = :now REMOVE coverImageKey',
+              ConditionExpression: 'attribute_exists(pk)',
+              ExpressionAttributeValues: {
+                ':now': updatedAt,
+                ...(coverImageKey ? { ':key': coverImageKey } : {}),
+              },
+            },
+          },
+          { Put: { TableName: env.tableName, Item: audit } },
+        ],
+      }),
+    );
+  } catch (error) {
+    if (failedConditionAt(error, 0)) throw new NotFoundError('Title');
+    throw error;
+  }
+}
+
 export async function replaceTitle(
   title: Title,
   expectedVersion: number,

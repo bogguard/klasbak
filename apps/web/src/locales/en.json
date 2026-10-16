@@ -94,7 +94,9 @@
     "READER_INACTIVE": "This reader is not active (anymore) and can't borrow.",
     "COPY_NOT_AVAILABLE": "This copy was just lent or changed. Please scan again.",
     "MFA_REQUIRED": "Set up two-step verification first. Reload the page.",
-    "READER_HAS_LOANS": "This reader still has books. Have them returned first."
+    "READER_HAS_LOANS": "This reader still has books. Have them returned first.",
+    "LOOKUP_UNAVAILABLE": "Looking up didn't work right now. Enter the details yourself or try again later.",
+    "INVALID_IMAGE": "This is not a valid image (JPEG, PNG or WebP, at most 2 MB)."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -484,5 +486,13 @@
       "heading": "Your rights",
       "body": "You (or your parents) may ask which data we have about you, have it corrected or have it deleted. Ask the school. Not satisfied? You can file a complaint with the Belgian Data Protection Authority (dataprotectionauthority.be)."
     }
+  },
+  "cover": {
+    "add": "Add cover",
+    "replace": "Change cover",
+    "remove": "Remove",
+    "busy": "Working…",
+    "confirmRemove": "Remove the cover of this title?",
+    "unsupported": "We can't read this file. Choose a JPEG or PNG photo, or take a new photo."
   }
 }

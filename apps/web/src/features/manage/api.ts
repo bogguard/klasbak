@@ -104,3 +104,25 @@ export function useIsbnLookup() {
       api<IsbnLookupResult>(`/api/catalog/isbn/${encodeURIComponent(isbn)}`),
   });
 }
+
+export function useUploadCover(titleId: string) {
+  const api = useAuthorizedApi();
+  const invalidate = useInvalidateTitle();
+  return useMutation({
+    mutationFn: (image: string) =>
+      api<{ coverImageKey: string }>(`/api/catalog/titles/${titleId}/cover`, {
+        method: 'PUT',
+        body: { image },
+      }),
+    onSuccess: () => invalidate(titleId),
+  });
+}
+
+export function useRemoveCover(titleId: string) {
+  const api = useAuthorizedApi();
+  const invalidate = useInvalidateTitle();
+  return useMutation({
+    mutationFn: () => api<undefined>(`/api/catalog/titles/${titleId}/cover`, { method: 'DELETE' }),
+    onSuccess: () => invalidate(titleId),
+  });
+}

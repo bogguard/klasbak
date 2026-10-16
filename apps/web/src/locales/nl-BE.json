@@ -94,7 +94,9 @@
     "READER_INACTIVE": "Deze lezer is niet (meer) actief en kan niets lenen.",
     "COPY_NOT_AVAILABLE": "Dit exemplaar werd net uitgeleend of gewijzigd. Scan opnieuw.",
     "MFA_REQUIRED": "Stel eerst tweestapsverificatie in. Herlaad de pagina.",
-    "READER_HAS_LOANS": "Deze lezer heeft nog boeken. Laat ze eerst terugbrengen."
+    "READER_HAS_LOANS": "Deze lezer heeft nog boeken. Laat ze eerst terugbrengen.",
+    "LOOKUP_UNAVAILABLE": "Opzoeken lukte nu niet. Vul de gegevens zelf in of probeer later opnieuw.",
+    "INVALID_IMAGE": "Dit is geen geldige afbeelding (JPEG, PNG of WebP, maximaal 2 MB)."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -484,5 +486,13 @@
       "heading": "Jouw rechten",
       "body": "Je mag (of je ouders mogen) vragen welke gegevens we over je hebben, ze laten verbeteren of laten wissen. Vraag het aan de school. Ben je niet tevreden, dan kan je een klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be)."
     }
+  },
+  "cover": {
+    "add": "Omslag toevoegen",
+    "replace": "Omslag wijzigen",
+    "remove": "Verwijderen",
+    "busy": "Bezig…",
+    "confirmRemove": "De omslag van deze titel verwijderen?",
+    "unsupported": "Dit bestand kunnen we niet lezen. Kies een JPEG- of PNG-foto, of neem een nieuwe foto."
   }
 }

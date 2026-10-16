@@ -8,12 +8,14 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { LambdaEvent } from 'hono/aws-lambda';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { app } from './handler';
 import { formatBarcode } from './service';
 
 const ddb = mockClient(DynamoDBDocumentClient);
+const s3 = mockClient(S3Client);
 
 const TITLE_ID = '01JABCDEFGHJKMNPQRSTVWXYZ0';
 
@@ -72,7 +74,10 @@ function conditionFailedAt(index: number, total: number) {
   });
 }
 
-beforeEach(() => ddb.reset());
+beforeEach(() => {
+  ddb.reset();
+  s3.reset();
+});
 
 describe('public title', () => {
   it('hides internal copy notes from the public', async () => {
@@ -229,5 +234,55 @@ describe('label data', () => {
       ],
       unknown: ['NOPE-1', 'L000001'],
     });
+  });
+});
+
+describe('uploaded covers', () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, ...Array(2000).fill(1)]).toString('base64');
+
+  it('stores the image under a new name, points the title to it and removes the old one', async () => {
+    ddb.on(QueryCommand).resolves({ Items: [{ ...titleItem, coverImageKey: 'covers/old.jpg' }] });
+    ddb.on(TransactWriteCommand).resolves({});
+    s3.on(PutObjectCommand).resolves({});
+    s3.on(DeleteObjectCommand).resolves({});
+
+    const res = await request('PUT', `/api/catalog/titles/${TITLE_ID}/cover`, '[librarian]', {
+      image: jpeg,
+    });
+
+    expect(res.status).toBe(200);
+    const { coverImageKey } = (await res.json()) as { coverImageKey: string };
+    expect(coverImageKey).toMatch(new RegExp(`^covers/${TITLE_ID}-[0-9a-z]{26}\\.jpg$`));
+    expect(s3.commandCalls(PutObjectCommand)[0]?.args[0].input).toMatchObject({
+      Key: coverImageKey,
+      ContentType: 'image/jpeg',
+    });
+    const update = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems?.[0];
+    // The cover change must not bump the version, so a parallel edit of the details still saves.
+    expect(update?.Update?.UpdateExpression).toBe('SET coverImageKey = :key, updatedAt = :now');
+    expect(s3.commandCalls(DeleteObjectCommand)[0]?.args[0].input.Key).toBe('covers/old.jpg');
+  });
+
+  it('refuses files that are not images, whatever they claim to be', async () => {
+    ddb.on(QueryCommand).resolves({ Items: [titleItem] });
+    const html = Buffer.from('<html><script>alert(1)</script></html>').toString('base64');
+    const res = await request('PUT', `/api/catalog/titles/${TITLE_ID}/cover`, '[librarian]', {
+      image: html,
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: { code: 'INVALID_IMAGE' } });
+    expect(s3.commandCalls(PutObjectCommand)).toHaveLength(0);
+  });
+
+  it('removes a cover', async () => {
+    ddb.on(QueryCommand).resolves({ Items: [{ ...titleItem, coverImageKey: 'covers/old.jpg' }] });
+    ddb.on(TransactWriteCommand).resolves({});
+    s3.on(DeleteObjectCommand).resolves({});
+
+    const res = await request('DELETE', `/api/catalog/titles/${TITLE_ID}/cover`, '[librarian]');
+
+    expect(res.status).toBe(204);
+    const update = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems?.[0];
+    expect(update?.Update?.UpdateExpression).toBe('SET updatedAt = :now REMOVE coverImageKey');
   });
 });

@@ -146,3 +146,11 @@ export const LabelLookupRequestSchema = z.object({
 export type CopyLabel = { barcode: string; titleId: string; title: string; authors: string[] };
 
 export type LabelLookupResult = { labels: CopyLabel[]; unknown: string[] };
+
+/** Uploaded covers are sent as base64; the browser shrinks photos well below this first. */
+export const COVER_MAX_BYTES = 2 * 1024 * 1024;
+
+export const CoverUploadRequestSchema = z.object({
+  // Base64 grows data by a third; allow the full 2 MB after decoding.
+  image: z.base64().max(Math.ceil((COVER_MAX_BYTES * 4) / 3) + 4),
+});

@@ -1,5 +1,7 @@
 import { logger } from '../lib/observability';
-import { putPublicFile } from '../lib/public-files';
+import { ulid } from 'ulid';
+import { AppError } from '../lib/errors';
+import { deletePublicFile, putPublicFile } from '../lib/public-files';
 
 /*
  * Covers are copied into our own bucket instead of hot-linked: visitors (often children)
@@ -68,5 +70,38 @@ export async function storeCover(titleId: string, url: string): Promise<string |
   } catch (error) {
     logger.warn('cover copy failed', { error });
     return undefined;
+  }
+}
+
+/** Recognises the image type from the file's first bytes; the declared type isn't trusted. */
+export function detectImageType(bytes: Uint8Array): keyof typeof ALLOWED_TYPES | undefined {
+  const starts = (...values: number[]) => values.every((v, i) => bytes[i] === v);
+  if (starts(0xff, 0xd8, 0xff)) return 'image/jpeg';
+  if (starts(0x89, 0x50, 0x4e, 0x47)) return 'image/png';
+  const ascii = (from: number, to: number) => String.fromCharCode(...bytes.slice(from, to));
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  return undefined;
+}
+
+/**
+ * Stores a cover a librarian uploaded (a photo of the book, usually). Every upload gets a new
+ * file name, so browsers and CloudFront never show a cached older cover.
+ */
+export async function storeUploadedCover(titleId: string, bytes: Uint8Array): Promise<string> {
+  const type = detectImageType(bytes);
+  if (!type || bytes.byteLength > MAX_BYTES) {
+    throw new AppError(400, 'INVALID_IMAGE', 'Upload a JPEG, PNG or WebP image of at most 2 MB');
+  }
+  const key = `covers/${titleId}-${ulid().toLowerCase()}.${ALLOWED_TYPES[type]}`;
+  await putPublicFile(key, bytes, type, 'public, max-age=604800, immutable');
+  return key;
+}
+
+/** Best effort: a leftover file only costs a little storage, never correctness. */
+export async function deleteCover(key: string): Promise<void> {
+  try {
+    await deletePublicFile(key);
+  } catch (error) {
+    logger.warn('cover delete failed', { error });
   }
 }

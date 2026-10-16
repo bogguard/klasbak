@@ -5,9 +5,9 @@ import { Link, useLocation, useParams } from 'react-router';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert } from '../../components/ui/Form';
 import { ApiError } from '../../lib/api';
-import { TitleCover } from '../catalog/TitleCover';
 import { useStaffTitle, useUpdateTitle } from './api';
 import { CopiesPanel } from './CopiesPanel';
+import { CoverEditor } from './CoverEditor';
 import { TitleForm } from './TitleForm';
 import { toFormValues } from './titleFormValues';
 
@@ -54,7 +54,7 @@ export function EditTitlePage() {
       </Link>
 
       <header className="flex flex-wrap items-start gap-4">
-        <TitleCover coverImageKey={title.data.coverImageKey} type={title.data.type} size="small" />
+        <CoverEditor title={title.data} />
         <div className="flex-1 space-y-1">
           <h1 className="text-3xl font-semibold tracking-tight">{title.data.title}</h1>
           <Link

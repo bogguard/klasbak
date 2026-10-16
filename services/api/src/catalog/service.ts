@@ -13,7 +13,7 @@ import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
 import { ConflictError, NotFoundError } from '../lib/errors';
 import { metrics } from '../lib/observability';
-import { storeCover } from './covers';
+import { deleteCover, storeCover, storeUploadedCover } from './covers';
 import { lookupIsbn } from './isbn-lookup';
 import * as repository from './repository';
 
@@ -180,4 +180,35 @@ function changedFields<T extends object>(before: T, after: T): string[] {
 
 export function getCopyLabels(codes: string[]) {
   return repository.getCopyLabels([...new Set(codes)]);
+}
+
+/** Replaces the cover with an uploaded image; returns the new cover's key. */
+export async function uploadCover(
+  actor: Actor,
+  titleId: string,
+  image: Uint8Array,
+  now = new Date(),
+): Promise<{ coverImageKey: string }> {
+  const { coverImageKey: previous } = await getTitle(titleId);
+  const coverImageKey = await storeUploadedCover(titleId, image);
+  await repository.setCoverImageKey(
+    titleId,
+    coverImageKey,
+    now.toISOString(),
+    auditItem({ entity: `TITLE#${titleId}`, action: 'title.coverUploaded', actor }, now),
+  );
+  if (previous) await deleteCover(previous);
+  return { coverImageKey };
+}
+
+export async function removeCover(actor: Actor, titleId: string, now = new Date()): Promise<void> {
+  const { coverImageKey: previous } = await getTitle(titleId);
+  if (!previous) return;
+  await repository.setCoverImageKey(
+    titleId,
+    undefined,
+    now.toISOString(),
+    auditItem({ entity: `TITLE#${titleId}`, action: 'title.coverRemoved', actor }, now),
+  );
+  await deleteCover(previous);
 }

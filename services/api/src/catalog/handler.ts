@@ -1,5 +1,6 @@
 import {
   CopyInputSchema,
+  CoverUploadRequestSchema,
   CreateTitleRequestSchema,
   LabelLookupRequestSchema,
   UpdateCopyRequestSchema,
@@ -38,6 +39,19 @@ app.put('/titles/:id', async (c) => {
   const id = parse(IdSchema, c.req.param('id'));
   const body = parse(UpdateTitleRequestSchema, await readJson(c));
   return c.json(await catalog.updateTitle(actor, id, body.title, body.version));
+});
+
+app.put('/titles/:id/cover', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  const id = parse(IdSchema, c.req.param('id'));
+  const { image } = parse(CoverUploadRequestSchema, await readJson(c));
+  return c.json(await catalog.uploadCover(actor, id, Buffer.from(image, 'base64')));
+});
+
+app.delete('/titles/:id/cover', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  await catalog.removeCover(actor, parse(IdSchema, c.req.param('id')));
+  return c.body(null, 204);
 });
 
 app.post('/titles/:id/copies', async (c) => {

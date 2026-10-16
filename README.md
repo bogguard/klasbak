@@ -57,6 +57,25 @@ Run from the project folder, in one terminal session:
 
    At the first sign-in the app asks for a new password.
 
+## Book data (ISBN lookup)
+
+Scanning an ISBN fills in the title, authors and cover from three free sources, in this order:
+Open Library (good for English books), Google Books (needs an API key, see below) and the Dutch
+public libraries' open catalogue, data.bibliotheken.nl (best for recent Dutch and Flemish books, but
+without covers). Google Books only answers requests with an API key (free, 1,000 lookups per day):
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), create a project.
+2. Under _APIs & Services → Library_, enable the **Books API**.
+3. Under _APIs & Services → Credentials_, create an **API key** and restrict it to the Books API.
+4. Store it in your AWS account (encrypted, never in git):
+
+   ```bash
+   aws ssm put-parameter --region eu-west-1 --name /library/google-books-api-key --type SecureString --value <key>
+   ```
+
+The API picks it up within an hour, or right away after a deploy. Without a key, Google Books is
+skipped. Locally, set `GOOGLE_BOOKS_API_KEY` in the terminal before `npm run dev:local`.
+
 ## Running the library
 
 - **Staff sign-in** requires two-step verification. The first sign-in shows a QR code for an authenticator app.
