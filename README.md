@@ -14,24 +14,48 @@ Start with [CLAUDE.md](CLAUDE.md) (overview, commands, glossary), [docs/features
 
 ## First deploy
 
-1. Store the address that receives alarms, once per AWS account (it stays out of git):
+Run from the project folder, in one terminal session:
+
+1. Choose the AWS profile and check it:
+
+   ```bash
+   export AWS_PROFILE=<your-profile>
+   aws sts get-caller-identity
+   ```
+
+2. Store the address that receives alarms, once per AWS account (it stays out of git):
 
    ```bash
    aws ssm put-parameter --region eu-west-1 --name /library/alarm-email --type String --value you@example.com
    ```
 
-   Optionally adjust the prod budget (`MonthlyBudgetUsd`) in `infra/samconfig.toml`.
-
-2. `npm install`
-3. `npm run deploy:dev`, then confirm the SNS subscription email you receive.
-4. `scripts/deploy-web.sh dev "Bib De Regenboog"`, which prints the app URL.
-5. Create the first staff user:
+3. Deploy the backend and infrastructure (5–10 minutes the first time, mostly CloudFront):
 
    ```bash
-   aws cognito-idp admin-create-user --user-pool-id <UserPoolId> --username juf.an \
-     --user-attributes Name=email,Value=an@school.be Name=email_verified,Value=true
-   aws cognito-idp admin-add-user-to-group --user-pool-id <UserPoolId> --username juf.an --group-name admin
+   npm run deploy:dev
    ```
+
+   Confirm the "AWS Notification – Subscription Confirmation" email, or alarms won't arrive.
+   Optionally adjust the prod budget (`MonthlyBudgetUsd`) in `infra/samconfig.toml`.
+
+4. Publish the website; it prints the app URL:
+
+   ```bash
+   scripts/deploy-web.sh dev "Name of the library"
+   ```
+
+5. Create the first admin. Find the `UserPoolId` with
+   `aws cloudformation describe-stacks --region eu-west-1 --stack-name library-dev --query "Stacks[0].Outputs" --output table`:
+
+   ```bash
+   aws cognito-idp admin-create-user --region eu-west-1 --user-pool-id <UserPoolId> \
+     --username <name> --temporary-password '<temporary password>' --message-action SUPPRESS \
+     --user-attributes Name=email,Value=<email> Name=email_verified,Value=true
+   aws cognito-idp admin-add-user-to-group --region eu-west-1 --user-pool-id <UserPoolId> \
+     --username <name> --group-name admin
+   ```
+
+   At the first sign-in the app asks for a new password.
 
 ## Local development
 

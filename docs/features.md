@@ -4,14 +4,14 @@ Features a school library needs, from cataloguing to lending to reading promotio
 
 ## Status
 
-| Area                                                                     | State                                        |
-| ------------------------------------------------------------------------ | -------------------------------------------- |
-| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit      | Built and tested; runs locally               |
-| Public catalogue: search (in browser) and title page                     | Built; runs locally                          |
-| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens       | Built; Cognito sign-in untested until deploy |
-| Readers: list, add/edit, CSV import                                      | Built; runs locally                          |
-| Lending desk, overdue/loan lists (printable), loan rules and closed days | Built and tested; runs locally               |
-| Barcode labels and reader cards (PDF)                                    | Built; runs locally                          |
+| Area                                                                     | State                          |
+| ------------------------------------------------------------------------ | ------------------------------ |
+| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit      | Built and tested; runs locally |
+| Public catalogue: search (in browser) and title page                     | Built; runs locally            |
+| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens       | Built; tested on AWS (dev)     |
+| Readers: list, add/edit, CSV import                                      | Built; runs locally            |
+| Lending desk, overdue/loan lists (printable), loan rules and closed days | Built and tested; runs locally |
+| Barcode labels and reader cards (PDF)                                    | Built; runs locally            |
 
 ## Phase 1 — MVP: run a school library
 
