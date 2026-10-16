@@ -43,7 +43,12 @@ export function useCreateTitle() {
   const api = useAuthorizedApi();
   const invalidate = useInvalidateTitle();
   return useMutation({
-    mutationFn: async (input: { title: TitleInput; coverUrl?: string; copies: number }) => {
+    mutationFn: async (input: {
+      title: TitleInput;
+      coverUrl?: string;
+      copies: number;
+      location?: string;
+    }) => {
       const title = await api<Title>('/api/catalog/titles', {
         method: 'POST',
         body: { title: input.title, coverUrl: input.coverUrl },
@@ -54,7 +59,10 @@ export function useCreateTitle() {
       try {
         // Sequential, so generated barcodes are consecutive on the labels.
         for (; copiesCreated < input.copies; copiesCreated++) {
-          await api<Copy>(`/api/catalog/titles/${title.id}/copies`, { method: 'POST', body: {} });
+          await api<Copy>(`/api/catalog/titles/${title.id}/copies`, {
+            method: 'POST',
+            body: { location: input.location },
+          });
         }
       } catch {
         // Reported to the librarian on the title page.
@@ -82,6 +90,17 @@ export function useAddCopy(titleId: string) {
     mutationFn: (input: CopyInput) =>
       api<Copy>(`/api/catalog/titles/${titleId}/copies`, { method: 'POST', body: input }),
     onSuccess: () => invalidate(titleId),
+  });
+}
+
+/** Adds a copy to any title, e.g. one found by scanning a known ISBN. */
+export function useAddCopyToTitle() {
+  const api = useAuthorizedApi();
+  const invalidate = useInvalidateTitle();
+  return useMutation({
+    mutationFn: ({ titleId, location }: { titleId: string; location?: string }) =>
+      api<Copy>(`/api/catalog/titles/${titleId}/copies`, { method: 'POST', body: { location } }),
+    onSuccess: (copy) => invalidate(copy.titleId),
   });
 }
 

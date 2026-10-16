@@ -1,5 +1,5 @@
 import { AVI_LEVELS, TITLE_TYPES, type TitleInput } from '@library/shared';
-import { Save } from 'lucide-react';
+import { ArrowRight, Save } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/Feedback';
@@ -15,7 +15,9 @@ import {
 type TitleFormProps = {
   initialValues: TitleFormValues;
   submitLabel: string;
-  onSubmit: (title: TitleInput) => Promise<void>;
+  /** A second save button, e.g. "save and next book"; onSubmit learns which one was used. */
+  alternativeSubmitLabel?: string;
+  onSubmit: (title: TitleInput, options: { alternative: boolean }) => Promise<void>;
   /** Extra fields rendered before the buttons, e.g. number of copies. */
   extra?: ReactNode;
   /** Shown above the buttons, e.g. a server error. */
@@ -26,6 +28,7 @@ type TitleFormProps = {
 export function TitleForm({
   initialValues,
   submitLabel,
+  alternativeSubmitLabel,
   onSubmit,
   extra,
   footer,
@@ -58,7 +61,8 @@ export function TitleForm({
     }
     setBusy(true);
     try {
-      await onSubmit(result.title);
+      const submitter = (event.nativeEvent as SubmitEvent).submitter;
+      await onSubmit(result.title, { alternative: submitter?.dataset.alternative === 'true' });
     } catch {
       // The page shows the error (via the mutation state) next to the form.
     } finally {
@@ -262,6 +266,12 @@ export function TitleForm({
           <Save className="size-4" aria-hidden="true" />
           {busy ? t('manage.form.saving') : submitLabel}
         </Button>
+        {alternativeSubmitLabel && (
+          <Button type="submit" variant="secondary" data-alternative="true" disabled={busy}>
+            <ArrowRight className="size-4" aria-hidden="true" />
+            {alternativeSubmitLabel}
+          </Button>
+        )}
         {secondaryAction}
       </div>
     </form>

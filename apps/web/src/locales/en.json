@@ -173,7 +173,17 @@
       "copies": "Number of copies",
       "copiesHint": "Each copy gets a barcode automatically.",
       "copiesError": "Enter a number from 0 to 20.",
-      "restart": "Start over"
+      "restart": "Start over",
+      "saveAndNext": "Save and next book",
+      "view": "View",
+      "addedTitle_one": "Added: {{title}} ({{count}} copy). Its label is under ‘Still to print’.",
+      "addedTitle_other": "Added: {{title}} ({{count}} copies). The labels are under ‘Still to print’.",
+      "addedCopy": "Copy {{barcode}} added to {{title}}. Its label is under ‘Still to print’.",
+      "known": "This book is already in the catalogue:",
+      "addCopy": "Add a copy",
+      "newTitleAnyway": "Create a new title anyway",
+      "location": "Location of new copies",
+      "locationHint": "Optional, e.g. ‘Reading books’ or ‘Class library 3B’. Kept for the next books."
     },
     "edit": {
       "viewPublic": "View in the catalogue",

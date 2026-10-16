@@ -173,7 +173,17 @@
       "copies": "Aantal exemplaren",
       "copiesHint": "Elk exemplaar krijgt automatisch een barcode.",
       "copiesError": "Geef een aantal van 0 tot 20.",
-      "restart": "Opnieuw beginnen"
+      "restart": "Opnieuw beginnen",
+      "saveAndNext": "Opslaan en volgend boek",
+      "view": "Bekijken",
+      "addedTitle_one": "Toegevoegd: {{title}} ({{count}} exemplaar). Het label staat bij ‘Nog af te drukken’.",
+      "addedTitle_other": "Toegevoegd: {{title}} ({{count}} exemplaren). De labels staan bij ‘Nog af te drukken’.",
+      "addedCopy": "Exemplaar {{barcode}} toegevoegd aan {{title}}. Het label staat bij ‘Nog af te drukken’.",
+      "known": "Dit boek staat al in de catalogus:",
+      "addCopy": "Exemplaar toevoegen",
+      "newTitleAnyway": "Toch een nieuwe titel maken",
+      "location": "Plaats van nieuwe exemplaren",
+      "locationHint": "Niet verplicht, bv. ‘Leesboeken’ of ‘Klasbib 3B’. Blijft staan voor de volgende boeken."
     },
     "edit": {
       "viewPublic": "Bekijk in de catalogus",

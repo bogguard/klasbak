@@ -1,5 +1,5 @@
 import { isValidIsbn, toIsbn13, type IsbnLookupResult } from '@library/shared';
-import { ArrowLeft, Barcode, PenLine, Search } from 'lucide-react';
+import { ArrowLeft, Barcode, PenLine, Plus, Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
@@ -7,7 +7,7 @@ import { Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { ApiError } from '../../lib/api';
 import { findByIsbn, useSearchIndex } from '../catalog/useSearchIndex';
-import { useCreateTitle, useIsbnLookup } from './api';
+import { useAddCopyToTitle, useCreateTitle, useIsbnLookup } from './api';
 import { TitleForm } from './TitleForm';
 import { emptyTitleForm, toFormValues, type TitleFormValues } from './titleFormValues';
 
@@ -19,13 +19,26 @@ type Draft = {
   lookupProblem?: 'notFound' | 'failed';
 };
 
+/** What was just added, shown while the librarian continues with the next book. */
+type Added =
+  | { kind: 'title'; id: string; title: string; copies: number }
+  | { kind: 'copy'; id: string; title: string; barcode: string };
+
 /**
- * Adding a title is optimised for a librarian with a barcode scanner: scan the ISBN,
- * check what we found, save. Typing everything by hand is the fallback, not the default.
+ * Adding books is optimised for a librarian with a stack of books and a barcode scanner:
+ * scan the ISBN, check what we found, save, next. A book that is already in the catalogue
+ * gets an extra copy in one click. The location is kept between books.
  */
 export function NewTitlePage() {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<Draft>();
+  const [location, setLocation] = useState('');
+  const [added, setAdded] = useState<Added>();
+
+  function next(info: Added) {
+    setAdded(info);
+    setDraft(undefined);
+  }
 
   return (
     <div className="space-y-6">
@@ -37,28 +50,94 @@ export function NewTitlePage() {
         {t('manage.backToList')}
       </Link>
       <h1 className="text-3xl font-semibold tracking-tight">{t('manage.new.heading')}</h1>
+      {added && <AddedMessage added={added} />}
       {draft ? (
-        <DraftForm draft={draft} onRestart={() => setDraft(undefined)} />
+        <DraftForm
+          draft={draft}
+          location={location}
+          onLocation={setLocation}
+          onRestart={() => setDraft(undefined)}
+          onSavedNext={next}
+        />
       ) : (
-        <IsbnStep onDraft={setDraft} />
+        <IsbnStep
+          location={location}
+          onLocation={setLocation}
+          onDraft={(d) => {
+            setAdded(undefined);
+            setDraft(d);
+          }}
+          onCopyAdded={setAdded}
+        />
       )}
     </div>
   );
 }
 
-function IsbnStep({ onDraft }: { onDraft: (draft: Draft) => void }) {
+function AddedMessage({ added }: { added: Added }) {
+  const { t } = useTranslation();
+  return (
+    <Alert
+      tone="success"
+      action={
+        <Link
+          to={`/manage/titles/${added.id}`}
+          className="font-medium underline underline-offset-4"
+        >
+          {t('manage.new.view')}
+        </Link>
+      }
+    >
+      {added.kind === 'title'
+        ? t('manage.new.addedTitle', { title: added.title, count: added.copies })
+        : t('manage.new.addedCopy', { title: added.title, barcode: added.barcode })}
+    </Alert>
+  );
+}
+
+function LocationField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTranslation();
+  return (
+    <Field
+      label={t('manage.new.location')}
+      hint={t('manage.new.locationHint')}
+      className="max-w-xs"
+    >
+      {(props) => (
+        <input
+          {...props}
+          className={`${props.className} ${inputHeight}`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete="off"
+        />
+      )}
+    </Field>
+  );
+}
+
+function IsbnStep({
+  location,
+  onLocation,
+  onDraft,
+  onCopyAdded,
+}: {
+  location: string;
+  onLocation: (location: string) => void;
+  onDraft: (draft: Draft) => void;
+  onCopyAdded: (added: Added) => void;
+}) {
   const { t } = useTranslation();
   const lookup = useIsbnLookup();
+  const addCopy = useAddCopyToTitle();
+  const errorMessage = useErrorMessage();
+  const index = useSearchIndex();
   const [isbn, setIsbn] = useState('');
   const [error, setError] = useState<string>();
+  // An ISBN that's already in the catalogue: offer a copy instead of a duplicate title.
+  const [known, setKnown] = useState<{ isbn13: string; id: string; title: string }>();
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!isValidIsbn(isbn)) {
-      setError(t('manage.form.errors.isbn'));
-      return;
-    }
-    const isbn13 = toIsbn13(isbn);
+  async function lookUp(isbn13: string) {
     try {
       const result = await lookup.mutateAsync(isbn13);
       onDraft({
@@ -76,6 +155,35 @@ function IsbnStep({ onDraft }: { onDraft: (draft: Draft) => void }) {
     }
   }
 
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setKnown(undefined);
+    if (!isValidIsbn(isbn)) {
+      setError(t('manage.form.errors.isbn'));
+      return;
+    }
+    const isbn13 = toIsbn13(isbn);
+    const [existing] = index.data ? findByIsbn(index.data, isbn13) : [];
+    if (existing) setKnown({ isbn13, ...existing });
+    else await lookUp(isbn13);
+  }
+
+  async function addToKnown() {
+    if (!known) return;
+    try {
+      const copy = await addCopy.mutateAsync({
+        titleId: known.id,
+        location: location.trim() || undefined,
+      });
+      onCopyAdded({ kind: 'copy', id: known.id, title: known.title, barcode: copy.barcode });
+      setKnown(undefined);
+      setIsbn('');
+      document.getElementById('isbn-scan')?.focus();
+    } catch {
+      // Shown below.
+    }
+  }
+
   return (
     <div className="max-w-xl space-y-6">
       <form onSubmit={(e) => void submit(e)} noValidate className="space-y-3">
@@ -88,11 +196,13 @@ function IsbnStep({ onDraft }: { onDraft: (draft: Draft) => void }) {
               />
               <input
                 {...props}
+                id="isbn-scan"
                 className={`${props.className} h-14 pl-12 text-lg tracking-wide`}
                 value={isbn}
                 onChange={(e) => {
                   setIsbn(e.target.value);
                   setError(undefined);
+                  setKnown(undefined);
                 }}
                 inputMode="numeric"
                 autoComplete="off"
@@ -107,6 +217,36 @@ function IsbnStep({ onDraft }: { onDraft: (draft: Draft) => void }) {
         </Button>
       </form>
 
+      {known && (
+        <section
+          role="status"
+          className="space-y-3 rounded-xl border border-accent bg-accent-soft p-4"
+        >
+          <p>
+            {t('manage.new.known')}{' '}
+            <Link
+              to={`/manage/titles/${known.id}`}
+              className="font-semibold underline underline-offset-4"
+            >
+              {known.title}
+            </Link>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {/* Focused, so pressing Enter adds the copy right away. */}
+            <Button autoFocus onClick={() => void addToKnown()} disabled={addCopy.isPending}>
+              <Plus className="size-4" aria-hidden="true" />
+              {t('manage.new.addCopy')}
+            </Button>
+            <Button variant="secondary" onClick={() => void lookUp(known.isbn13)}>
+              {t('manage.new.newTitleAnyway')}
+            </Button>
+          </div>
+          {addCopy.isError && <Alert tone="danger">{errorMessage(addCopy.error)}</Alert>}
+        </section>
+      )}
+
+      <LocationField value={location} onChange={onLocation} />
+
       <div className="border-t border-line pt-6">
         <Button variant="secondary" onClick={() => onDraft({ values: emptyTitleForm })}>
           <PenLine className="size-4" aria-hidden="true" />
@@ -117,7 +257,19 @@ function IsbnStep({ onDraft }: { onDraft: (draft: Draft) => void }) {
   );
 }
 
-function DraftForm({ draft, onRestart }: { draft: Draft; onRestart: () => void }) {
+function DraftForm({
+  draft,
+  location,
+  onLocation,
+  onRestart,
+  onSavedNext,
+}: {
+  draft: Draft;
+  location: string;
+  onLocation: (location: string) => void;
+  onRestart: () => void;
+  onSavedNext: (added: Added) => void;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const create = useCreateTitle();
@@ -165,34 +317,49 @@ function DraftForm({ draft, onRestart }: { draft: Draft; onRestart: () => void }
       <TitleForm
         initialValues={draft.values}
         submitLabel={t('manage.new.save')}
-        onSubmit={async (title) => {
+        alternativeSubmitLabel={t('manage.new.saveAndNext')}
+        onSubmit={async (title, { alternative }) => {
           if (!copiesValid) return;
           const { title: created, copiesCreated } = await create.mutateAsync({
             title,
             coverUrl: draft.lookup?.coverUrl,
             copies: copyCount,
+            location: location.trim() || undefined,
           });
+          // If some copies failed, go to the title page, which explains what's missing.
+          if (alternative && copiesCreated === copyCount) {
+            onSavedNext({
+              kind: 'title',
+              id: created.id,
+              title: created.title,
+              copies: copiesCreated,
+            });
+            return;
+          }
           void navigate(`/manage/titles/${created.id}`, {
             state: { flash: 'created', copiesCreated, copiesRequested: copyCount },
           });
         }}
         extra={
-          <Field
-            label={t('manage.new.copies')}
-            hint={t('manage.new.copiesHint')}
-            error={copiesValid ? undefined : t('manage.new.copiesError')}
-            className="max-w-48"
-          >
-            {(props) => (
-              <input
-                {...props}
-                className={`${props.className} ${inputHeight}`}
-                value={copies}
-                onChange={(e) => setCopies(e.target.value)}
-                inputMode="numeric"
-              />
-            )}
-          </Field>
+          <div className="flex flex-wrap gap-4">
+            <Field
+              label={t('manage.new.copies')}
+              hint={t('manage.new.copiesHint')}
+              error={copiesValid ? undefined : t('manage.new.copiesError')}
+              className="max-w-48"
+            >
+              {(props) => (
+                <input
+                  {...props}
+                  className={`${props.className} ${inputHeight}`}
+                  value={copies}
+                  onChange={(e) => setCopies(e.target.value)}
+                  inputMode="numeric"
+                />
+              )}
+            </Field>
+            <LocationField value={location} onChange={onLocation} />
+          </div>
         }
         footer={create.isError && <Alert tone="danger">{errorMessage(create.error)}</Alert>}
         secondaryAction={
