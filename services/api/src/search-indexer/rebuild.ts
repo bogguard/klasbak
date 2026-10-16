@@ -12,7 +12,8 @@ export async function rebuildSearchIndex(): Promise<number> {
     SEARCH_INDEX_PATH,
     JSON.stringify(index),
     'application/json',
-    'public, max-age=60',
+    // Revalidate every time (cheap "304 Not Modified" when unchanged), so changes show at once.
+    'no-cache',
   );
   return titles.length;
 }

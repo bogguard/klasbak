@@ -375,8 +375,9 @@ Resources:
           Properties:
             Stream: !GetAtt Table.StreamArn
             StartingPosition: LATEST
+            # No waiting: a change is indexed within seconds. Changes arriving while a rebuild
+            # runs are picked up together by the next one, so bursts still coalesce.
             BatchSize: 1000
-            MaximumBatchingWindowInSeconds: 60
             MaximumRetryAttempts: 3
             FilterCriteria:
               Filters:

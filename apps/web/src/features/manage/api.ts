@@ -9,6 +9,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';
+import { upsertIntoSearchIndex } from '../catalog/useSearchIndex';
 
 const titleKey = (id: string) => ['staff-title', id];
 
@@ -24,12 +25,18 @@ export function useStaffTitle(id: string) {
 /** After a change, the staff view, the public page and the search results must catch up. */
 function useInvalidateTitle() {
   const queryClient = useQueryClient();
-  return (id: string) =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: titleKey(id) }),
-      queryClient.invalidateQueries({ queryKey: ['public-title', id] }),
-      queryClient.invalidateQueries({ queryKey: ['search-index'] }),
-    ]);
+  const api = useAuthorizedApi();
+  return async (id: string) => {
+    await queryClient.invalidateQueries({ queryKey: ['public-title', id] });
+    // Fresh title with its copies: shown on the staff page and put into the search list
+    // right away (the server's search index follows a few seconds later).
+    const title = await queryClient.fetchQuery({
+      queryKey: titleKey(id),
+      queryFn: () => api<TitleWithCopies>(`/api/catalog/titles/${encodeURIComponent(id)}`),
+      staleTime: 0,
+    });
+    upsertIntoSearchIndex(queryClient, title);
+  };
 }
 
 export function useCreateTitle() {

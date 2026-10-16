@@ -128,3 +128,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 
 - **Decision**: A "Medewerkers" page (admins only, enforced by the API) lists the Cognito users in the `admin` and `librarian` groups and lets admins create accounts, change roles, issue a new temporary password, reset two-step verification and deactivate or reactivate accounts (deactivating also signs them out everywhere). New accounts get a generated temporary password (no look-alike characters) that is shown once to the admin; Cognito sends no email. Nobody can change their own account there, and the last active admin can't be demoted or deactivated. Changes are written to the audit trail. Locally an in-memory list stands in for Cognito.
 - **Consequences**: No email setup needed and no passwords in mailboxes; the admin passes the password on in person. The staff function has its own narrowly scoped Cognito permissions. Beheerder vs bibliothecaris now differ in one place (staff management); splitting other admin-only tasks is still open.
+
+## 022 — Search index updates within seconds
+
+- **Context**: New books showed up in search only after a minute or more, which confused staff: the stream waited up to 60 s, the index was cached for 60 s, and the app kept its copy for 5 minutes.
+- **Decision**: No batching window on the stream (changes during a rebuild still coalesce into the next one), `Cache-Control: no-cache` on the index (revalidated each time, a cheap 304 when unchanged), and after a staff change the app puts the fresh title straight into its own copy of the index.
+- **Consequences**: Staff see their change immediately; visitors within seconds. During busy desk hours the index is rebuilt more often, still a fraction of a cent per day at school scale.

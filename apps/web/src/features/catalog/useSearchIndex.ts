@@ -1,5 +1,11 @@
-import { SEARCH_INDEX_PATH, searchIndexOptions, type SearchDocument } from '@library/shared';
-import { useQuery } from '@tanstack/react-query';
+import {
+  SEARCH_INDEX_PATH,
+  searchIndexOptions,
+  toSearchDocument,
+  type SearchDocument,
+  type TitleWithCopies,
+} from '@library/shared';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
 import MiniSearch from 'minisearch';
 
 /**
@@ -17,6 +23,22 @@ export function useSearchIndex() {
     },
     staleTime: 5 * 60_000,
   });
+}
+
+/**
+ * Puts a title that staff just changed straight into the index on this screen, so it shows up
+ * immediately instead of after the server has rebuilt the index (a few seconds later).
+ */
+export function upsertIntoSearchIndex(queryClient: QueryClient, title: TitleWithCopies) {
+  const current = queryClient.getQueryData<MiniSearch<SearchDocument>>(['search-index']);
+  if (!current) return;
+  // A copy, because cached data must not be changed in place (React wouldn't notice).
+  const next = MiniSearch.loadJS<SearchDocument>(current.toJSON(), searchIndexOptions);
+  const { copies, ...rest } = title;
+  const doc = toSearchDocument(rest, copies);
+  if (next.has(doc.id)) next.replace(doc);
+  else next.add(doc);
+  queryClient.setQueryData(['search-index'], next);
 }
 
 /** Titles in the catalogue with exactly this (normalised ISBN-13) ISBN. */
