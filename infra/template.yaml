@@ -335,7 +335,8 @@ Resources:
             MaximumRetryAttempts: 3
             FilterCriteria:
               Filters:
-                - Pattern: '{"dynamodb":{"Keys":{"sk":{"S":["TITLE"]}}}}'
+                # Titles and copies (copies change status on every loan): availability in search.
+                - Pattern: '{"dynamodb":{"Keys":{"sk":{"S":["TITLE",{"prefix":"COPY#"}]}}}}'
             DestinationConfig:
               OnFailure:
                 Type: SQS

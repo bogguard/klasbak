@@ -1,7 +1,7 @@
 import { AVI_LEVELS, TITLE_TYPES, type SearchDocument, type TitleType } from '@library/shared';
 import { BookOpen, Search, SearchX, TriangleAlert } from 'lucide-react';
 import MiniSearch, { type SearchResult } from 'minisearch';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import { Badge, Button, Skeleton, StatusMessage } from '../../components/ui/Feedback';
@@ -11,6 +11,16 @@ import { useSearchIndex } from './useSearchIndex';
 const PAGE_SIZE = 30;
 
 type Result = SearchResult & Omit<SearchDocument, 'id'>;
+
+const SORTS = {
+  // Newest first doubles as the "new acquisitions" list.
+  new: (a: Result, b: Result) => (b.addedAt ?? '').localeCompare(a.addedAt ?? ''),
+  title: (a: Result, b: Result) => a.title.localeCompare(b.title, 'nl'),
+  author: (a: Result, b: Result) =>
+    (a.authors || '~').localeCompare(b.authors || '~', 'nl') ||
+    a.title.localeCompare(b.title, 'nl'),
+};
+type Sort = keyof typeof SORTS;
 
 type SearchPageProps = {
   heading?: string;
@@ -32,14 +42,39 @@ export function SearchPage({
   const query = params.get('q') ?? '';
   const type = params.get('type') ?? '';
   const avi = params.get('avi') ?? '';
+  const onlyAvailable = params.get('available') === '1';
+  const sort: Sort = (params.get('sort') as Sort | null) ?? 'new';
+  const browsing = !query.trim();
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const results = useMemo(() => {
-    if (!index.data || (!query.trim() && !type && !avi)) return undefined;
-    const filter = (r: SearchResult) => (!type || r.type === type) && (!avi || r.aviLevel === avi);
-    // No words but a filter (e.g. "all AVI E4 books") lists everything matching the filter.
-    return index.data.search(query.trim() || MiniSearch.wildcard, { filter }) as Result[];
-  }, [index.data, query, type, avi]);
+    if (!index.data) return undefined;
+    const filter = (r: SearchResult) =>
+      (!type || r.type === type) &&
+      (!avi || r.aviLevel === avi) &&
+      (!onlyAvailable || (r.available ?? 0) > 0);
+    // Without words the whole catalogue is listed, so people can browse.
+    const found = index.data.search(query.trim() || MiniSearch.wildcard, { filter }) as Result[];
+    // With words the best matches come first; when browsing, the chosen order.
+    return browsing ? [...found].sort(SORTS[sort] ?? SORTS.new) : found;
+  }, [index.data, query, type, avi, onlyAvailable, sort, browsing]);
+
+  // Load more titles automatically when the end of the list scrolls into view.
+  const sentinel = useRef<HTMLDivElement>(null);
+  const hasMore = (results?.length ?? 0) > visible;
+  useEffect(() => {
+    const element = sentinel.current;
+    if (!element || !hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) setVisible((v) => v + PAGE_SIZE);
+      },
+      { rootMargin: '400px' },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+    // Re-observing after each load re-checks the sentinel, in case it is still in view.
+  }, [hasMore, visible]);
 
   function update(key: string, value: string) {
     setVisible(PAGE_SIZE);
@@ -54,7 +89,7 @@ export function SearchPage({
     );
   }
 
-  const hasFilters = Boolean(type || avi);
+  const hasFilters = Boolean(type || avi || onlyAvailable);
 
   return (
     <div className="space-y-6">
@@ -103,11 +138,38 @@ export function SearchPage({
                 ...AVI_LEVELS.map((value) => ({ value, label: value })),
               ]}
             />
+            {browsing && (
+              <FilterSelect
+                label={t('search.sort.label')}
+                value={sort}
+                onChange={(v) => update('sort', v === 'new' ? '' : v)}
+                options={(Object.keys(SORTS) as Sort[]).map((value) => ({
+                  value,
+                  label: t(`search.sort.${value}`),
+                }))}
+              />
+            )}
+            <label className="flex min-h-11 items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={onlyAvailable}
+                onChange={(e) => update('available', e.target.checked ? '1' : '')}
+                className="size-4 accent-[var(--accent)]"
+              />
+              {t('search.filters.onlyAvailable')}
+            </label>
             {hasFilters && (
               <Button
                 variant="secondary"
                 type="button"
-                onClick={() => setParams(query ? { q: query } : {})}
+                onClick={() =>
+                  setParams(() => {
+                    const keep = new URLSearchParams();
+                    if (query) keep.set('q', query);
+                    if (params.get('sort')) keep.set('sort', sort);
+                    return keep;
+                  })
+                }
               >
                 {t('search.filters.clear')}
               </Button>
@@ -132,27 +194,24 @@ export function SearchPage({
           >
             {t('search.emptyCatalogue.hint')}
           </StatusMessage>
-        ) : !results ? (
-          <p className="text-muted">
-            {t('search.catalogueSize', { count: index.data.documentCount })}.{' '}
-            {t('search.startHint')}
-          </p>
-        ) : results.length === 0 ? (
+        ) : !results ? null : results.length === 0 ? (
           <StatusMessage icon={<SearchX className="size-6" />} title={t('search.noResults.title')}>
             {t('search.noResults.hint')}
           </StatusMessage>
         ) : (
           <>
             <p className="mb-3 text-sm text-muted">
-              {t('search.resultCount', { count: results.length })}
+              {browsing
+                ? t('search.browseCount', { count: results.length })
+                : t('search.resultCount', { count: results.length })}
             </p>
             <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
               {results.slice(0, visible).map((result) => (
                 <ResultItem key={result.id} result={result} to={titleLink(result.id)} />
               ))}
             </ul>
-            {results.length > visible && (
-              <div className="mt-4 flex justify-center">
+            {hasMore && (
+              <div ref={sentinel} className="mt-4 flex justify-center">
                 <Button variant="secondary" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
                   {t('search.showMore')}
                 </Button>
@@ -187,6 +246,13 @@ function ResultItem({ result, to }: { result: Result; to: string }) {
             <Badge>{t(`types.${result.type}`)}</Badge>
             {result.aviLevel && <Badge>AVI {result.aviLevel}</Badge>}
             {result.publishedYear && <Badge>{result.publishedYear}</Badge>}
+            {result.copies > 0 &&
+              (result.available > 0 ? (
+                <Badge tone="success">{t('copyStatus.available')}</Badge>
+              ) : (
+                // On loan, lost or damaged: for a visitor it's simply not on the shelf.
+                <Badge tone="warning">{t('search.notAvailable')}</Badge>
+              ))}
           </div>
         </div>
       </Link>

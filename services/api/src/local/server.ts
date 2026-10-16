@@ -57,9 +57,12 @@ server.all('/api/readers/*', (c) =>
 server.all('/api/readers', (c) =>
   readers.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
 );
-server.all('/api/circulation/*', (c) =>
-  circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
-);
+server.all('/api/circulation/*', async (c) => {
+  const response = await circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization')));
+  // Loans change copy statuses, and availability is part of the search index.
+  if (c.req.method !== 'GET' && response.ok) await rebuildSearchIndex();
+  return response;
+});
 
 serve({ fetch: server.fetch, port: PORT }, ({ port }) => {
   logger.info(`Local API on http://localhost:${port}`);

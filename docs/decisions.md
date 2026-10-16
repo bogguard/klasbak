@@ -117,3 +117,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Many Dutch books are found without a cover (decision 018), and new books aren't in any free source yet.
 - **Decision**: Staff upload a photo or image on the title page. The browser turns it upright, scales it to at most 900 px and re-saves it as JPEG, which also strips photo metadata such as GPS location. The API accepts only real JPEG/PNG/WebP files (checked by their first bytes, at most 2 MB), sent as base64 JSON, and stores each upload under a new name (`covers/<titleId>-<id>.jpg`) so caches never show an old cover. Changing the cover doesn't change the title's version, so editing details at the same time doesn't conflict.
 - **Consequences**: No presigned uploads or S3 CORS to manage. Replaced and removed covers are deleted from the bucket.
+
+## 020 — Browse the catalogue, with availability in the search index
+
+- **Context**: Visitors want to scroll through the collection and see what's on the shelf, not only search.
+- **Decision**: With no search words, the catalogue lists every title (newest first by default, which also serves as "new acquisitions"; or A–Z by title or author), loading more while scrolling. The search index stores each title's number of visible copies and available copies and the date it was added, and is now rebuilt when copies change too (stream filter on `TITLE` and `COPY#` keys), so loans and returns update availability.
+- **Consequences**: During busy desk hours the index is rebuilt about once a minute (batched), a full table read that costs a fraction of a cent at school scale. Availability in lists can lag a minute or two; the title page shows the live status.

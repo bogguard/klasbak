@@ -14,9 +14,6 @@
     "label": "Zoeken in de catalogus",
     "placeholder": "Titel, auteur, onderwerp of ISBN",
     "submit": "Zoeken",
-    "catalogueSize_one": "Doorzoek {{count}} titel",
-    "catalogueSize_other": "Doorzoek {{count}} titels",
-    "startHint": "Typ bijvoorbeeld een titel, een schrijver of een onderwerp zoals ‘dinosaurussen’.",
     "resultCount_one": "{{count}} resultaat",
     "resultCount_other": "{{count}} resultaten",
     "showMore": "Meer tonen",
@@ -25,7 +22,8 @@
       "allTypes": "Alles",
       "avi": "AVI-niveau",
       "anyLevel": "Alle niveaus",
-      "clear": "Filters wissen"
+      "clear": "Filters wissen",
+      "onlyAvailable": "Alleen beschikbaar"
     },
     "noResults": {
       "title": "Niets gevonden",
@@ -35,7 +33,16 @@
       "title": "De catalogus is nog leeg",
       "hint": "Zodra er boeken toegevoegd zijn, kan je hier zoeken."
     },
-    "loadError": "De catalogus kon niet geladen worden."
+    "loadError": "De catalogus kon niet geladen worden.",
+    "browseCount_one": "{{count}} titel",
+    "browseCount_other": "{{count}} titels",
+    "sort": {
+      "label": "Volgorde",
+      "new": "Nieuwste eerst",
+      "title": "Titel A–Z",
+      "author": "Auteur A–Z"
+    },
+    "notAvailable": "Niet beschikbaar"
   },
   "types": {
     "book": "Boek",

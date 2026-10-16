@@ -14,9 +14,6 @@
     "label": "Search the catalogue",
     "placeholder": "Title, author, subject or ISBN",
     "submit": "Search",
-    "catalogueSize_one": "Search {{count}} title",
-    "catalogueSize_other": "Search {{count}} titles",
-    "startHint": "Type a title, an author or a subject like ‘dinosaurs’.",
     "resultCount_one": "{{count}} result",
     "resultCount_other": "{{count}} results",
     "showMore": "Show more",
@@ -25,7 +22,8 @@
       "allTypes": "All",
       "avi": "AVI level",
       "anyLevel": "All levels",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "onlyAvailable": "Available only"
     },
     "noResults": {
       "title": "Nothing found",
@@ -35,7 +33,16 @@
       "title": "The catalogue is still empty",
       "hint": "Once books have been added, you can search them here."
     },
-    "loadError": "The catalogue could not be loaded."
+    "loadError": "The catalogue could not be loaded.",
+    "browseCount_one": "{{count}} title",
+    "browseCount_other": "{{count}} titles",
+    "sort": {
+      "label": "Order",
+      "new": "Newest first",
+      "title": "Title A–Z",
+      "author": "Author A–Z"
+    },
+    "notAvailable": "Not available"
   },
   "types": {
     "book": "Book",

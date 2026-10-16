@@ -20,7 +20,7 @@ function title(overrides: Partial<Title>): Title {
 
 function buildIndex(titles: Title[]) {
   const index = new MiniSearch<SearchDocument>(searchIndexOptions);
-  index.addAll(titles.map(toSearchDocument));
+  index.addAll(titles.map((t) => toSearchDocument(t)));
   // Round-trip through JSON exactly like the indexer (server) and the browser do.
   return MiniSearch.loadJSON<SearchDocument>(JSON.stringify(index), searchIndexOptions);
 }
@@ -49,6 +49,15 @@ describe('catalogue search', () => {
 
   it('tolerates small typos', () => {
     expect(ids('weerwolfie')).toEqual(['C']);
+  });
+
+  it('stores how many copies are available, ignoring withdrawn ones', () => {
+    const doc = toSearchDocument(title({ id: 'X' }), [
+      { status: 'available' },
+      { status: 'onLoan' },
+      { status: 'withdrawn' },
+    ]);
+    expect(doc).toMatchObject({ copies: 2, available: 1, addedAt: '2026-01-01T00:00:00.000Z' });
   });
 
   it('finds authors, subjects and ISBN', () => {

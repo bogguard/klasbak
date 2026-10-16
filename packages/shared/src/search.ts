@@ -1,5 +1,5 @@
 import type { Options } from 'minisearch';
-import type { Title, TitleType } from './catalog';
+import type { Copy, Title, TitleType } from './catalog';
 
 /** What the public catalogue search shows in a result list. Public data only. */
 export type SearchDocument = {
@@ -15,11 +15,24 @@ export type SearchDocument = {
   ageMin?: number;
   ageMax?: number;
   coverImageKey?: string;
+  /** When the title was added: sorts "newest first" (new acquisitions). */
+  addedAt: string;
+  /** Copies the public can see (withdrawn ones excluded), and how many are on the shelf. */
+  copies: number;
+  available: number;
 };
 
 export const SEARCH_INDEX_PATH = 'search/catalog.json';
 
-export function toSearchDocument(title: Title): SearchDocument {
+/**
+ * Availability in the index can lag a minute or two behind the desk (it's rebuilt in
+ * batches); the title page always shows the live status.
+ */
+export function toSearchDocument(
+  title: Title,
+  copies: Pick<Copy, 'status'>[] = [],
+): SearchDocument {
+  const visible = copies.filter((copy) => copy.status !== 'withdrawn');
   return {
     id: title.id,
     type: title.type,
@@ -33,6 +46,9 @@ export function toSearchDocument(title: Title): SearchDocument {
     ageMin: title.ageMin,
     ageMax: title.ageMax,
     coverImageKey: title.coverImageKey,
+    addedAt: title.createdAt,
+    copies: visible.length,
+    available: visible.filter((copy) => copy.status === 'available').length,
   };
 }
 
@@ -60,6 +76,9 @@ export const searchIndexOptions: Options<SearchDocument> = {
     'ageMin',
     'ageMax',
     'coverImageKey',
+    'addedAt',
+    'copies',
+    'available',
   ],
   processTerm: normalizeTerm,
   searchOptions: {

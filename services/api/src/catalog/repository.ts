@@ -224,21 +224,34 @@ export async function replaceCopy(
   }
 }
 
-/** Reads every title; used to rebuild the search index. Fine for school-sized catalogues. */
+/** Reads every title; used by the seed script. */
 export async function scanAllTitles(): Promise<Title[]> {
-  const titles: Title[] = [];
+  return (await scanCatalogue()).map(({ copies: _copies, ...title }) => title);
+}
+
+/**
+ * Reads every title with its copies in one pass; used to rebuild the search index.
+ * Fine for school-sized catalogues (see decision 003).
+ */
+export async function scanCatalogue(): Promise<TitleWithCopies[]> {
+  const titles = new Map<string, Title>();
+  const copies = new Map<string, Copy[]>();
   let startKey: Item | undefined;
   do {
     const page: ScanCommandOutput = await db.send(
       new ScanCommand({
         TableName: env.tableName,
-        FilterExpression: 'sk = :sk',
-        ExpressionAttributeValues: { ':sk': 'TITLE' },
+        FilterExpression: 'sk = :title OR begins_with(sk, :copy)',
+        ExpressionAttributeValues: { ':title': 'TITLE', ':copy': 'COPY#' },
         ExclusiveStartKey: startKey,
       }),
     );
-    titles.push(...(page.Items ?? []).map((item) => stripKeys<Title>(item)));
+    for (const item of page.Items ?? []) {
+      const pk = String(item.pk);
+      if (item.sk === 'TITLE') titles.set(pk, stripKeys<Title>(item));
+      else copies.set(pk, [...(copies.get(pk) ?? []), stripKeys<Copy>(item)]);
+    }
     startKey = page.LastEvaluatedKey;
   } while (startKey);
-  return titles;
+  return [...titles].map(([pk, title]) => ({ ...title, copies: copies.get(pk) ?? [] }));
 }

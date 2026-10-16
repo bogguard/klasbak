@@ -4,7 +4,8 @@ import { logger, metrics } from '../lib/observability';
 import { rebuildSearchIndex } from './rebuild';
 
 /*
- * Rebuilds the public search index whenever titles change (see decision 003).
+ * Rebuilds the public search index whenever titles or copies change (see decision 003);
+ * copies change on every loan and return, which keeps "available" up to date.
  * The DynamoDB stream only acts as a trigger: we always rebuild from the table, so the
  * result is correct no matter which or how many changes are in the batch. The SAM template
  * batches changes for up to a minute so bulk edits cause one rebuild, not hundreds.
