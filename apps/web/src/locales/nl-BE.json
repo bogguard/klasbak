@@ -532,7 +532,8 @@
       "no": "Nee, later opnieuw",
       "done_one": "{{count}} label gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}.",
       "done_other": "{{count}} labels gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}."
-    }
+    },
+    "cardsHowTo": "Tien kaarten per A4, zo groot als een bankkaart. Druk af op stevig papier (200–250 g/m²) op ware grootte, snijd langs de streepjes in de marge en lamineer met hoesjes van 65 × 95 mm, liefst mat zodat de scanner geen reflectie ziet. Test eerst één kaart met de scanner. De klas staat er bewust niet op, zodat een kaart meerdere schooljaren meegaat."
   },
   "mfa": {
     "heading": "Beveilig je account met tweestapsverificatie",

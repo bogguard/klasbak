@@ -172,6 +172,31 @@ export async function loadLogo(logoKey: string | undefined): Promise<PdfLogo | u
   }
 }
 
+/**
+ * Short marks in the page margin where the paper cutter should cut, on the grid lines
+ * between the cards. Nothing is printed on the cards themselves, so a cut that's slightly
+ * off leaves no stray line on a card.
+ */
+function drawCropMarks(doc: jsPDF, sheet: SheetLayout) {
+  const left = sheet.marginLeft;
+  const top = sheet.marginTop;
+  const right = left + sheet.columns * sheet.pitchX;
+  const bottom = top + sheet.rows * sheet.pitchY;
+  const gap = 2;
+  const length = 6;
+  doc.setDrawColor(0, 0, 0).setLineWidth(0.2);
+  for (let c = 0; c <= sheet.columns; c++) {
+    const x = left + c * sheet.pitchX;
+    doc.line(x, top - gap - length, x, top - gap);
+    doc.line(x, bottom + gap, x, bottom + gap + length);
+  }
+  for (let r = 0; r <= sheet.rows; r++) {
+    const y = top + r * sheet.pitchY;
+    doc.line(left - gap - length, y, left - gap, y);
+    doc.line(right + gap, y, right + gap + length, y);
+  }
+}
+
 export async function readerCardsPdf(
   readers: Reader[],
   libraryName: string,
@@ -183,13 +208,14 @@ export async function readerCardsPdf(
   const padding = 5;
   const inner = sheet.labelWidth - 2 * padding;
 
+  const marked = new Set<number>();
   readers.forEach((reader, i) => {
     const { page, x, y } = positions[i] as (typeof positions)[number];
     placeOnPage(doc, page);
-
-    // Light outline as a cutting guide.
-    doc.setDrawColor(200, 200, 200).setLineWidth(0.2);
-    doc.roundedRect(x, y, sheet.labelWidth, sheet.labelHeight, 3, 3, 'S');
+    if (!marked.has(page)) {
+      drawCropMarks(doc, sheet);
+      marked.add(page);
+    }
 
     // The school logo top right (at most 10 mm high, in proportion), the name next to it.
     let nameWidth = inner;
@@ -213,17 +239,11 @@ export async function readerCardsPdf(
       .setTextColor(...ACCENT);
     doc.text(fit(doc, libraryName, nameWidth), x + padding, y + padding + 10 * PT);
 
+    // No class on the card: it changes every school year, the card shouldn't have to.
     doc.setFontSize(15).setTextColor(0, 0, 0);
-    doc.text(fit(doc, readerName(reader), inner), x + padding, y + 19);
-    if (reader.group) {
-      doc
-        .setFont('helvetica', 'normal')
-        .setFontSize(11)
-        .setTextColor(...MUTED);
-      doc.text(pdfText(reader.group), x + padding, y + 25);
-    }
+    doc.text(fit(doc, readerName(reader), inner), x + padding, y + 21);
 
-    drawBarcode(doc, reader.memberNumber, { x: x + padding, y: y + 29, width: inner, height: 13 });
+    drawBarcode(doc, reader.memberNumber, { x: x + padding, y: y + 26, width: inner, height: 15 });
     doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(0, 0, 0);
     doc.text(reader.memberNumber, x + sheet.labelWidth / 2, y + sheet.labelHeight - padding, {
       align: 'center',

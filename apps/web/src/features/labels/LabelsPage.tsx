@@ -448,6 +448,7 @@ function ReaderCards({ readerIds }: { readerIds: string | null }) {
         </label>
       )}
       <p>{t('labels.cardsCount', { count: selected.length })}</p>
+      <p className="text-sm text-muted">{t('labels.cardsHowTo')}</p>
       {done !== undefined && <Alert tone="success">{t('labels.cardsDone', { count: done })}</Alert>}
       <Button onClick={() => void makePdf()} disabled={busy || selected.length === 0}>
         <Download className="size-4" aria-hidden="true" />

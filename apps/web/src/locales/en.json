@@ -532,7 +532,8 @@
       "no": "No, later again",
       "done_one": "{{count}} label marked as printed. Next time you start at label {{next}}.",
       "done_other": "{{count}} labels marked as printed. Next time you start at label {{next}}."
-    }
+    },
+    "cardsHowTo": "Ten cards per A4, the size of a bank card. Print on sturdy paper (200–250 g/m²) at actual size, cut along the marks in the margin and laminate with 65 × 95 mm pouches, preferably matte so the scanner sees no glare. Test one card with the scanner first. The class is left off on purpose, so a card lasts several school years."
   },
   "mfa": {
     "heading": "Protect your account with two-step verification",
