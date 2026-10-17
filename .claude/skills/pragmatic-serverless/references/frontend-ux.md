@@ -97,6 +97,7 @@ Print is part of the product: people hold it in their hands, so it gets the same
 
 - **Generate in the browser** (jsPDF, loaded on demand) in millimetres; no server, no cost. For a quick slip (e.g. a loan ticket) use the browser's own print with a print-only element instead of a PDF.
 - **Design for the physical object**: exact sheet layouts for standard label sheets, credit-card size for cards, 72 mm width for tickets (fits receipt printers, prints at the top of A4 elsewhere). Remember people print "fit to page" by mistake: tell them to print at actual size.
+- **Browsers leave out background colours when printing** (the default setting): charts drawn with backgrounds come out empty. Give them `print-color-adjust: exact`, print white paper behind them, and test printing with backgrounds switched off. On paper, write the value on every bar (a blank reads as missing) but leave future periods empty.
 - **Barcodes stay scannable**: black on white, quiet zones, enough height; never shrink the barcode to make room for decoration.
 - **Make cutting and handling easy**: crop marks in the margin instead of outlines on the item; leave changing data (like a class) off things that should last.
 - **Built-in PDF fonts only cover Western European characters**: normalise text to NFC and replace or drop what they can't show, or a single odd character spreads a whole line apart.
