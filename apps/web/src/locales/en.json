@@ -42,7 +42,8 @@
       "title": "Title A–Z",
       "author": "Author A–Z"
     },
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "noCopies": "No copies"
   },
   "types": {
     "book": "Book",

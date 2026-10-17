@@ -48,6 +48,11 @@ await rebuildSearchIndex();
 const server = new Hono();
 
 server.get('/config.json', (c) => c.json({ libraryName: 'Bibliotheek (lokaal)', devAuth: true }));
+// Like the S3 file in the cloud: always revalidated, so a reload shows the latest index.
+server.use('/search/*', async (c, next) => {
+  await next();
+  c.header('Cache-Control', 'no-cache');
+});
 server.use('/search/*', serveStatic({ root: publicDir }));
 server.use('/covers/*', serveStatic({ root: publicDir }));
 server.use('/branding/*', serveStatic({ root: publicDir }));

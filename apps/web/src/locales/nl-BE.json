@@ -42,7 +42,8 @@
       "title": "Titel A–Z",
       "author": "Auteur A–Z"
     },
-    "notAvailable": "Niet beschikbaar"
+    "notAvailable": "Niet beschikbaar",
+    "noCopies": "Geen exemplaren"
   },
   "types": {
     "book": "Boek",

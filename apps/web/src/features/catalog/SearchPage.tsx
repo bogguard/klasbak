@@ -274,7 +274,7 @@ function ResultCard({ result, to }: { result: Result; to: string }) {
             {result.title}
           </p>
           {result.authors && <p className="line-clamp-1 text-sm text-muted">{result.authors}</p>}
-          {result.copies > 0 && (
+          {result.copies > 0 ? (
             <p className="flex items-center gap-1.5 text-sm">
               <span
                 className={`size-2 rounded-full ${result.available > 0 ? 'bg-success' : 'bg-warning'}`}
@@ -284,6 +284,9 @@ function ResultCard({ result, to }: { result: Result; to: string }) {
                 {result.available > 0 ? t('copyStatus.available') : t('search.notAvailable')}
               </span>
             </p>
+          ) : (
+            // All copies withdrawn (or none added yet): say so, rather than show nothing.
+            <p className="text-sm text-muted">{t('search.noCopies')}</p>
           )}
         </div>
       </Link>
