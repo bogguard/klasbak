@@ -3,7 +3,15 @@ import { DEFAULT_SETTINGS, type Copy, type LibrarySettings, type Loan } from '@l
 import { db, env } from '../lib/aws';
 import { failedConditionAt, getItem, queryAll, stripKeys, type Item } from '../lib/dynamo';
 import { ConflictError } from '../lib/errors';
-import { ACTIVE_LOANS_INDEX_PK, copyKey, GSI1, loanKey, readerKey, settingsKey } from '../lib/keys';
+import {
+  ACTIVE_LOANS_INDEX_PK,
+  copyKey,
+  GSI1,
+  loanKey,
+  readerKey,
+  settingsKey,
+  statsKey,
+} from '../lib/keys';
 
 export async function getSettings(): Promise<LibrarySettings> {
   // Defaults first, so settings saved before a new option existed still get a value for it.
@@ -77,14 +85,22 @@ export type CheckOutFailure = 'readerRefused' | 'copyNotAvailable';
 /**
  * Lends a copy in one transaction. The database itself guarantees the rules:
  * the reader is active and below their maximum, and the copy is still available.
+ * The anonymous statistics are counted in the same transaction, so they never drift.
  */
 export async function checkOut(params: {
   loan: Loan;
   copy: Copy;
   maxLoans: number;
   audit: Item;
+  /** Month (YYYY-MM, Brussels time) and, for pupils, the class to count the loan under. */
+  stats: { month: string; group?: string };
 }): Promise<CheckOutFailure | undefined> {
-  const { loan, copy, maxLoans, audit } = params;
+  const { loan, copy, maxLoans, audit, stats } = params;
+  const counters = [
+    'TOTAL',
+    `TITLE#${loan.titleId}`,
+    ...(stats.group ? [`GROUP#${stats.group}`] : []),
+  ];
   try {
     await db.send(
       new TransactWriteCommand({
@@ -132,6 +148,14 @@ export async function checkOut(params: {
             },
           },
           { Put: { TableName: env.tableName, Item: audit } },
+          ...counters.map((sk) => ({
+            Update: {
+              TableName: env.tableName,
+              Key: statsKey(stats.month, sk),
+              UpdateExpression: 'ADD loans :one',
+              ExpressionAttributeValues: { ':one': 1 },
+            },
+          })),
         ],
       }),
     );
@@ -236,4 +260,20 @@ export async function checkIn(params: {
     if (failedConditionAt(error, 0) || failedConditionAt(error, 1)) return false;
     throw error;
   }
+}
+
+/** All counters of these months (one small partition per month). */
+export async function statisticsOf(
+  months: string[],
+): Promise<Array<{ month: string; sk: string; loans: number }>> {
+  const perMonth = await Promise.all(
+    months.map(async (month) => {
+      const items = await queryAll({
+        KeyConditionExpression: 'pk = :pk',
+        ExpressionAttributeValues: { ':pk': statsKey(month, '').pk },
+      });
+      return items.map((item) => ({ month, sk: String(item.sk), loans: Number(item.loans ?? 0) }));
+    }),
+  );
+  return perMonth.flat();
 }

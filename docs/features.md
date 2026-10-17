@@ -13,6 +13,7 @@ Features a school library needs, from cataloguing to lending to reading promotio
 | Lending desk, overdue/loan lists (printable), loan rules and closed days | Built and tested; runs locally |
 | Barcode labels and reader cards (PDF)                                    | Built; runs locally            |
 | Staff two-step verification, privacy page, history retention, erasure    | Built; runs locally            |
+| Reminder slips, "Mijn boeken" screen, anonymous statistics               | Built; runs locally            |
 
 ## Phase 1 — MVP: run a school library
 
@@ -54,10 +55,10 @@ Features a school library needs, from cataloguing to lending to reading promotio
 
 - Reader portal: login, own loans and history, renew online.
 - Reservations with queue and notification when available (email; on-screen for readers without email).
-- Automatic overdue reminders (email to reader/parent/teacher, class lists for teachers).
+- Overdue reminders: printed slips per pupil (built, decision 028); email to teachers later.
 - ~~Fines~~ — not planned for now (decision 007).
 - New acquisitions, theme lists, popular subjects on the homepage.
-- Statistics: loans per period/class/type, most popular titles, collection usage; CSV export. Aggregated only.
+- Statistics: loans per month and class, most popular and never-lent titles (built, decision 028); CSV export later. Aggregated only.
 
 ## Phase 3 — Nice to have
 

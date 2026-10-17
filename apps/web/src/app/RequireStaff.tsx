@@ -9,8 +9,9 @@ import { ManageNav } from './ManageNav';
 /**
  * Guards the management pages in the browser for a friendly experience.
  * The real protection is the API, which checks the role on every request.
+ * Without `nav` (the kiosk), the management menu stays hidden.
  */
-export function RequireStaff() {
+export function RequireStaff({ nav = true }: { nav?: boolean }) {
   const { t } = useTranslation();
   const { session } = useAuth();
   const staff = useIsStaff();
@@ -32,7 +33,7 @@ export function RequireStaff() {
   if (!session.mfaEnabled) return <MfaSetup />;
   return (
     <>
-      <ManageNav />
+      {nav && <ManageNav />}
       <Outlet />
     </>
   );

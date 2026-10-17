@@ -1,5 +1,5 @@
 import { localDate, type Loan } from '@library/shared';
-import { BookCheck, Printer, TriangleAlert } from 'lucide-react';
+import { BookCheck, FileText, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
@@ -10,8 +10,11 @@ import {
   StatusMessage,
   useErrorMessage,
 } from '../../components/ui/Feedback';
-import { daysBetween, formatDate, formatTimestampDate } from '../../lib/format';
+import { useConfig } from '../../lib/config';
+import { compareGroups, daysBetween, formatDate, formatTimestampDate } from '../../lib/format';
+import { loadLogo } from '../labels/pdf';
 import { useLoans } from './api';
+import { reminderSlips, reminderSlipsPdf } from './reminders';
 
 /** Overdue and current loans, per class, ready to print for teachers. */
 export function LoansPage() {
@@ -23,9 +26,15 @@ export function LoansPage() {
   const errorMessage = useErrorMessage();
   const today = localDate();
   const [printedAt] = useState(() => formatDate(today, i18n.language));
+  const { libraryName, logoKey } = useConfig();
+  const [slipsBusy, setSlipsBusy] = useState(false);
+  const [slipsFailed, setSlipsFailed] = useState(false);
 
   const groups = useMemo(
-    () => [...new Set((loans.data ?? []).map((l) => l.readerGroup ?? ''))].sort(),
+    () =>
+      [...new Set((loans.data ?? []).map((l) => l.readerGroup ?? ''))].sort((a, b) =>
+        compareGroups(a || undefined, b || undefined),
+      ),
     [loans.data],
   );
   const visible = useMemo(
@@ -45,17 +54,61 @@ export function LoansPage() {
     });
   }
 
+  /** One slip per pupil with their late books (the list as filtered), for the class teacher. */
+  async function printReminders() {
+    setSlipsBusy(true);
+    setSlipsFailed(false);
+    try {
+      const slips = reminderSlips(visible);
+      const doc = await reminderSlipsPdf(
+        slips,
+        libraryName,
+        {
+          heading: t('loans.reminder.heading'),
+          intro: t('loans.reminder.intro'),
+          dueOn: (date) => t('loans.reminder.dueOn', { date: formatDate(date, i18n.language) }),
+          more: (count) => t('loans.reminder.more', { count }),
+          printedOn: t('loans.printedOn', { date: printedAt }),
+        },
+        await loadLogo(logoKey),
+      );
+      doc.save(`${t('loans.reminder.fileName')}${group ? `-${group}` : ''}.pdf`);
+    } catch {
+      setSlipsFailed(true);
+    } finally {
+      setSlipsBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">
           {overdue ? t('loans.headingOverdue') : t('loans.headingAll')}
         </h1>
-        <Button variant="secondary" onClick={() => window.print()} className="print:hidden">
-          <Printer className="size-4" aria-hidden="true" />
-          {t('loans.print')}
-        </Button>
+        <div className="flex flex-wrap gap-2 print:hidden">
+          {overdue && visible.length > 0 && (
+            <Button onClick={() => void printReminders()} disabled={slipsBusy}>
+              <FileText className="size-4" aria-hidden="true" />
+              {slipsBusy
+                ? t('labels.busy')
+                : t('loans.reminder.button', { count: reminderSlips(visible).length })}
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="size-4" aria-hidden="true" />
+            {t('loans.print')}
+          </Button>
+        </div>
       </div>
+      {overdue && visible.length > 0 && (
+        <p className="text-sm text-muted print:hidden">{t('loans.reminder.hint')}</p>
+      )}
+      {slipsFailed && (
+        <p role="alert" className="text-sm text-danger">
+          {t('loans.reminder.failed')}
+        </p>
+      )}
       <p className="hidden print:block">{t('loans.printedOn', { date: printedAt })}</p>
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">
@@ -166,7 +219,7 @@ export function LoansPage() {
 
 function byGroupThenName(a: Loan, b: Loan): number {
   return (
-    (a.readerGroup ?? '~').localeCompare(b.readerGroup ?? '~', 'nl') ||
+    compareGroups(a.readerGroup, b.readerGroup) ||
     a.readerName.localeCompare(b.readerName, 'nl') ||
     a.dueDate.localeCompare(b.dueDate)
   );

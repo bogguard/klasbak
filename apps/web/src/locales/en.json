@@ -108,7 +108,8 @@
     "CANNOT_CHANGE_SELF": "You can't change your own account here. Ask another administrator.",
     "LAST_ADMIN": "There must always be at least one active administrator.",
     "LOAN_NOT_ACTIVE": "This book was already returned and can't be renewed.",
-    "RENEWAL_NOT_LONGER": "This book may already stay until {{dueDate}}; renewing wouldn't make that longer."
+    "RENEWAL_NOT_LONGER": "This book may already stay until {{dueDate}}; renewing wouldn't make that longer.",
+    "NOT_A_READER_CARD": "This is a book. Please scan your library card."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -264,7 +265,8 @@
     "readers": "Readers",
     "settings": "Settings",
     "labels": "Labels",
-    "staff": "Staff"
+    "staff": "Staff",
+    "statistics": "Statistics"
   },
   "readers": {
     "heading": "Readers",
@@ -371,7 +373,19 @@
     "daysLate_one": "{{count}} day late",
     "daysLate_other": "{{count}} days late",
     "renewed_one": "renewed {{count}}×",
-    "renewed_other": "renewed {{count}}×"
+    "renewed_other": "renewed {{count}}×",
+    "reminder": {
+      "button_one": "Make reminder slip",
+      "button_other": "Make {{count}} reminder slips",
+      "hint": "One slip per reader with all their late books, three per A4 page. Choose a class first to make slips for that class only.",
+      "heading": "Reminder: please return your books",
+      "intro": "These library books should already have been returned. Please bring them back as soon as possible. If you have lost a book, let the librarian know.",
+      "dueOn": "was due {{date}}",
+      "more_one": "and {{count}} more book",
+      "more_other": "and {{count}} more books",
+      "fileName": "reminders",
+      "failed": "The slips could not be made. Please try again."
+    }
   },
   "desk": {
     "heading": "Lending desk",
@@ -549,7 +563,7 @@
     },
     "retention": {
       "heading": "How long do we keep it?",
-      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). After that only an anonymous count remains, like ‘120 books were lent in October’. When you leave the school, the school can delete all your data."
+      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. When you leave the school, the school can delete all your data."
     },
     "where": {
       "heading": "Where is the data?",
@@ -627,5 +641,42 @@
       "noCamera": "We can't find a camera on this device.",
       "other": "The camera couldn't start. Close other apps using the camera and try again."
     }
+  },
+  "myBooks": {
+    "heading": "My books",
+    "instruction": "Scan your library card to see which books you have and when they are due.",
+    "cardLabel": "Card number",
+    "hello": "Hi {{name}}!",
+    "none": "You have no library books. Time to pick one!",
+    "count_one": "You have {{count}} library book.",
+    "count_other": "You have {{count}} library books.",
+    "dueOn": "Due {{date}}",
+    "dueToday": "Due today",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "done": "Done",
+    "open": "‘My books’ screen",
+    "exit": "Close screen (librarian)"
+  },
+  "statistics": {
+    "heading": "Statistics",
+    "schoolYear": "School year",
+    "intro": "Anonymous: we count how many books are lent per month, per title and per class, not who read what.",
+    "empty": "No loans in this school year yet",
+    "emptyHint": "As soon as books are lent at the desk, the figures appear here.",
+    "total": "Loans",
+    "perPupil": "Per pupil",
+    "busiestMonth": "Busiest month",
+    "perMonth": "Per month",
+    "topTitles": "Most borrowed",
+    "loans_one": "{{count}}×",
+    "loans_other": "{{count}}×",
+    "perClass": "Per class",
+    "pupils": "Pupils",
+    "notLent_one": "{{count}} title not borrowed",
+    "notLent_other": "{{count}} titles not borrowed",
+    "notLentHint": "Not borrowed this school year yet, oldest first. Maybe they deserve a spot in the spotlight, or they can go.",
+    "andMore_one": "and {{count}} more",
+    "andMore_other": "and {{count}} more"
   }
 }

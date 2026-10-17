@@ -6,6 +6,9 @@ import {
   isClosed,
   isOverdue,
   localDate,
+  monthsBetween,
+  schoolYear,
+  StatisticsQuerySchema,
 } from './circulation';
 
 const settings = {
@@ -57,5 +60,31 @@ describe('date helpers', () => {
     expect(isOverdue({ dueDate: '2026-10-15' }, '2026-10-15')).toBe(false);
     expect(isOverdue({ dueDate: '2026-10-15' }, '2026-10-16')).toBe(true);
     expect(isOverdue({ dueDate: '2026-10-15', returnedAt: 'x' }, '2026-10-16')).toBe(false);
+  });
+});
+
+describe('monthsBetween', () => {
+  it('lists every month, across the turn of the year', () => {
+    expect(monthsBetween('2026-11', '2027-02')).toEqual([
+      '2026-11',
+      '2026-12',
+      '2027-01',
+      '2027-02',
+    ]);
+  });
+});
+
+describe('schoolYear', () => {
+  it('runs from September to August', () => {
+    expect(schoolYear('2026-09-01')).toEqual({ from: '2026-09', to: '2027-08' });
+    expect(schoolYear('2027-08-31')).toEqual({ from: '2026-09', to: '2027-08' });
+  });
+});
+
+describe('StatisticsQuerySchema', () => {
+  it('accepts up to two school years', () => {
+    expect(StatisticsQuerySchema.safeParse({ from: '2025-09', to: '2027-08' }).success).toBe(true);
+    expect(StatisticsQuerySchema.safeParse({ from: '2025-09', to: '2027-09' }).success).toBe(false);
+    expect(StatisticsQuerySchema.safeParse({ from: '2026-13', to: '2027-01' }).success).toBe(false);
   });
 });

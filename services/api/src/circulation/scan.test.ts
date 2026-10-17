@@ -9,7 +9,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from '../lib/auth';
 import { codeKey, copyKey, loanKey, readerKey, titleKey } from '../lib/keys';
-import { renewLoan, scan } from './service';
+import { myBooks, renewLoan, scan, statistics } from './service';
 
 const ddb = mockClient(DynamoDBDocumentClient);
 const librarian: Actor = { userId: 'lib-1', roles: ['librarian'] };
@@ -88,6 +88,12 @@ describe('scanning at the desk', () => {
     // The maximum (3 for pupils) and availability are enforced by the database itself.
     expect(items?.[0]?.Update?.ExpressionAttributeValues).toMatchObject({ ':max': 3 });
     expect(items?.[1]?.Update?.ConditionExpression).toBe('#status = :available');
+    // Counted anonymously in the same transaction: month, title and class, never the reader.
+    expect(items?.slice(4).map((i) => i.Update?.Key)).toEqual([
+      { pk: 'STATS#2026-10', sk: 'TOTAL' },
+      { pk: 'STATS#2026-10', sk: 'TITLE#T1' },
+      { pk: 'STATS#2026-10', sk: 'GROUP#3B' },
+    ]);
   });
 
   it('explains when the reader already has the maximum number of books', async () => {
@@ -200,5 +206,88 @@ describe('renewing', () => {
     await expect(renewLoan(librarian, 'R1', 'LN1', NOW)).rejects.toMatchObject({
       code: 'READER_INACTIVE',
     });
+  });
+});
+
+describe('my books', () => {
+  it('shows the first name and the books by due date, nothing else', async () => {
+    ddb.on(QueryCommand).resolves({
+      Items: [
+        {
+          pk: 'READER#R1',
+          sk: 'LOAN#2',
+          id: 'LN2',
+          titleTitle: 'Later',
+          dueDate: '2026-11-05',
+          barcode: 'X',
+        },
+        {
+          pk: 'READER#R1',
+          sk: 'LOAN#1',
+          id: 'LN1',
+          titleTitle: 'Eerst',
+          dueDate: '2026-10-20',
+          barcode: 'Y',
+        },
+      ],
+    });
+
+    expect(await myBooks('L000001')).toEqual({
+      firstName: 'Lotte',
+      loans: [
+        { id: 'LN1', titleTitle: 'Eerst', dueDate: '2026-10-20' },
+        { id: 'LN2', titleTitle: 'Later', dueDate: '2026-11-05' },
+      ],
+    });
+  });
+
+  it('asks for a reader card when a book is scanned', async () => {
+    await expect(myBooks('00000001')).rejects.toMatchObject({ code: 'NOT_A_READER_CARD' });
+  });
+});
+
+describe('statistics', () => {
+  it('adds up the counters per month, title and class, with the number of pupils per class', async () => {
+    ddb.on(QueryCommand, { ExpressionAttributeValues: { ':pk': 'STATS#2026-09' } }).resolves({
+      Items: [
+        { sk: 'TOTAL', loans: 5 },
+        { sk: 'TITLE#T1', loans: 3 },
+        { sk: 'TITLE#T2', loans: 2 },
+        { sk: 'GROUP#3B', loans: 4 },
+      ],
+    });
+    ddb.on(QueryCommand, { ExpressionAttributeValues: { ':pk': 'STATS#2026-10' } }).resolves({
+      Items: [
+        { sk: 'TOTAL', loans: 2 },
+        { sk: 'TITLE#T2', loans: 2 },
+      ],
+    });
+    ddb.on(QueryCommand, { IndexName: 'gsi1' }).resolves({
+      Items: [
+        { ...reader, id: 'R1' },
+        { ...reader, id: 'R2', group: '1A' },
+        { ...reader, id: 'R3', active: false },
+        { ...reader, id: 'R4', category: 'teacher' },
+      ],
+    });
+
+    const result = await statistics('2026-09', '2026-11');
+
+    expect(result.months).toEqual([
+      { month: '2026-09', loans: 5 },
+      { month: '2026-10', loans: 2 },
+      { month: '2026-11', loans: 0 },
+    ]);
+    expect(result.titles).toEqual([
+      { titleId: 'T2', loans: 4 },
+      { titleId: 'T1', loans: 3 },
+    ]);
+    expect(result.groups).toEqual(
+      expect.arrayContaining([
+        { group: '3B', loans: 4, pupils: 1 },
+        { group: '1A', loans: 0, pupils: 1 },
+      ]),
+    );
+    expect(result.groups).toHaveLength(2);
   });
 });

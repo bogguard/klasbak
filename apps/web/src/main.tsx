@@ -101,6 +101,12 @@ const router = createBrowserRouter([
             }),
           },
           {
+            path: 'statistics',
+            lazy: async () => ({
+              Component: (await import('./features/statistics/StatisticsPage')).StatisticsPage,
+            }),
+          },
+          {
             path: 'readers/:id',
             lazy: async () => ({
               Component: (await import('./features/readers/ReaderPage')).ReaderPage,
@@ -109,6 +115,19 @@ const router = createBrowserRouter([
         ],
       },
       { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+  // "Mijn boeken": full screen on a library device, without the site's menus.
+  {
+    path: 'kiosk',
+    element: <RequireStaff nav={false} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./features/circulation/MyBooksPage')).MyBooksPage,
+        }),
+      },
     ],
   },
 ]);

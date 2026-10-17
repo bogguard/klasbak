@@ -15,6 +15,8 @@
  *   Branding      pk SETTINGS           sk BRANDING      name and logo, also published as a file
  *   Counter       pk COUNTER            sk <name>        last generated number
  *   Audit         pk AUDIT#<entity>     sk <timestamp>#<ulid>   (expires via TTL)
+ *   Statistics    pk STATS#<yyyy-mm>    sk TOTAL | TITLE#<titleId> | GROUP#<class>   { loans }
+ *                 Anonymous counters, added to when a book is lent (decision 028).
  */
 
 export const titleKey = (titleId: string) => ({ pk: `TITLE#${titleId}`, sk: 'TITLE' });
@@ -32,6 +34,9 @@ export const loanKey = (readerId: string, loanId: string) => ({
   pk: `READER#${readerId}`,
   sk: `LOAN#${loanId}`,
 });
+
+/** Counter for loans in a month (Brussels time), in total or per title or class. */
+export const statsKey = (month: string, sk: string) => ({ pk: `STATS#${month}`, sk });
 
 export const settingsKey = { pk: 'SETTINGS', sk: 'LIBRARY' };
 export const brandingKey = { pk: 'SETTINGS', sk: 'BRANDING' };

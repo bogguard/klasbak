@@ -3,6 +3,9 @@ import {
   calculateDueDate,
   isOverdue,
   localDate,
+  monthsBetween,
+  type LoanStatistics,
+  type MyBooks,
   readerName,
   type Copy,
   type LibrarySettings,
@@ -20,7 +23,7 @@ import { getCodePointer, getItem } from '../lib/dynamo';
 import { AppError, ConflictError, NotFoundError } from '../lib/errors';
 import { copyKey, titleKey } from '../lib/keys';
 import { metrics } from '../lib/observability';
-import { getReader } from '../readers/repository';
+import { getReader, listReaders } from '../readers/repository';
 import * as repository from './repository';
 
 /** A second scan of the same book for the same reader within this time is a double scan. */
@@ -111,6 +114,11 @@ async function checkOut(
     copy,
     maxLoans: policy.maxLoans,
     audit: auditItem({ entity: `COPY#${copy.id}`, action: 'loan.created', actor }, now),
+    // Classes are counted for pupils only: the statistics compare reading per class.
+    stats: {
+      month: localDate(now).slice(0, 7),
+      group: reader.category === 'pupil' ? reader.group : undefined,
+    },
   });
   if (failure === 'copyNotAvailable') {
     throw new ConflictError('COPY_NOT_AVAILABLE', 'This copy was just lent or changed');
@@ -198,6 +206,63 @@ export async function renewLoan(
     loan: { ...loan, dueDate, renewals: (loan.renewals ?? 0) + 1 },
     ...(await readerAtDesk(readerId)),
   };
+}
+
+/**
+ * The "Mijn boeken" screen: a reader scans their own card and sees what they have and until
+ * when. Read-only, so a pupil at that screen can't lend or return anything.
+ */
+export async function myBooks(code: string): Promise<MyBooks> {
+  const pointer = await getCodePointer(code);
+  if (!pointer) throw new AppError(404, 'UNKNOWN_CODE', 'No copy or reader has this code');
+  if (pointer.kind !== 'reader') {
+    throw new AppError(409, 'NOT_A_READER_CARD', 'This is a book, not a reader card');
+  }
+  const { reader, activeLoans } = await readerAtDesk(pointer.readerId);
+  return {
+    firstName: reader.firstName,
+    loans: activeLoans
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+      .map(({ id, titleTitle, dueDate }) => ({ id, titleTitle, dueDate })),
+  };
+}
+
+/** Anonymous loan counts per month, title and class (decision 028). */
+export async function statistics(from: string, to: string): Promise<LoanStatistics> {
+  const months = monthsBetween(from, to);
+  const [counters, readers] = await Promise.all([repository.statisticsOf(months), listReaders()]);
+
+  const perMonth = new Map(months.map((month) => [month, 0]));
+  const titles = new Map<string, number>();
+  const groups = new Map<string, number>();
+  for (const { month, sk, loans } of counters) {
+    if (sk === 'TOTAL') perMonth.set(month, (perMonth.get(month) ?? 0) + loans);
+    else if (sk.startsWith('TITLE#')) add(titles, sk.slice('TITLE#'.length), loans);
+    else if (sk.startsWith('GROUP#')) add(groups, sk.slice('GROUP#'.length), loans);
+  }
+
+  // Classes as they are now, so classes without loans show up too (with 0).
+  const pupils = new Map<string, number>();
+  for (const reader of readers) {
+    if (reader.active && reader.category === 'pupil' && reader.group) add(pupils, reader.group, 1);
+  }
+  const groupNames = new Set([...groups.keys(), ...pupils.keys()]);
+
+  return {
+    months: [...perMonth].map(([month, loans]) => ({ month, loans })),
+    titles: [...titles]
+      .map(([titleId, loans]) => ({ titleId, loans }))
+      .sort((a, b) => b.loans - a.loans),
+    groups: [...groupNames].map((group) => ({
+      group,
+      loans: groups.get(group) ?? 0,
+      pupils: pupils.get(group) ?? 0,
+    })),
+  };
+}
+
+function add(map: Map<string, number>, key: string, value: number) {
+  map.set(key, (map.get(key) ?? 0) + value);
 }
 
 export function listLoans(filter: { overdue: boolean }, now = new Date()): Promise<Loan[]> {

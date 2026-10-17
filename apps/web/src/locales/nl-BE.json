@@ -108,7 +108,8 @@
     "CANNOT_CHANGE_SELF": "Je eigen account kan je hier niet wijzigen. Vraag het aan een andere beheerder.",
     "LAST_ADMIN": "Er moet altijd minstens één actieve beheerder zijn.",
     "LOAN_NOT_ACTIVE": "Dit boek is al teruggebracht en kan niet meer verlengd worden.",
-    "RENEWAL_NOT_LONGER": "Dit boek mag al tot {{dueDate}} blijven; verlengen maakt dat niet langer."
+    "RENEWAL_NOT_LONGER": "Dit boek mag al tot {{dueDate}} blijven; verlengen maakt dat niet langer.",
+    "NOT_A_READER_CARD": "Dit is een boek. Scan je bibliotheekpasje."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -264,7 +265,8 @@
     "readers": "Lezers",
     "settings": "Instellingen",
     "labels": "Labels",
-    "staff": "Medewerkers"
+    "staff": "Medewerkers",
+    "statistics": "Statistieken"
   },
   "readers": {
     "heading": "Lezers",
@@ -371,7 +373,19 @@
     "daysLate_one": "{{count}} dag te laat",
     "daysLate_other": "{{count}} dagen te laat",
     "renewed_one": "{{count}}× verlengd",
-    "renewed_other": "{{count}}× verlengd"
+    "renewed_other": "{{count}}× verlengd",
+    "reminder": {
+      "button_one": "Herinneringsbriefje maken",
+      "button_other": "{{count}} herinneringsbriefjes maken",
+      "hint": "Eén briefje per lezer met al zijn of haar boeken die te laat zijn, drie per A4. Kies eerst een klas om alleen de briefjes voor die klas te maken.",
+      "heading": "Herinnering: boeken terugbrengen",
+      "intro": "Deze boeken van de bibliotheek hadden al terug moeten zijn. Breng je ze zo snel mogelijk terug? Ben je een boek kwijt, laat het dan weten aan de bibliothecaris.",
+      "dueOn": "moest terug op {{date}}",
+      "more_one": "en nog {{count}} boek",
+      "more_other": "en nog {{count}} boeken",
+      "fileName": "herinneringen",
+      "failed": "De briefjes konden niet gemaakt worden. Probeer het opnieuw."
+    }
   },
   "desk": {
     "heading": "Uitleenbalie",
@@ -549,7 +563,7 @@
     },
     "retention": {
       "heading": "Hoe lang bewaren we ze?",
-      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Daarna blijft alleen een anoniem aantal over, zoals ‘in oktober werden 120 boeken uitgeleend’. Verlaat je de school, dan kan de school al je gegevens wissen."
+      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Verlaat je de school, dan kan de school al je gegevens wissen."
     },
     "where": {
       "heading": "Waar staan de gegevens?",
@@ -627,5 +641,42 @@
       "noCamera": "We vinden geen camera op dit toestel.",
       "other": "De camera kon niet starten. Sluit andere apps die de camera gebruiken en probeer opnieuw."
     }
+  },
+  "myBooks": {
+    "heading": "Mijn boeken",
+    "instruction": "Scan je bibliotheekpasje om te zien welke boeken je hebt en wanneer ze terug moeten.",
+    "cardLabel": "Kaartnummer",
+    "hello": "Hallo {{name}}!",
+    "none": "Je hebt geen boeken van de bibliotheek. Tijd om er eentje uit te kiezen!",
+    "count_one": "Je hebt {{count}} boek van de bibliotheek.",
+    "count_other": "Je hebt {{count}} boeken van de bibliotheek.",
+    "dueOn": "Terugbrengen op {{date}}",
+    "dueToday": "Vandaag terug",
+    "daysLeft_one": "Nog {{count}} dag",
+    "daysLeft_other": "Nog {{count}} dagen",
+    "done": "Klaar",
+    "open": "Scherm ‘Mijn boeken’",
+    "exit": "Scherm sluiten (bibliothecaris)"
+  },
+  "statistics": {
+    "heading": "Statistieken",
+    "schoolYear": "Schooljaar",
+    "intro": "Anoniem: we tellen hoeveel boeken er per maand, per titel en per klas uitgeleend worden, niet wie wat las.",
+    "empty": "Nog geen uitleningen in dit schooljaar",
+    "emptyHint": "Zodra er boeken uitgeleend worden aan de uitleenbalie, verschijnen hier de cijfers.",
+    "total": "Uitleningen",
+    "perPupil": "Per leerling",
+    "busiestMonth": "Drukste maand",
+    "perMonth": "Per maand",
+    "topTitles": "Meest uitgeleend",
+    "loans_one": "{{count}}×",
+    "loans_other": "{{count}}×",
+    "perClass": "Per klas",
+    "pupils": "Leerlingen",
+    "notLent_one": "{{count}} titel niet uitgeleend",
+    "notLent_other": "{{count}} titels niet uitgeleend",
+    "notLentHint": "Dit schooljaar nog niet uitgeleend, de oudste eerst. Misschien verdienen ze een plaatsje in de kijker, of mogen ze weg.",
+    "andMore_one": "en nog {{count}}",
+    "andMore_other": "en nog {{count}}"
   }
 }

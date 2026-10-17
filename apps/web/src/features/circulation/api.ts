@@ -3,6 +3,8 @@ import type {
   LibrarySettings,
   LibrarySettingsInput,
   Loan,
+  LoanStatistics,
+  MyBooks,
   ReaderAtDesk,
   ScanResult,
 } from '@library/shared';
@@ -47,6 +49,25 @@ export function useLoans(overdue: boolean) {
   return useQuery({
     queryKey: ['loans', { overdue }],
     queryFn: () => api<Loan[]>(`/api/circulation/loans${overdue ? '?overdue=true' : ''}`),
+    retry: shouldRetry,
+  });
+}
+
+/** Read-only lookup for the "Mijn boeken" screen: lends or returns nothing. */
+export function useMyBooks() {
+  const api = useAuthorizedApi();
+  return useMutation({
+    mutationFn: (code: string) =>
+      api<MyBooks>('/api/circulation/my-books', { method: 'POST', body: { code } }),
+  });
+}
+
+export function useStatistics(range: { from: string; to: string }) {
+  const api = useAuthorizedApi();
+  return useQuery({
+    queryKey: ['statistics', range],
+    queryFn: () =>
+      api<LoanStatistics>(`/api/circulation/statistics?from=${range.from}&to=${range.to}`),
     retry: shouldRetry,
   });
 }

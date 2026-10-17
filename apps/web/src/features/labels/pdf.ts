@@ -8,18 +8,18 @@ import { CARD_SHEET, labelPositions, type SheetLayout } from './sheets';
  * points. The built-in Helvetica covers Dutch and other Western European characters.
  */
 
-const PT = 0.3528; // millimetres per point
-const ACCENT: [number, number, number] = [15, 118, 110]; // matches the app's accent colour
-const MUTED: [number, number, number] = [91, 102, 98];
+export const PT = 0.3528; // millimetres per point
+export const ACCENT: [number, number, number] = [15, 118, 110]; // matches the app's accent colour
+export const MUTED: [number, number, number] = [91, 102, 98];
 
-async function newDocument(): Promise<jsPDF> {
+export async function newDocument(): Promise<jsPDF> {
   // Loaded on demand: only people printing labels download the PDF library.
   const { jsPDF } = await import('jspdf');
   return new jsPDF({ unit: 'mm', format: 'a4', compress: true });
 }
 
 /** Shortens text with an ellipsis until it fits. */
-function fit(doc: jsPDF, text: string, maxWidth: number): string {
+export function fit(doc: jsPDF, text: string, maxWidth: number): string {
   if (doc.getTextWidth(text) <= maxWidth) return text;
   let shortened = text;
   while (shortened.length > 1 && doc.getTextWidth(`${shortened}…`) > maxWidth) {

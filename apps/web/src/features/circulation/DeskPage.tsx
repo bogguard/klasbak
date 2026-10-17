@@ -12,12 +12,14 @@ import {
   BookUp,
   CircleAlert,
   Info,
+  MonitorSmartphone,
   UserRound,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { formatDate } from '../../lib/format';
 import { useReaders } from '../readers/api';
@@ -250,14 +252,23 @@ export function DeskPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">{t('desk.heading')}</h1>
-        <Button variant="secondary" onClick={toggleSound} aria-pressed={soundOn}>
-          {soundOn ? (
-            <Volume2 className="size-4" aria-hidden="true" />
-          ) : (
-            <VolumeX className="size-4" aria-hidden="true" />
-          )}
-          {soundOn ? t('desk.soundOn') : t('desk.soundOff')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/kiosk"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-surface px-4 font-medium hover:bg-surface-sunken"
+          >
+            <MonitorSmartphone className="size-4" aria-hidden="true" />
+            {t('myBooks.open')}
+          </Link>
+          <Button variant="secondary" onClick={toggleSound} aria-pressed={soundOn}>
+            {soundOn ? (
+              <Volume2 className="size-4" aria-hidden="true" />
+            ) : (
+              <VolumeX className="size-4" aria-hidden="true" />
+            )}
+            {soundOn ? t('desk.soundOn') : t('desk.soundOff')}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_24rem]">
@@ -292,7 +303,7 @@ export function DeskPage() {
                   onClick={() => setCameraOpen(true)}
                 >
                   <Camera className="size-5" aria-hidden="true" />
-                  <span className="hidden sm:inline">{t('camera.open')}</span>
+                  <span className="sr-only sm:not-sr-only">{t('camera.open')}</span>
                 </Button>
               )}
             </div>

@@ -1,17 +1,17 @@
-import { ScanCommand, TransactWriteCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
+import { DeleteCommand, ScanCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import type { Loan } from '@library/shared';
 import type { Context } from 'aws-lambda';
 import { getSettings } from '../circulation/repository';
 import { db, env } from '../lib/aws';
-import { isTransactionCancelled, type Item } from '../lib/dynamo';
+import type { Item } from '../lib/dynamo';
 import { logger, metrics } from '../lib/observability';
 
 /*
  * Runs daily (see the template). Reading history is personal data, so returned loans older
- * than the retention period (a library setting) are deleted. Before deleting, each loan is
- * added to anonymous monthly counters (per month, and per title per month) so statistics
- * stay possible without knowing who read what.
+ * than the retention period (a library setting) are deleted. Statistics don't need them:
+ * every loan was already counted anonymously when it was lent (decision 028).
  *
  * A full table scan is fine at school scale (tens of thousands of items, a fraction of a cent).
  */
@@ -40,44 +40,26 @@ export async function removeOldLoanHistory(now = new Date()): Promise<number> {
       }),
     );
     for (const item of page.Items ?? []) {
-      if (await anonymise(item as Item & Loan)) removed++;
+      if (await removeLoan(item as Item & Loan)) removed++;
     }
     startKey = page.LastEvaluatedKey;
   } while (startKey);
   return removed;
 }
 
-/** Counts the loan in the monthly statistics and deletes it, in one transaction. */
-async function anonymise(loan: Item & Loan): Promise<boolean> {
-  const month = loan.loanedAt.slice(0, 7); // YYYY-MM
-  const count = (sk: string) => ({
-    Update: {
-      TableName: env.tableName,
-      Key: { pk: `STATS#${month}`, sk },
-      UpdateExpression: 'ADD loans :one',
-      ExpressionAttributeValues: { ':one': 1 },
-    },
-  });
+/** Deletes one returned loan; false when it was already gone (e.g. a retried run). */
+async function removeLoan(loan: Item & Loan): Promise<boolean> {
   try {
     await db.send(
-      new TransactWriteCommand({
-        TransactItems: [
-          {
-            Delete: {
-              TableName: env.tableName,
-              Key: { pk: loan.pk, sk: loan.sk },
-              // Only if it's still there, so a retry never counts a loan twice.
-              ConditionExpression: 'attribute_exists(returnedAt)',
-            },
-          },
-          count('TOTAL'),
-          count(`TITLE#${loan.titleId}`),
-        ],
+      new DeleteCommand({
+        TableName: env.tableName,
+        Key: { pk: loan.pk, sk: loan.sk },
+        ConditionExpression: 'attribute_exists(returnedAt)',
       }),
     );
     return true;
   } catch (error) {
-    if (isTransactionCancelled(error)) return false;
+    if (error instanceof ConditionalCheckFailedException) return false;
     throw error;
   }
 }

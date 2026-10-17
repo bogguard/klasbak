@@ -74,6 +74,60 @@ export const ScanRequestSchema = z.object({
   readerId: z.string().optional(),
 });
 
+/** Scanning a card on the "Mijn boeken" screen. */
+export const MyBooksRequestSchema = z.object({ code: CodeSchema });
+
+/**
+ * What a reader sees after scanning their own card. Others may be looking at the screen,
+ * so only the first name and the books, nothing else about the reader.
+ */
+export type MyBooks = {
+  firstName: string;
+  loans: Array<Pick<Loan, 'id' | 'titleTitle' | 'dueDate'>>;
+};
+
+/** Months as "YYYY-MM", inclusive; at most two school years at a time. */
+const MonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+export const StatisticsQuerySchema = z
+  .object({ from: MonthSchema, to: MonthSchema })
+  .refine((q) => q.from <= q.to, { message: 'from must not be after to', path: ['to'] })
+  .refine((q) => monthsBetween(q.from, q.to).length <= 24, {
+    message: 'at most 24 months',
+    path: ['to'],
+  });
+
+/**
+ * Anonymous loan counts (decision 028): counted when a book is lent, never linked to a
+ * reader. `groups` has the number of active pupils per class, for an average per pupil.
+ */
+export type LoanStatistics = {
+  months: Array<{ month: string; loans: number }>;
+  titles: Array<{ titleId: string; loans: number }>;
+  groups: Array<{ group: string; loans: number; pupils: number }>;
+};
+
+/** "2026-09" … "2027-08". */
+export function monthsBetween(from: string, to: string): string[] {
+  const months: string[] = [];
+  let [year, month] = from.split('-').map(Number) as [number, number];
+  let current = from;
+  // The cap only guards against nonsense input; real ranges are validated to 24 months.
+  while (current <= to && months.length < 120) {
+    months.push(current);
+    month = month === 12 ? 1 : month + 1;
+    if (month === 1) year++;
+    current = `${year}-${String(month).padStart(2, '0')}`;
+  }
+  return months;
+}
+
+/** The school year (1 September – 31 August) a date falls in, as months. */
+export function schoolYear(isoDate: string): { from: string; to: string } {
+  const year = Number(isoDate.slice(0, 4));
+  const start = Number(isoDate.slice(5, 7)) >= 9 ? year : year - 1;
+  return { from: `${start}-09`, to: `${start + 1}-08` };
+}
+
 export type ReaderAtDesk = { reader: Reader; activeLoans: Loan[] };
 
 /** What happened after a scan at the desk. */

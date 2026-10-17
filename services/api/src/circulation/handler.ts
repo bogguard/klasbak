@@ -1,5 +1,7 @@
 import {
   LogoUploadRequestSchema,
+  MyBooksRequestSchema,
+  StatisticsQuerySchema,
   RenewRequestSchema,
   UpdateBrandingRequestSchema,
   ScanRequestSchema,
@@ -28,6 +30,22 @@ app.post('/renew', async (c) => {
 app.get('/loans', async (c) => {
   requireRole(getActor(c), STAFF);
   return c.json(await circulation.listLoans({ overdue: c.req.query('overdue') === 'true' }));
+});
+
+// "Mijn boeken": runs on a library device signed in by staff, where pupils scan their card.
+app.post('/my-books', async (c) => {
+  requireRole(getActor(c), STAFF);
+  const { code } = parse(MyBooksRequestSchema, await readJson(c));
+  return c.json(await circulation.myBooks(code));
+});
+
+app.get('/statistics', async (c) => {
+  requireRole(getActor(c), STAFF);
+  const { from, to } = parse(StatisticsQuerySchema, {
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  });
+  return c.json(await circulation.statistics(from, to));
 });
 
 app.get('/settings', async (c) => {

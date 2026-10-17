@@ -26,3 +26,9 @@ export function formatTimestampDate(timestamp: string, language: string): string
 export function daysBetween(a: string, b: string): number {
   return Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000);
 }
+
+/** Classes in natural order ("2A" before "10A"); readers without a class last. */
+export function compareGroups(a: string | undefined, b: string | undefined): number {
+  if (!a || !b) return Number(!a) - Number(!b);
+  return a.localeCompare(b, 'nl', { numeric: true });
+}
