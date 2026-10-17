@@ -74,15 +74,16 @@ async function wipe() {
 
 type Book = Partial<TitleInput> & { copies: CopyInput[]; added?: string };
 
-/** With a real ISBN, cover and details come from the book databases (when online). */
-const withCover: Array<{ isbn: string; copies: CopyInput[]; aviLevel?: TitleInput['aviLevel'] }> = [
-  { isbn: '9789061699767', copies: [{ location: 'Leesboeken' }, { location: 'Leesboeken' }] },
-  { isbn: '9789031726653', copies: [{ location: 'Leesboeken' }], aviLevel: 'E6' },
-  { isbn: '9780140328721', copies: [{ location: 'Engelse boeken' }] },
-];
-
+/*
+ * Real books (title and author as the book databases give them), so the demo shows real
+ * covers: with an ISBN, cover, publisher and year are looked up when the demo is loaded
+ * (offline, the title and author below are used and the cover is generated). AVI levels and
+ * ages are indicative, for the demo. Items without an ISBN have no author on purpose: no
+ * made-up books are attributed to real people.
+ */
 const books: Book[] = [
   {
+    isbn: '9789066921863',
     title: 'Dolfje Weerwolfje',
     authors: ['Paul van Loon'],
     aviLevel: 'E4',
@@ -93,7 +94,8 @@ const books: Book[] = [
     added: '2025-09-12',
   },
   {
-    title: 'Vos en Haas',
+    isbn: '9789020931976',
+    title: 'Vos en haas',
     authors: ['Sylvia Vanden Heede'],
     aviLevel: 'M4',
     ageMin: 6,
@@ -103,26 +105,29 @@ const books: Book[] = [
     added: '2025-09-12',
   },
   {
-    title: 'Pluk van de Petteflet',
+    isbn: '9789021432571',
+    title: 'Jip en Janneke 2',
     authors: ['Annie M.G. Schmidt'],
-    aviLevel: 'E5',
-    ageMin: 6,
-    ageMax: 10,
-    subjects: ['avontuur', 'humor'],
+    aviLevel: 'M3',
+    ageMin: 4,
+    ageMax: 7,
+    subjects: ['voorlezen'],
+    copies: [{ location: 'Prentenboeken' }],
+    added: '2025-10-03',
+  },
+  {
+    isbn: '9789060698181',
+    title: 'Kruistocht in spijkerbroek',
+    authors: ['Thea Beckman'],
+    aviLevel: 'Plus',
+    ageMin: 11,
+    ageMax: 14,
+    subjects: ['geschiedenis', 'tijdreizen'],
     copies: [{ location: 'Leesboeken' }],
     added: '2025-10-03',
   },
   {
-    title: 'Kikker is verliefd',
-    authors: ['Max Velthuijs'],
-    aviLevel: 'Start',
-    ageMin: 4,
-    ageMax: 7,
-    subjects: ['liefde', 'dieren'],
-    copies: [{ location: 'Prentenboeken' }, { location: 'Klasbib 1A' }],
-    added: '2025-10-03',
-  },
-  {
+    isbn: '9789025840631',
     title: 'Het zakmes',
     authors: ['Sjoerd Kuyper'],
     aviLevel: 'E6',
@@ -133,58 +138,117 @@ const books: Book[] = [
     added: '2025-11-20',
   },
   {
-    title: 'Rikki en de verdwenen tekening',
-    authors: ['Guido van Genechten'],
-    aviLevel: 'M3',
-    ageMin: 5,
-    ageMax: 7,
-    subjects: ['dieren', 'school'],
-    copies: [{ location: 'Prentenboeken' }],
-    added: '2026-01-15',
-  },
-  {
-    title: 'De Gruffalo',
-    authors: ['Julia Donaldson', 'Axel Scheffler'],
-    aviLevel: 'M4',
-    ageMin: 4,
-    ageMax: 8,
-    subjects: ['bos', 'monsters'],
+    isbn: '9789073991927',
+    title: 'Nijntje',
+    authors: ['Dick Bruna'],
+    aviLevel: 'Start',
+    ageMin: 2,
+    ageMax: 5,
+    subjects: ['voorlezen', 'dieren'],
     copies: [{ location: 'Prentenboeken' }, { location: 'Klasbib 1A' }],
     added: '2026-01-15',
   },
   {
-    title: 'Mijn mama is een superheld',
-    authors: ['Kaat Vandenbossche'],
-    aviLevel: 'M5',
-    ageMin: 6,
-    ageMax: 9,
-    subjects: ['familie', 'humor'],
+    isbn: '9789060690888',
+    title: 'Koning van Katoren',
+    authors: ['Jan Terlouw'],
+    aviLevel: 'Plus',
+    ageMin: 10,
+    ageMax: 14,
+    subjects: ['avontuur'],
     copies: [{ location: 'Leesboeken' }],
     added: '2026-02-09',
   },
   {
-    title: 'Het geheim van de oude vuurtoren',
-    authors: ['Marc de Bel'],
+    isbn: '9789026129582',
+    title: 'Dagboek van een muts',
+    authors: ['Rachel Renée Russell'],
     aviLevel: 'E7',
-    ageMin: 9,
-    ageMax: 12,
-    subjects: ['avontuur', 'zee', 'mysterie'],
+    ageMin: 10,
+    ageMax: 13,
+    subjects: ['humor', 'school'],
     copies: [{ location: 'Leesboeken' }, { location: 'Klasbib 6A' }],
     added: '2026-03-02',
   },
   {
-    title: 'Superjuffie op schoolreis',
-    authors: ['Janneke Schotveld'],
+    isbn: '9789047701170',
+    title: 'Oorlogswinter',
+    authors: ['Jan Terlouw'],
+    aviLevel: 'Plus',
+    ageMin: 11,
+    ageMax: 14,
+    subjects: ['oorlog', 'geschiedenis'],
+    copies: [{ location: 'Klasbib 6A' }],
+    added: '2026-04-20',
+  },
+  {
+    isbn: '9789025866495',
+    title: 'De brief voor de koning',
+    authors: ['Tonke Dragt'],
+    aviLevel: 'Plus',
+    ageMin: 10,
+    ageMax: 14,
+    subjects: ['ridders', 'avontuur'],
+    copies: [{ location: 'Leesboeken' }, {}],
+    added: '2026-09-07',
+  },
+  {
+    isbn: '9789066921467',
+    title: 'Meester kikker',
+    authors: ['Paul van Loon'],
     aviLevel: 'E5',
     ageMin: 7,
     ageMax: 10,
     subjects: ['school', 'humor'],
-    copies: [{ location: 'Leesboeken' }, {}],
-    added: '2026-03-02',
+    copies: [{ location: 'Leesboeken' }],
+    added: '2026-09-07',
+  },
+  {
+    isbn: '9789061699767',
+    title: 'Harry Potter en de steen der wijzen',
+    authors: ['J.K. Rowling'],
+    aviLevel: 'Plus',
+    ageMin: 9,
+    ageMax: 14,
+    subjects: ['tovenarij', 'avontuur'],
+    copies: [{ location: 'Leesboeken' }, { location: 'Leesboeken' }],
+    added: '2026-09-14',
+  },
+  {
+    isbn: '9789000327089',
+    title: 'Dummie de mummie en de dans van de Cobra',
+    authors: ['Tosca Menten'],
+    aviLevel: 'E6',
+    ageMin: 8,
+    ageMax: 12,
+    subjects: ['humor', 'griezelen'],
+    copies: [{ location: 'Leesboeken' }],
+    added: '2026-09-21',
+  },
+  {
+    isbn: '9789045117652',
+    title: 'Hoe overleef ik (zonder) dromen?',
+    authors: ['Francine Oomen'],
+    aviLevel: 'E7',
+    ageMin: 10,
+    ageMax: 13,
+    subjects: ['vriendschap'],
+    copies: [{ location: 'Leesboeken' }],
+    added: '2026-10-05',
+  },
+  {
+    isbn: '9780140328721',
+    title: 'Fantastic Mr. Fox',
+    authors: ['Roald Dahl'],
+    language: 'en',
+    ageMin: 8,
+    ageMax: 12,
+    subjects: ['dieren', 'Engels'],
+    copies: [{ location: 'Engelse boeken' }],
+    added: '2026-10-05',
   },
   {
     title: 'Alles over dinosaurussen',
-    authors: ['Redactie Jeugdkennis'],
     ageMin: 7,
     ageMax: 12,
     subjects: ['dinosaurussen', 'informatief'],
@@ -192,63 +256,12 @@ const books: Book[] = [
     added: '2026-04-20',
   },
   {
-    title: 'Ruimtereis: onze planeten',
-    authors: ['Redactie Jeugdkennis'],
+    title: 'Onze planeten',
     ageMin: 8,
     ageMax: 12,
     subjects: ['ruimte', 'informatief'],
     copies: [{ location: 'Infoboeken' }],
     added: '2026-04-20',
-  },
-  {
-    title: 'Fien en de geheime tuin',
-    authors: ['Ann Peeters'],
-    aviLevel: 'E4',
-    ageMin: 7,
-    ageMax: 9,
-    subjects: ['natuur', 'vriendschap'],
-    copies: [{ location: 'Leesboeken' }, { location: 'Klasbib 3B' }],
-    added: '2026-09-07',
-  },
-  {
-    title: 'De dag dat de klas verdween',
-    authors: ['Bart Moeyaert'],
-    aviLevel: 'M6',
-    ageMin: 8,
-    ageMax: 11,
-    subjects: ['school', 'mysterie'],
-    copies: [{ location: 'Leesboeken' }],
-    added: '2026-09-07',
-  },
-  {
-    title: 'Leren lezen met Lars',
-    authors: ['Hilde Van Dam'],
-    aviLevel: 'Start',
-    ageMin: 5,
-    ageMax: 6,
-    subjects: ['eerste lezers'],
-    copies: [{ location: 'Eerste lezers' }, { location: 'Eerste lezers' }],
-    added: '2026-09-21',
-  },
-  {
-    title: 'Voetbal is mijn leven',
-    authors: ['Johan Fabricius jr.'],
-    aviLevel: 'M7',
-    ageMin: 9,
-    ageMax: 12,
-    subjects: ['sport', 'voetbal'],
-    copies: [{ location: 'Leesboeken' }],
-    added: '2026-10-05',
-  },
-  {
-    title: 'Zwemmen met dolfijnen',
-    authors: ['Saar Vermeulen'],
-    aviLevel: 'E3',
-    ageMin: 6,
-    ageMax: 8,
-    subjects: ['zee', 'dieren'],
-    copies: [{ location: 'Leesboeken' }],
-    added: '2026-10-05',
   },
   {
     type: 'magazine',
@@ -278,6 +291,14 @@ const books: Book[] = [
     added: '2025-11-20',
   },
 ];
+
+/** Our data first (it's checked); the lookup adds publisher, year and the cover. */
+async function withLookup(book: Partial<TitleInput>) {
+  if (!book.isbn) return { input: book, coverUrl: undefined };
+  const found = await lookupIsbn(book.isbn).catch(() => undefined);
+  const { publisher, publishedYear, summary } = found?.title ?? {};
+  return { input: { publisher, publishedYear, summary, ...book }, coverUrl: found?.coverUrl };
+}
 
 const classes: Record<string, Array<[string, string]>> = {
   '1A': [
@@ -345,36 +366,24 @@ async function main() {
 
   // Catalogue, with titles added over the last year (so "new titles" means something).
   const copies: Array<{ barcode: string; titleId: string }> = [];
+  const titleIds = new Map<string, string>();
+  let covers = 0;
   for (const book of books) {
     const { copies: copyInputs, added = '2026-09-01', ...title } = book;
-    const input = TitleInputSchema.parse({ type: 'book', ...title });
-    const created = await createTitle(actor, input, undefined, at(added));
-    for (const copyInput of copyInputs) {
-      const copy = await addCopy(actor, created.id, copyInput, at(added));
-      copies.push({ barcode: copy.barcode, titleId: created.id });
-    }
-  }
-  let covers = 0;
-  for (const { isbn, copies: copyInputs, aviLevel } of withCover) {
-    const found = await lookupIsbn(isbn).catch(() => undefined);
-    const input = TitleInputSchema.parse({
-      type: 'book',
-      title: `ISBN ${isbn}`,
-      ...found?.title,
-      isbn,
-      ...(aviLevel ? { aviLevel } : {}),
-    });
-    const created = await createTitle(actor, input, found?.coverUrl, at('2026-09-14'));
+    const { input, coverUrl } = await withLookup(title);
+    const parsed = TitleInputSchema.parse({ type: 'book', ...input });
+    const created = await createTitle(actor, parsed, coverUrl, at(added));
+    titleIds.set(parsed.title, created.id);
     if (created.coverImageKey) covers++;
     for (const copyInput of copyInputs) {
-      const copy = await addCopy(actor, created.id, copyInput, at('2026-09-14'));
+      const copy = await addCopy(actor, created.id, copyInput, at(added));
       copies.push({ barcode: copy.barcode, titleId: created.id });
     }
   }
   // Labels printed, except the newest two (the print queue has something to show).
   await markLabelsPrinted(copies.slice(0, -2).map((c) => c.barcode));
   console.log(
-    `Catalogue: ${books.length + withCover.length} titles, ${copies.length} copies (${covers} real covers).`,
+    `Catalogue: ${books.length} titles, ${copies.length} copies (${covers} real covers).`,
   );
 
   // Readers: seven classes, three teachers, one pupil who left.
@@ -425,10 +434,11 @@ async function main() {
     { name: 'Voorjaar 2026', lender: 'Bibliotheek Zele', returnBy: '2026-06-19' },
     at('2026-03-02'),
   );
+  // Spring: plain titles without authors (the saved list after returning is what matters).
   const springBooks = [
-    'Op avontuur met Wiebe',
+    'Op avontuur',
     'De kleine walvis',
-    'Bram en de bliksem',
+    'Het onweer',
     'Zoek de kat!',
     'Mijn eerste atlas',
   ];
@@ -446,23 +456,39 @@ async function main() {
     { name: 'Najaar 2026', lender: 'Bibliotheek Zele', returnBy: '2026-12-18' },
     at('2026-09-15'),
   );
-  const autumnBooks: Array<[string, string, TitleInput['aviLevel']?]> = [
-    ['De vlucht van de reiger', 'Lies Goossens', 'E5'],
-    ['Waar is Bobbie?', 'Tom Schamp', 'M3'],
-    ['Het grote griezelboek', 'Diverse auteurs'],
-    ['Sterren boven de stad', 'Elke Bonte', 'M6'],
-    ['Tim en de tijdmachine', 'Pieter Gaudesaboos', 'E4'],
-    ['Paarden in de wei', 'Inge Moreel', 'M4'],
-    ['Het mysterie van het kasteel', 'Marc de Bel', 'E6'],
-    ['Robots zijn ook maar mensen', 'Jef Aerts', 'M7'],
-  ];
+  // Autumn: real books, two of which the school also owns (to show "Herkomst").
+  const autumnRows = [];
+  for (const book of [
+    {
+      isbn: '9789025748456',
+      title: 'Mama kwijt',
+      authors: ['Chris Haughton'],
+      aviLevel: 'M3' as const,
+    },
+    {
+      isbn: '9789051160413',
+      title: 'Kleine ijsbeer en de walvisbaai',
+      authors: ['Hans de Beer'],
+      aviLevel: 'M4' as const,
+    },
+    {
+      isbn: '9789000362462',
+      title: 'Het nieuwe grote Superjuffie doeboek',
+      authors: ['Janneke Schotveld'],
+    },
+  ]) {
+    const { input, coverUrl } = await withLookup(book);
+    autumnRows.push({ title: TitleInputSchema.parse({ type: 'book', ...input }), coverUrl });
+  }
+  const owned = ['Dolfje Weerwolfje', 'Nijntje'].flatMap((title) => {
+    const titleId = titleIds.get(title);
+    return titleId ? [{ titleId }] : [];
+  });
+  const autumnBooks = [...autumnRows, ...owned];
   await addExchangeBooks(
     actor,
     autumn.id,
-    autumnBooks.map(([title, author, aviLevel], i) => ({
-      barcode: `307000512${30 + i}`,
-      title: { type: 'book', title, authors: [author], ...(aviLevel ? { aviLevel } : {}) },
-    })),
+    autumnBooks.map((book, i) => ({ barcode: `307000512${30 + i}`, ...book })),
     at('2026-09-15'),
   );
   const shelf = [
