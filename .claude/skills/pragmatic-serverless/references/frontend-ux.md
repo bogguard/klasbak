@@ -84,7 +84,7 @@ The bar is not "a clean admin template" but a product that feels made for its pl
 
 - **Desk / fast workflows**: one big focused input, large unmistakable feedback (colour + icon + text + optional sound), the last few actions visible, nothing to click between items.
 - **Shared or public screens (kiosk)**: full screen without the app's menus, huge type and targets, show the minimum personal data (first name only), clear themselves after a short time.
-- **Phones**: every page works at 390 px; wide tables scroll inside their own container, never the page.
+- **Phones**: every page works at 390 px; wide tables scroll inside their own container, never the page. Give grids explicit columns (`grid-cols-1` on phones): an implicit grid column grows to its content (e.g. an input row) and widens the whole page. Two less obvious culprits: `sr-only` text (absolutely positioned) inside a horizontally scrolling box escapes it unless the box is `relative`, and a `fieldset` never shrinks below its content unless it gets `min-width: 0`. Measure `document.documentElement.scrollWidth` on every page in the phone screenshot test.
 
 **Verify like a designer**
 
