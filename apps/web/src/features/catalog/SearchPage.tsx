@@ -131,7 +131,7 @@ export function SearchPage({
               className="h-14 w-full rounded-xl border border-line bg-surface pl-12 pr-4 text-lg shadow-sm placeholder:text-muted"
             />
           </div>
-          <div className="-mx-4 overflow-x-auto px-4 pb-1">
+          <div className="-mx-4 relative overflow-x-auto px-4 pb-1">
             <div role="group" aria-label={t('search.filters.type')} className="flex w-max gap-2">
               <Chip pressed={!type} onClick={() => update('type', '')}>
                 {t('search.filters.allTypes')}

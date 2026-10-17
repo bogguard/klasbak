@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseReaderRecords, parseReadersCsv } from './csv';
 import { strToU8, zipSync } from 'fflate';
-import { readXlsx } from './xlsx';
+import { readXlsx } from '../../lib/spreadsheet';
 
 describe('parseReadersCsv', () => {
   it('reads a Belgian Excel export (semicolons, Dutch headers, BOM)', () => {

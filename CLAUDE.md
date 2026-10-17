@@ -19,11 +19,13 @@ TypeScript everywhere · React + Vite (frontend) · Node.js Lambdas on AWS (back
 The layout from the skill (section 3), with these domain areas:
 
 ```
-apps/web/src/features/   catalog, manage (titles and copies), circulation (desk, loans, kiosk, settings),
-                         readers, labels, statistics, staff, export, auth
+apps/web/src/features/   catalog, manage (titles and copies), exchange, circulation (desk, loans, kiosk,
+                         settings), readers, labels, statistics, staff, export, auth
 services/api/src/        catalog, circulation, readers, staff (API functions); search-indexer, retention (jobs);
-                         branding, export (used by the circulation function); local/ (local dev server)
-packages/shared/src/     one file per domain: auth, branding, catalog, circulation, export, isbn, readers, search, staff
+                         branding, export (used by the circulation function), exchange (used by the
+                         catalog function); local/ (local dev server)
+packages/shared/src/     one file per domain: auth, branding, catalog, circulation, exchange, export, isbn,
+                         readers, search, staff
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
 docs/                    features.md, decisions.md

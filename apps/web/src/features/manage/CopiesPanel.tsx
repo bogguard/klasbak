@@ -1,11 +1,12 @@
 import { COPY_STATUSES, CopyInputSchema, type Copy, type CopyStatus } from '@library/shared';
-import { Pencil, Plus, Tags } from 'lucide-react';
+import { ArrowLeftRight, Pencil, Plus, Tags } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { formatDate } from '../../lib/format';
+import { useExchanges } from '../exchange/api';
 import { useAddCopy, useUpdateCopy, type CopyChanges } from './api';
 
 const STATUS_TONES: Record<CopyStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
@@ -21,10 +22,43 @@ const EDITABLE_STATUSES = COPY_STATUSES.filter(
   (s): s is Exclude<CopyStatus, 'onLoan'> => s !== 'onLoan',
 );
 
+/** Where a copy comes from: the school's own, or a library's exchange collection (linked). */
+function Origin({ exchangeId }: { exchangeId?: string }) {
+  const { t } = useTranslation();
+  if (!exchangeId) return <span className="text-muted">{t('manage.copies.ownCopy')}</span>;
+  return <ExchangeLabel exchangeId={exchangeId} />;
+}
+
+/** An exchange copy's collection, linked, with its return date. */
+function ExchangeLabel({ exchangeId }: { exchangeId: string }) {
+  const { t, i18n } = useTranslation();
+  const exchange = useExchanges().data?.find((e) => e.id === exchangeId);
+  return (
+    <span className="inline-flex flex-col gap-0.5">
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+        <ArrowLeftRight className="size-4" aria-hidden="true" />
+        <Link to={`/manage/exchanges/${exchangeId}`} className="underline underline-offset-2">
+          {exchange ? `${exchange.lender} · ${exchange.name}` : t('exchange.copy.label')}
+        </Link>
+      </span>
+      {exchange && (
+        <span className="text-xs text-muted">
+          {t('exchange.copy.until', { date: formatDate(exchange.returnBy, i18n.language) })}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy[] }) {
   const { t, i18n } = useTranslation();
   const [editing, setEditing] = useState<string>();
   const sorted = [...copies].sort((a, b) => a.barcode.localeCompare(b.barcode));
+  // Books from an exchange collection keep the library's label: none of ours.
+  const labelCodes = sorted.filter((c) => !c.exchangeId).map((c) => c.barcode);
+  // "Origin" (the school's own or a library's) is a column of its own, only when it varies:
+  // the location is where a book stands in the school library, not where it comes from.
+  const showOrigin = copies.some((c) => c.exchangeId);
 
   return (
     <section aria-labelledby="copies-heading" className="space-y-4">
@@ -32,9 +66,9 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
         <h2 id="copies-heading" className="text-xl font-semibold">
           {t('manage.copies.heading', { count: copies.length })}
         </h2>
-        {copies.length > 0 && (
+        {labelCodes.length > 0 && (
           <Link
-            to={`/manage/labels?codes=${sorted.map((c) => c.barcode).join(',')}`}
+            to={`/manage/labels?codes=${labelCodes.join(',')}`}
             className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-accent underline underline-offset-4"
           >
             <Tags className="size-4" aria-hidden="true" />
@@ -47,7 +81,7 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
         <p className="text-muted">{t('manage.copies.none')}</p>
       ) : (
         // Horizontal scroll inside the card on narrow screens; the page itself never scrolls sideways.
-        <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+        <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead className="border-b border-line text-muted">
               <tr>
@@ -57,6 +91,11 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
                 <th scope="col" className="px-4 py-3 font-medium">
                   {t('manage.copies.location')}
                 </th>
+                {showOrigin && (
+                  <th scope="col" className="px-4 py-3 font-medium">
+                    {t('manage.copies.origin')}
+                  </th>
+                )}
                 <th scope="col" className="px-4 py-3 font-medium">
                   {t('manage.copies.status')}
                 </th>
@@ -73,6 +112,7 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
                 editing === copy.id ? (
                   <EditCopyRow
                     key={copy.id}
+                    showOrigin={showOrigin}
                     titleId={titleId}
                     copy={copy}
                     onDone={() => setEditing(undefined)}
@@ -81,6 +121,11 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
                   <tr key={copy.id}>
                     <td className="px-4 py-3 font-mono">{copy.barcode}</td>
                     <td className="px-4 py-3">{copy.location ?? '—'}</td>
+                    {showOrigin && (
+                      <td className="px-4 py-3">
+                        <Origin exchangeId={copy.exchangeId} />
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <Badge tone={STATUS_TONES[copy.status]}>
                         {t(`copyStatus.${copy.status}`)}
@@ -125,10 +170,12 @@ export function CopiesPanel({ titleId, copies }: { titleId: string; copies: Copy
 function EditCopyRow({
   titleId,
   copy,
+  showOrigin,
   onDone,
 }: {
   titleId: string;
   copy: Copy;
+  showOrigin: boolean;
   onDone: () => void;
 }) {
   const { t } = useTranslation();
@@ -166,6 +213,11 @@ function EditCopyRow({
           autoFocus
         />
       </td>
+      {showOrigin && (
+        <td className="px-4 py-3 align-top">
+          <Origin exchangeId={copy.exchangeId} />
+        </td>
+      )}
       <td className="px-4 py-3 align-top">
         {copy.status === 'onLoan' ? (
           <p className="text-muted">{t('manage.copies.onLoanLocked')}</p>

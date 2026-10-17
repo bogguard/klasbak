@@ -1,6 +1,7 @@
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import {
   calculateDueDate,
+  capDueDateForExchange,
   isOverdue,
   localDate,
   monthsBetween,
@@ -8,6 +9,7 @@ import {
   type MyBooks,
   readerName,
   type Copy,
+  type ExchangeCollection,
   type LibrarySettings,
   type LibrarySettingsInput,
   type Loan,
@@ -21,7 +23,7 @@ import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
 import { getCodePointer, getItem } from '../lib/dynamo';
 import { AppError, ConflictError, NotFoundError } from '../lib/errors';
-import { copyKey, titleKey } from '../lib/keys';
+import { copyKey, exchangeKey, titleKey } from '../lib/keys';
 import { metrics } from '../lib/observability';
 import { getReader, listReaders } from '../readers/repository';
 import * as repository from './repository';
@@ -88,14 +90,24 @@ async function checkOut(
   readerId: string,
   now: Date,
 ): Promise<ScanResult> {
-  const [reader, title, settings] = await Promise.all([
+  const [reader, title, settings, exchange] = await Promise.all([
     getReader(readerId),
     getItem<Title>(titleKey(copy.titleId)),
     repository.getSettings(),
+    copy.exchangeId
+      ? getItem<ExchangeCollection>(exchangeKey(copy.exchangeId))
+      : Promise.resolve(undefined),
   ]);
   if (!reader) throw new NotFoundError('Reader');
 
   const policy = settings.loanPolicies[reader.category];
+  const today = localDate(now);
+  const normalDue = calculateDueDate(today, reader.category, settings);
+  // A book from the public library's collection must be back before the collection goes back.
+  const dueDate =
+    exchange?.status === 'active'
+      ? capDueDateForExchange(normalDue, exchange.returnBy, today, settings)
+      : normalDue;
   const loan: Loan = {
     id: ulid(now.getTime()),
     readerId,
@@ -106,7 +118,7 @@ async function checkOut(
     copyId: copy.id,
     barcode: copy.barcode,
     loanedAt: now.toISOString(),
-    dueDate: calculateDueDate(localDate(now), reader.category, settings),
+    dueDate,
   };
 
   const failure = await repository.checkOut({
@@ -116,8 +128,10 @@ async function checkOut(
     audit: auditItem({ entity: `COPY#${copy.id}`, action: 'loan.created', actor }, now),
     // Classes are counted for pupils only: the statistics compare reading per class.
     stats: {
-      month: localDate(now).slice(0, 7),
+      month: today.slice(0, 7),
       group: reader.category === 'pupil' ? reader.group : undefined,
+      aviLevel: title?.aviLevel,
+      exchangeId: exchange?.id,
     },
   });
   if (failure === 'copyNotAvailable') {
@@ -234,11 +248,17 @@ export async function statistics(from: string, to: string): Promise<LoanStatisti
 
   const perMonth = new Map(months.map((month) => [month, 0]));
   const titles = new Map<string, number>();
+  const titleNames = new Map<string, string>();
   const groups = new Map<string, number>();
-  for (const { month, sk, loans } of counters) {
+  const avi = new Map<string, number>();
+  for (const { month, sk, loans, title } of counters) {
     if (sk === 'TOTAL') perMonth.set(month, (perMonth.get(month) ?? 0) + loans);
-    else if (sk.startsWith('TITLE#')) add(titles, sk.slice('TITLE#'.length), loans);
-    else if (sk.startsWith('GROUP#')) add(groups, sk.slice('GROUP#'.length), loans);
+    else if (sk.startsWith('TITLE#')) {
+      const titleId = sk.slice('TITLE#'.length);
+      add(titles, titleId, loans);
+      if (title) titleNames.set(titleId, title);
+    } else if (sk.startsWith('GROUP#')) add(groups, sk.slice('GROUP#'.length), loans);
+    else if (sk.startsWith('AVI#')) add(avi, sk.slice('AVI#'.length), loans);
   }
 
   // Classes as they are now, so classes without loans show up too (with 0).
@@ -251,8 +271,9 @@ export async function statistics(from: string, to: string): Promise<LoanStatisti
   return {
     months: [...perMonth].map(([month, loans]) => ({ month, loans })),
     titles: [...titles]
-      .map(([titleId, loans]) => ({ titleId, loans }))
+      .map(([titleId, loans]) => ({ titleId, loans, title: titleNames.get(titleId) }))
       .sort((a, b) => b.loans - a.loans),
+    avi: [...avi].map(([level, loans]) => ({ level, loans })),
     groups: [...groupNames].map((group) => ({
       group,
       loans: groups.get(group) ?? 0,

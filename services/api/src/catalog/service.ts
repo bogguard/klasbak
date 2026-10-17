@@ -41,6 +41,7 @@ export async function createTitle(
   input: TitleInput,
   coverUrl: string | undefined,
   now = new Date(),
+  options: { exchangeId?: string } = {},
 ): Promise<Title> {
   const id = ulid();
   const coverImageKey = coverUrl ? await storeCover(id, coverUrl) : undefined;
@@ -48,6 +49,7 @@ export async function createTitle(
     ...input,
     id,
     coverImageKey,
+    exchangeId: options.exchangeId,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
     version: 1,
@@ -72,6 +74,7 @@ export async function updateTitle(
     ...input,
     id: existing.id,
     coverImageKey: existing.coverImageKey,
+    exchangeId: existing.exchangeId,
     createdAt: existing.createdAt,
     updatedAt: now.toISOString(),
     version: expectedVersion + 1,
@@ -94,6 +97,7 @@ export async function addCopy(
   titleId: string,
   input: CopyInput,
   now = new Date(),
+  options: { exchangeId?: string } = {},
 ): Promise<Copy> {
   const barcode = input.barcode ?? formatBarcode(await repository.nextBarcodeNumber());
   const copy: Copy = {
@@ -103,6 +107,7 @@ export async function addCopy(
     status: 'available',
     // A generated barcode needs a printed label; a typed one usually has a sticker already.
     labelPending: input.barcode === undefined,
+    exchangeId: options.exchangeId,
     location: input.location,
     note: input.note,
     createdAt: now.toISOString(),

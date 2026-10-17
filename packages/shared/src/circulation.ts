@@ -102,7 +102,13 @@ export const StatisticsQuerySchema = z
  */
 export type LoanStatistics = {
   months: Array<{ month: string; loans: number }>;
-  titles: Array<{ titleId: string; loans: number }>;
+  /**
+   * Per title, with its name as it was when lent: a title can leave the catalogue later (an
+   * exchange collection that went back) and must still count in the report.
+   */
+  titles: Array<{ titleId: string; loans: number; title?: string }>;
+  /** Per AVI level, as the title had it when lent. */
+  avi: Array<{ level: string; loans: number }>;
   groups: Array<{ group: string; loans: number; pupils: number }>;
   /** Active readers now, for the report. */
   readers: { pupils: number; teachers: number };

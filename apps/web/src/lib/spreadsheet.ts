@@ -1,8 +1,9 @@
 import { strFromU8, unzipSync } from 'fflate';
 
 /*
- * Reads the first sheet of an Excel workbook (.xlsx) as rows of text, so schools can import
- * the export from their administration software as is, without "save as CSV" first.
+ * Reads spreadsheets as rows of text: CSV (any separator) and the first sheet of an Excel
+ * workbook (.xlsx), so schools can import exports from their administration software or the
+ * public library's lists as they are, without "save as CSV" first.
  * An .xlsx file is a ZIP of XML files; Excel writes them in a regular way, so a few patterns
  * are enough. Formulas give their last calculated value. Old .xls files are not supported.
  */
@@ -78,3 +79,72 @@ export function readXlsx(data: Uint8Array): string[][] {
   }
   return rows;
 }
+
+/** Excel adds this invisible character at the start of UTF-8 files. */
+const BYTE_ORDER_MARK = new RegExp(`^${String.fromCharCode(0xfeff)}`);
+
+/** Splits CSV text into records and cells, handling quotes, and guesses the separator. */
+export function splitRecords(text: string): string[][] {
+  const firstLine = text.split(/\r?\n/, 1)[0] ?? '';
+  const separator = [';', '\t', ','].reduce((best, candidate) =>
+    firstLine.split(candidate).length > firstLine.split(best).length ? candidate : best,
+  );
+
+  const records: string[][] = [];
+  let record: string[] = [];
+  let cell = '';
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"' && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        cell += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === separator) {
+      record.push(cell);
+      cell = '';
+    } else if (char === '\n' || char === '\r') {
+      if (char === '\r' && text[i + 1] === '\n') i++;
+      record.push(cell);
+      records.push(record);
+      record = [];
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+  if (cell !== '' || record.length > 0) {
+    record.push(cell);
+    records.push(record);
+  }
+  return records;
+}
+
+export type SpreadsheetResult =
+  { ok: true; rows: string[][] } | { ok: false; error: 'oldExcel' | 'unreadable' };
+
+/** A file the user picked → rows of cells. Old binary .xls files can't be read. */
+export async function readSpreadsheet(file: File): Promise<SpreadsheetResult> {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.xls')) return { ok: false, error: 'oldExcel' };
+  try {
+    return {
+      ok: true,
+      rows: name.endsWith('.xlsx')
+        ? readXlsx(new Uint8Array(await file.arrayBuffer()))
+        : splitRecords((await file.text()).replace(BYTE_ORDER_MARK, '')),
+    };
+  } catch {
+    return { ok: false, error: 'unreadable' };
+  }
+}
+
+export const SPREADSHEET_ACCEPT =
+  '.xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

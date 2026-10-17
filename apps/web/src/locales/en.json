@@ -109,7 +109,9 @@
     "LAST_ADMIN": "There must always be at least one active administrator.",
     "LOAN_NOT_ACTIVE": "This book was already returned and can't be renewed.",
     "RENEWAL_NOT_LONGER": "This book may already stay until {{dueDate}}; renewing wouldn't make that longer.",
-    "NOT_A_READER_CARD": "This is a book. Please scan your library card."
+    "NOT_A_READER_CARD": "This is a book. Please scan your library card.",
+    "EXCHANGE_RETURNED": "This exchange collection was already returned.",
+    "EXCHANGE_HAS_LOANS": "{{count}} books are still on loan. Have them returned first."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -254,7 +256,9 @@
       "barcodeInvalid": "3 to 32 letters, digits or dashes.",
       "automatic": "Automatic",
       "add": "Add",
-      "added": "Copy {{barcode}} added. Stick the label on the book."
+      "added": "Copy {{barcode}} added. Stick the label on the book.",
+      "origin": "Origin",
+      "ownCopy": "School's own"
     }
   },
   "manageNav": {
@@ -266,7 +270,8 @@
     "settings": "Settings",
     "labels": "Labels",
     "staff": "Staff",
-    "statistics": "Statistics"
+    "statistics": "Statistics",
+    "exchanges": "Exchange collections"
   },
   "readers": {
     "heading": "Readers",
@@ -714,7 +719,8 @@
     "pupilsCount_one": "{{count}} pupil",
     "pupilsCount_other": "{{count}} pupils",
     "teachersCount_one": "{{count}} teacher",
-    "teachersCount_other": "{{count}} teachers"
+    "teachersCount_other": "{{count}} teachers",
+    "exchanges": "Exchange collections from the public library"
   },
   "ticket": {
     "print": "Print ticket",
@@ -724,5 +730,115 @@
     "dueOn": "Return by {{date}}",
     "footer": "Please return your books on time. Happy reading!",
     "late": "Late! Was due {{date}}"
+  },
+  "exchange": {
+    "heading": "Exchange collections",
+    "new": "New exchange collection",
+    "intro": "Books the public library lends to the school for a while. They keep the library's label, you lend them at the desk as usual, and when the collection goes back they all leave the catalogue at once.",
+    "none": "No exchange collections yet",
+    "noneHint": "Does the school get books from the public library? Create an exchange collection and read in the library's list, or scan the books one by one.",
+    "active": "At school",
+    "returned": "Returned",
+    "returnBy": "Back to the library on {{date}}",
+    "returnedOn": "Returned on {{date}}",
+    "books_one": "{{count}} book",
+    "books_other": "{{count}} books",
+    "onLoan_one": "{{count}} on loan",
+    "onLoan_other": "{{count}} on loan",
+    "loans_one": "lent {{count}} time",
+    "loans_other": "lent {{count}} times",
+    "back": "Back to the exchange collections",
+    "closedHint_one": "This collection was returned; its books are no longer in the catalogue. Together they were lent {{count}} time.",
+    "closedHint_other": "This collection was returned; its books are no longer in the catalogue. Together they were lent {{count}} times.",
+    "form": {
+      "lender": "From which library",
+      "lenderHint": "For example: Bibliotheek Zele",
+      "name": "Name",
+      "nameHint": "For example: Autumn 2026",
+      "returnBy": "Back to the library on",
+      "returnByHint": "Pupils must return their books a week earlier.",
+      "required": "Please fill this in.",
+      "create": "Create and add books",
+      "cancel": "Cancel"
+    },
+    "add": {
+      "heading": "Add books",
+      "scanHeading": "Scan",
+      "scanHint": "First scan the barcode on the back (ISBN), then the library's label. The book doesn't get a new label.",
+      "isbn": "ISBN",
+      "find": "Find",
+      "noIsbn": "No ISBN? Type the title",
+      "invalidIsbn": "This is not a valid ISBN. Scan the barcode on the back of the book.",
+      "notFound": "We didn't find this ISBN. Type the title and author.",
+      "typeTitle": "Type the title and author.",
+      "author": "Author",
+      "next": "Next",
+      "titleRequired": "Fill in at least the title.",
+      "barcode": "Now scan the library's label (barcode)",
+      "addBook": "Add",
+      "otherBook": "Other book",
+      "added": "Added: {{title}} ({{barcode}})",
+      "cameraLabelHint": "Hold the library's label (not the ISBN on the back) in the frame.",
+      "thatIsTheIsbn": "This is the book's ISBN. Now scan the library's label (usually inside or on the front)."
+    },
+    "import": {
+      "heading": "Read in the library's list",
+      "hint": "An Excel or CSV file from the library with one row per book, as below. A title row at the top and extra columns are fine.",
+      "ready_one": "{{count}} book ready to add.",
+      "ready_other": "{{count}} books ready to add.",
+      "skipped_one": "{{count}} row is skipped (no barcode, or no title and ISBN).",
+      "skipped_other": "{{count}} rows are skipped (no barcode, or no title and ISBN).",
+      "run_one": "Add {{count}} book",
+      "run_other": "Add {{count}} books",
+      "result": "{{added}} added, {{failed}} not added.",
+      "errors": {
+        "missingColumns": "We found no ‘barcode’ and ‘title’ or ‘ISBN’ columns. Check the column names."
+      },
+      "failed": {
+        "NOT_FOUND": "ISBN not found and no title in the list."
+      },
+      "example": {
+        "barcode": "Barcode",
+        "title": "Title",
+        "author": "Author",
+        "isbn": "ISBN",
+        "avi": "AVI",
+        "caption": "Example of a list",
+        "explain": "Required: the barcode on the library's label, and the title or ISBN (or both). Optional: author and AVI level. With only an ISBN we look up title, author and cover ourselves, as on the third row.",
+        "download": "Download this example (for the library)",
+        "fileName": "example-exchange-collection-list"
+      }
+    },
+    "list": {
+      "heading": "Books in this collection",
+      "barcode": "Library barcode",
+      "where": "Where is it?",
+      "inLibrary": "In the library",
+      "until": "until {{date}}",
+      "loans": "Times lent",
+      "download": "Download list (CSV)",
+      "returnedHeading_one": "{{count}} book in this collection",
+      "returnedHeading_other": "{{count}} books in this collection",
+      "notSaved": "The book list wasn't saved: this collection was returned before that was possible."
+    },
+    "return": {
+      "heading": "Return to the library",
+      "stillOut_one": "{{count}} book is still on loan. The list above shows who has it; have it returned first.",
+      "stillOut_other": "{{count}} books are still on loan. The list above shows who has them; have them returned first.",
+      "allIn_one": "The book is in.",
+      "allIn_other": "All {{count}} books are in.",
+      "button": "Return collection",
+      "confirm_one": "The book leaves the catalogue and its barcode is released. Continue?",
+      "confirm_other": "The {{count}} books leave the catalogue and their barcodes are released. Continue?",
+      "yes": "Yes, return"
+    },
+    "copy": {
+      "label": "Exchange collection",
+      "until": "back to the library on {{date}}",
+      "titleNotice": "This book comes from the exchange collection {{name}} and goes back to the library on {{date}}. It then leaves the catalogue too.",
+      "copyNotice_one": "{{count}} copy comes from the exchange collection {{name}} and goes back to the library on {{date}}. The school's own copies stay.",
+      "copyNotice_other": "{{count}} copies come from the exchange collection {{name}} and go back to the library on {{date}}. The school's own copies stay.",
+      "open": "Go to the exchange collection"
+    }
   }
 }

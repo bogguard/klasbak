@@ -1,5 +1,7 @@
 import {
+  AddExchangeBooksRequestSchema,
   CopyInputSchema,
+  CreateExchangeRequestSchema,
   CoverUploadRequestSchema,
   CreateTitleRequestSchema,
   LabelLookupRequestSchema,
@@ -12,6 +14,7 @@ import {
 import { requireRole, STAFF } from '../lib/auth';
 import { ValidationError } from '../lib/errors';
 import { createApp, getActor, IdSchema, parse, readJson, toLambdaHandler } from '../lib/http';
+import * as exchanges from '../exchange/service';
 import * as catalog from './service';
 
 export const app = createApp().basePath('/api/catalog');
@@ -89,6 +92,35 @@ app.patch('/copies/:barcode', async (c) => {
   const actor = requireRole(getActor(c), STAFF);
   const changes = parse(UpdateCopyRequestSchema, await readJson(c));
   return c.json(await catalog.updateCopy(actor, c.req.param('barcode'), changes));
+});
+
+// Exchange collections from the public library (decision 031); in the catalogue function
+// because they add and remove titles and copies.
+app.get('/exchanges', async (c) => {
+  requireRole(getActor(c), STAFF);
+  return c.json(await exchanges.listExchanges());
+});
+
+app.post('/exchanges', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  const input = parse(CreateExchangeRequestSchema, await readJson(c));
+  return c.json(await exchanges.createExchange(actor, input), 201);
+});
+
+app.get('/exchanges/:id', async (c) => {
+  requireRole(getActor(c), STAFF);
+  return c.json(await exchanges.getExchange(parse(IdSchema, c.req.param('id'))));
+});
+
+app.post('/exchanges/:id/books', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  const { books } = parse(AddExchangeBooksRequestSchema, await readJson(c));
+  return c.json(await exchanges.addExchangeBooks(actor, parse(IdSchema, c.req.param('id')), books));
+});
+
+app.post('/exchanges/:id/return', async (c) => {
+  const actor = requireRole(getActor(c), STAFF);
+  return c.json(await exchanges.returnExchange(actor, parse(IdSchema, c.req.param('id'))));
 });
 
 app.get('/isbn/:isbn', async (c) => {

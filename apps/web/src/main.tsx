@@ -101,6 +101,18 @@ const router = createBrowserRouter([
             }),
           },
           {
+            path: 'exchanges',
+            lazy: async () => ({
+              Component: (await import('./features/exchange/ExchangesPage')).ExchangesPage,
+            }),
+          },
+          {
+            path: 'exchanges/:id',
+            lazy: async () => ({
+              Component: (await import('./features/exchange/ExchangePage')).ExchangePage,
+            }),
+          },
+          {
             path: 'statistics',
             lazy: async () => ({
               Component: (await import('./features/statistics/StatisticsPage')).StatisticsPage,

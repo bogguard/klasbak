@@ -29,7 +29,7 @@ const reader = {
   version: 1,
 };
 const copy = { id: 'C1', titleId: 'T1', barcode: '00000001', status: 'available' };
-const title = { id: 'T1', title: 'Dolfje Weerwolfje' };
+const title = { id: 'T1', title: 'Dolfje Weerwolfje', aviLevel: 'E4' };
 
 function givenItems(items: Array<[{ pk: string; sk: string }, object]>) {
   for (const [key, item] of items) ddb.on(GetCommand, { Key: key }).resolves({ Item: item });
@@ -88,12 +88,36 @@ describe('scanning at the desk', () => {
     // The maximum (3 for pupils) and availability are enforced by the database itself.
     expect(items?.[0]?.Update?.ExpressionAttributeValues).toMatchObject({ ':max': 3 });
     expect(items?.[1]?.Update?.ConditionExpression).toBe('#status = :available');
+    // The copy counts its own loans.
+    expect(items?.[1]?.Update?.UpdateExpression).toContain('ADD loanCount :one');
     // Counted anonymously in the same transaction: month, title and class, never the reader.
     expect(items?.slice(4).map((i) => i.Update?.Key)).toEqual([
       { pk: 'STATS#2026-10', sk: 'TOTAL' },
       { pk: 'STATS#2026-10', sk: 'TITLE#T1' },
       { pk: 'STATS#2026-10', sk: 'GROUP#3B' },
+      { pk: 'STATS#2026-10', sk: 'AVI#E4' },
     ]);
+    // The title's name is kept with its counter, for when the title leaves the catalogue.
+    expect(items?.[5]?.Update?.ExpressionAttributeValues).toMatchObject({
+      ':title': 'Dolfje Weerwolfje',
+    });
+  });
+
+  it('lends a book of an exchange collection until a week before the collection goes back', async () => {
+    givenItems([
+      [copyKey('T1', 'C1'), { ...copy, exchangeId: 'X1' }],
+      [
+        { pk: 'EXCHANGE', sk: 'X1' },
+        { id: 'X1', status: 'active', returnBy: '2026-11-06', name: 'Najaar', lender: 'Bib' },
+      ],
+    ]);
+
+    const result = await scan(librarian, '00000001', 'R1', NOW);
+
+    // Normally 5 November; the collection goes back on 6 November → back by 30 October.
+    expect(result).toMatchObject({ outcome: 'checkedOut', loan: { dueDate: '2026-10-30' } });
+    const items = ddb.commandCalls(TransactWriteCommand)[0]?.args[0].input.TransactItems;
+    expect(items?.at(-1)?.Update?.Key).toEqual({ pk: 'EXCHANGE', sk: 'X1' });
   });
 
   it('explains when the reader already has the maximum number of books', async () => {
@@ -251,7 +275,8 @@ describe('statistics', () => {
     ddb.on(QueryCommand, { ExpressionAttributeValues: { ':pk': 'STATS#2026-09' } }).resolves({
       Items: [
         { sk: 'TOTAL', loans: 5 },
-        { sk: 'TITLE#T1', loans: 3 },
+        { sk: 'TITLE#T1', loans: 3, title: 'Dolfje Weerwolfje' },
+        { sk: 'AVI#E4', loans: 3 },
         { sk: 'TITLE#T2', loans: 2 },
         { sk: 'GROUP#3B', loans: 4 },
       ],
@@ -279,9 +304,10 @@ describe('statistics', () => {
       { month: '2026-11', loans: 0 },
     ]);
     expect(result.titles).toEqual([
-      { titleId: 'T2', loans: 4 },
-      { titleId: 'T1', loans: 3 },
+      { titleId: 'T2', loans: 4, title: undefined },
+      { titleId: 'T1', loans: 3, title: 'Dolfje Weerwolfje' },
     ]);
+    expect(result.avi).toEqual([{ level: 'E4', loans: 3 }]);
     expect(result.groups).toEqual(
       expect.arrayContaining([
         { group: '3B', loans: 4, pupils: 1 },

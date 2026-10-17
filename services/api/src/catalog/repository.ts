@@ -22,6 +22,7 @@ import { ConflictError, NotFoundError } from '../lib/errors';
 import {
   codeKey,
   copyKey,
+  exchangeCopiesIndexPk,
   GSI1,
   PENDING_LABELS_INDEX_PK,
   titleKey,
@@ -30,14 +31,16 @@ import {
 
 /**
  * The stored form of a copy. Copies waiting for a printed label are also in the index, so the
- * print queue is one cheap query. Always write copies through this, or the queue loses them.
+ * print queue is one cheap query; so are copies of an exchange collection (they keep the
+ * library's labels, so never both). Always write copies through this, or the lists lose them.
  */
-function copyItem(copy: Copy): Item {
-  return {
-    ...copyKey(copy.titleId, copy.id),
-    ...(copy.labelPending ? { gsi1pk: PENDING_LABELS_INDEX_PK, gsi1sk: copy.barcode } : {}),
-    ...copy,
-  };
+export function copyItem(copy: Copy): Item {
+  const index = copy.labelPending
+    ? { gsi1pk: PENDING_LABELS_INDEX_PK, gsi1sk: copy.barcode }
+    : copy.exchangeId
+      ? { gsi1pk: exchangeCopiesIndexPk(copy.exchangeId), gsi1sk: copy.barcode }
+      : {};
+  return { ...copyKey(copy.titleId, copy.id), ...index, ...copy };
 }
 
 export async function getTitleWithCopies(titleId: string): Promise<TitleWithCopies | undefined> {

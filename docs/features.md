@@ -16,6 +16,7 @@ Features a school library needs, from cataloguing to lending to reading promotio
 | Reminder slips, "Mijn boeken" screen, anonymous statistics                 | Built; runs locally            |
 | Loan ticket at the desk (browser print, receipt or A4)                     | Built; runs locally            |
 | Import from Informat/Wisa/Smartschool (xlsx, CSV), new school year, report | Built; runs locally            |
+| Exchange collections from the public library (decision 031)                | Built; runs locally            |
 
 ## Phase 1 — MVP: run a school library
 

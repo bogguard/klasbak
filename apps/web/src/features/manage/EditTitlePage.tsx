@@ -5,6 +5,8 @@ import { Link, useLocation, useParams } from 'react-router';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert } from '../../components/ui/Form';
 import { ApiError } from '../../lib/api';
+import { formatDate } from '../../lib/format';
+import { useExchanges } from '../exchange/api';
 import { useStaffTitle, useUpdateTitle } from './api';
 import { CopiesPanel } from './CopiesPanel';
 import { CoverEditor } from './CoverEditor';
@@ -66,6 +68,12 @@ export function EditTitlePage() {
           </Link>
         </div>
       </header>
+
+      <ExchangeNotice
+        titleExchangeId={title.data.exchangeId}
+        exchangeIds={title.data.copies.flatMap((c) => (c.exchangeId ? [c.exchangeId] : []))}
+        ownCopies={title.data.copies.filter((c) => !c.exchangeId).length}
+      />
 
       {flash.flash === 'created' && !missingCopies && (
         <Alert
@@ -139,5 +147,40 @@ export function EditTitlePage() {
         />
       </section>
     </div>
+  );
+}
+
+/**
+ * A title (or some of its copies) from a public library's exchange collection: say so, and
+ * what happens when the collection goes back, so nobody is surprised when it disappears.
+ */
+function ExchangeNotice({
+  titleExchangeId,
+  exchangeIds,
+  ownCopies,
+}: {
+  titleExchangeId?: string;
+  exchangeIds: string[];
+  ownCopies: number;
+}) {
+  const { t, i18n } = useTranslation();
+  const exchanges = useExchanges();
+  const id = exchangeIds[0] ?? titleExchangeId;
+  if (!id) return null;
+  const exchange = exchanges.data?.find((e) => e.id === id);
+  const name = exchange ? `${exchange.lender} · ${exchange.name}` : t('exchange.copy.label');
+  const date = exchange ? formatDate(exchange.returnBy, i18n.language) : '';
+  const goesWithIt = titleExchangeId === id && ownCopies === 0;
+  return (
+    <Alert tone="info">
+      {t(goesWithIt ? 'exchange.copy.titleNotice' : 'exchange.copy.copyNotice', {
+        name,
+        date,
+        count: exchangeIds.length,
+      })}{' '}
+      <Link to={`/manage/exchanges/${id}`} className="font-medium underline underline-offset-2">
+        {t('exchange.copy.open')}
+      </Link>
+    </Alert>
   );
 }

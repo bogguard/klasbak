@@ -20,6 +20,8 @@ export type SearchDocument = {
   /** Copies the public can see (withdrawn ones excluded), and how many are on the shelf. */
   copies: number;
   available: number;
+  /** How many of those belong to a public library's exchange collection (not the school's). */
+  exchangeCopies?: number;
 };
 
 export const SEARCH_INDEX_PATH = 'search/catalog.json';
@@ -30,9 +32,10 @@ export const SEARCH_INDEX_PATH = 'search/catalog.json';
  */
 export function toSearchDocument(
   title: Title,
-  copies: Pick<Copy, 'status'>[] = [],
+  copies: Pick<Copy, 'status' | 'exchangeId'>[] = [],
 ): SearchDocument {
   const visible = copies.filter((copy) => copy.status !== 'withdrawn');
+  const exchangeCopies = visible.filter((copy) => copy.exchangeId).length;
   return {
     id: title.id,
     type: title.type,
@@ -49,6 +52,7 @@ export function toSearchDocument(
     addedAt: title.createdAt,
     copies: visible.length,
     available: visible.filter((copy) => copy.status === 'available').length,
+    ...(exchangeCopies > 0 ? { exchangeCopies } : {}),
   };
 }
 
@@ -79,6 +83,7 @@ export const searchIndexOptions: Options<SearchDocument> = {
     'addedAt',
     'copies',
     'available',
+    'exchangeCopies',
   ],
   processTerm: normalizeTerm,
   searchOptions: {

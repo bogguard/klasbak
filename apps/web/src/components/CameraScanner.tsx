@@ -1,7 +1,7 @@
 import { CameraOff, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createDetector, type ScanFormat } from '../lib/barcodeScanner';
+import { createDetector, normalizeScan, type ScanFormat } from '../lib/barcodeScanner';
 import { Button } from './ui/Feedback';
 
 type CameraScannerProps = {
@@ -15,6 +15,8 @@ type CameraScannerProps = {
    * next to it (the lending desk). The page shows the on/off button; Escape belongs to the page.
    */
   inline?: boolean;
+  /** What to hold in front of the camera, when the default for these formats doesn't fit. */
+  hint?: string;
 };
 
 /** A code counts again only after it has been out of view this long (a book left in front of the camera is one scan). */
@@ -31,6 +33,7 @@ export function CameraScanner({
   onCode,
   onClose,
   inline = false,
+  hint: customHint,
 }: CameraScannerProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,7 +69,8 @@ export function CameraScanner({
           if (stopped) return;
           try {
             if (video.readyState >= 2) {
-              for (const { rawValue } of await detector.detect(video)) {
+              for (const detected of await detector.detect(video)) {
+                const rawValue = normalizeScan(detected.rawValue, detected.format);
                 const now = Date.now();
                 const lastSeen = seen.get(rawValue) ?? 0;
                 // Every sighting counts, so a code that stays in view is never read twice.
@@ -116,7 +120,7 @@ export function CameraScanner({
     return () => window.removeEventListener('keydown', onKey, { capture: true });
   }, [inline]);
 
-  const hint = t(`camera.hint.${formats.includes('ean_13') ? 'isbn' : 'label'}`);
+  const hint = customHint ?? t(`camera.hint.${formats.includes('ean_13') ? 'isbn' : 'label'}`);
   const view = problem ? (
     <div className="max-w-sm space-y-3 p-6 text-center">
       <CameraOff className="mx-auto size-10" aria-hidden="true" />

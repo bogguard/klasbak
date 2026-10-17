@@ -160,7 +160,7 @@ export function LoansPage() {
           title={overdue ? t('loans.noneOverdue') : t('loans.none')}
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-line bg-surface print:overflow-visible print:border-0">
+        <div className="relative overflow-x-auto rounded-xl border border-line bg-surface print:overflow-visible print:border-0">
           <table className="w-full min-w-[44rem] text-left text-sm">
             <thead className="border-b border-line text-muted">
               <tr>

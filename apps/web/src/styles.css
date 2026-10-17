@@ -77,6 +77,11 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
+  /* Browsers keep a fieldset at least as wide as its content; on a phone a wide table in a
+     form would then widen the whole page instead of scrolling in its own box. */
+  fieldset {
+    min-width: 0;
+  }
 }
 
 /* Charts: print their coloured bars even when the browser leaves out backgrounds. */

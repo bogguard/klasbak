@@ -124,7 +124,7 @@ export function ReadersPage() {
           <p className="text-sm text-muted" aria-live="polite">
             {t('readers.count', { count: visible.length })}
           </p>
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+          <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
             <table className="w-full min-w-[36rem] text-left text-sm">
               <thead className="border-b border-line text-muted">
                 <tr>

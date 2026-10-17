@@ -1,4 +1,4 @@
-import type { LoanStatistics } from '@library/shared';
+import type { ExchangeSummary, LoanStatistics } from '@library/shared';
 import { toCsv } from '../export/buildExport';
 import type { StatisticsSummary } from './summary';
 
@@ -18,6 +18,7 @@ export type ReportLabels = {
   perClass: string;
   perAvi: string;
   topTitles: string;
+  exchanges: string;
 };
 
 type Row = { section: string; item: string; value: string | number };
@@ -30,6 +31,7 @@ export function statisticsCsv(
   stats: LoanStatistics,
   summary: StatisticsSummary,
   labels: ReportLabels,
+  exchanges: ExchangeSummary[] = [],
 ): string {
   const rows: Row[] = [
     { section: labels.totals, item: labels.loans, value: summary.total },
@@ -47,6 +49,11 @@ export function statisticsCsv(
     ...summary.groups.map((g) => ({ section: labels.perClass, item: g.group, value: g.loans })),
     ...summary.perAvi.map((a) => ({ section: labels.perAvi, item: a.level, value: a.loans })),
     ...summary.topTitles.map((t) => ({ section: labels.topTitles, item: t.title, value: t.loans })),
+    ...exchanges.map((e) => ({
+      section: labels.exchanges,
+      item: `${e.lender} · ${e.name}`,
+      value: e.loans,
+    })),
   ];
   return toCsv(rows, [
     [labels.columns.section, (r) => r.section],

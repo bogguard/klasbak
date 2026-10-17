@@ -90,6 +90,8 @@ export const UpdateTitleRequestSchema = z.object({
 
 export type Title = TitleInput & {
   id: string;
+  /** Created for an exchange collection: removed with it when no other copies remain. */
+  exchangeId?: string;
   coverImageKey?: string;
   createdAt: string;
   updatedAt: string;
@@ -123,6 +125,10 @@ export type Copy = {
   note?: string;
   /** True until its barcode label has been printed (the label print queue). */
   labelPending?: boolean;
+  /** Lent to the school by the public library as part of this exchange collection. */
+  exchangeId?: string;
+  /** How often this copy was lent (counted at the desk). */
+  loanCount?: number;
   /** Set while the copy is on loan; maintained by circulation only. */
   currentLoan?: { loanId: string; readerId: string; dueDate: string; loanedAt: string };
   createdAt: string;

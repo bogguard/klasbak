@@ -10,6 +10,7 @@ import { useSearchIndex } from '../catalog/useSearchIndex';
 import { useConfig } from '../../lib/config';
 import { formatDate } from '../../lib/format';
 import { useStatistics } from '../circulation/api';
+import { useExchanges } from '../exchange/api';
 import { statisticsCsv } from './reportCsv';
 import { summarize, type CatalogueTitle } from './summary';
 
@@ -39,6 +40,14 @@ export function StatisticsPage() {
   const index = useSearchIndex();
   const errorMessage = useErrorMessage();
   const { libraryName } = useConfig();
+  const exchanges = useExchanges();
+  // Exchange collections that were at the school during this school year.
+  const yearExchanges = (exchanges.data ?? []).filter(
+    (e) =>
+      year &&
+      e.createdAt.slice(0, 7) <= year.to &&
+      (e.returnedOn ?? e.returnBy).slice(0, 7) >= year.from,
+  );
 
   const summary = useMemo(() => {
     if (!stats.data || !index.data) return undefined;
@@ -58,26 +67,32 @@ export function StatisticsPage() {
 
   function downloadCsv() {
     if (!stats.data || !summary || !year) return;
-    const csv = statisticsCsv(stats.data, summary, {
-      columns: {
-        section: t('statistics.report.section'),
-        item: t('statistics.report.item'),
-        value: t('statistics.report.value'),
+    const csv = statisticsCsv(
+      stats.data,
+      summary,
+      {
+        columns: {
+          section: t('statistics.report.section'),
+          item: t('statistics.report.item'),
+          value: t('statistics.report.value'),
+        },
+        totals: t('statistics.report.totals'),
+        loans: t('statistics.total'),
+        perPupil: t('statistics.perPupil'),
+        activePupils: t('statistics.activePupils'),
+        activeTeachers: t('statistics.activeTeachers'),
+        collection: t('statistics.collection'),
+        titles: t('statistics.titles'),
+        copies: t('statistics.copies'),
+        added: t('statistics.added'),
+        perMonth: t('statistics.perMonth'),
+        perClass: t('statistics.perClass'),
+        perAvi: t('statistics.perAvi'),
+        topTitles: t('statistics.topTitles'),
+        exchanges: t('statistics.exchanges'),
       },
-      totals: t('statistics.report.totals'),
-      loans: t('statistics.total'),
-      perPupil: t('statistics.perPupil'),
-      activePupils: t('statistics.activePupils'),
-      activeTeachers: t('statistics.activeTeachers'),
-      collection: t('statistics.collection'),
-      titles: t('statistics.titles'),
-      copies: t('statistics.copies'),
-      added: t('statistics.added'),
-      perMonth: t('statistics.perMonth'),
-      perClass: t('statistics.perClass'),
-      perAvi: t('statistics.perAvi'),
-      topTitles: t('statistics.topTitles'),
-    });
+      yearExchanges,
+    );
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
@@ -206,12 +221,16 @@ export function StatisticsPage() {
                     className="w-10"
                   />
                   <div className="min-w-0 flex-1">
-                    <Link
-                      to={`/manage/titles/${title.id}`}
-                      className="line-clamp-2 font-medium hover:underline"
-                    >
-                      {title.title}
-                    </Link>
+                    {title.removed ? (
+                      <p className="line-clamp-2 font-medium">{title.title}</p>
+                    ) : (
+                      <Link
+                        to={`/manage/titles/${title.id}`}
+                        className="line-clamp-2 font-medium hover:underline"
+                      >
+                        {title.title}
+                      </Link>
+                    )}
                     {title.authors && (
                       <p className="truncate text-sm text-muted">{title.authors}</p>
                     )}
@@ -246,6 +265,26 @@ export function StatisticsPage() {
                   >
                     <span className="block text-sm text-muted">{a.level}</span>
                     <span className="font-display text-xl font-semibold">{number(a.loans)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {yearExchanges.length > 0 && (
+            <section aria-labelledby="exchanges" className="space-y-3 break-inside-avoid">
+              <h2 id="exchanges" className="text-xl font-semibold">
+                {t('statistics.exchanges')}
+              </h2>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {yearExchanges.map((e) => (
+                  <li key={e.id} className="rounded-xl border border-line bg-surface p-4">
+                    <p className="font-medium">{e.name}</p>
+                    <p className="text-sm text-muted">{e.lender}</p>
+                    <p className="mt-1 text-sm">
+                      {t('exchange.books', { count: e.books })} ·{' '}
+                      {t('exchange.loans', { count: e.loans })}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -308,7 +347,7 @@ function MonthBars({
   const thisMonth = localDate().slice(0, 7);
   return (
     // print-colors: browsers leave out background colours when printing, and the bars are one.
-    <div className="print-colors overflow-x-auto rounded-xl border border-line bg-surface p-4 print:bg-transparent">
+    <div className="print-colors relative overflow-x-auto rounded-xl border border-line bg-surface p-4 print:bg-transparent">
       <ol className="flex h-48 min-w-[36rem] items-end gap-2 print:h-40 print:min-w-0">
         {months.map((m) => (
           <li key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
@@ -347,7 +386,7 @@ function GroupTable({
   const { t } = useTranslation();
   const max = Math.max(0.1, ...groups.map((g) => g.perPupil ?? 0));
   return (
-    <div className="print-colors overflow-x-auto rounded-xl border border-line bg-surface">
+    <div className="print-colors relative overflow-x-auto rounded-xl border border-line bg-surface">
       <table className="w-full min-w-[32rem] text-left text-sm">
         <thead className="border-b border-line text-muted">
           <tr>

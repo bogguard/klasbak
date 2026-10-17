@@ -109,7 +109,9 @@
     "LAST_ADMIN": "Er moet altijd minstens één actieve beheerder zijn.",
     "LOAN_NOT_ACTIVE": "Dit boek is al teruggebracht en kan niet meer verlengd worden.",
     "RENEWAL_NOT_LONGER": "Dit boek mag al tot {{dueDate}} blijven; verlengen maakt dat niet langer.",
-    "NOT_A_READER_CARD": "Dit is een boek. Scan je bibliotheekpasje."
+    "NOT_A_READER_CARD": "Dit is een boek. Scan je bibliotheekpasje.",
+    "EXCHANGE_RETURNED": "Deze wisselcollectie is al teruggebracht.",
+    "EXCHANGE_HAS_LOANS": "Er zijn nog {{count}} boeken uitgeleend. Laat ze eerst terugbrengen."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -254,7 +256,9 @@
       "barcodeInvalid": "3 tot 32 letters, cijfers of streepjes.",
       "automatic": "Automatisch",
       "add": "Toevoegen",
-      "added": "Exemplaar {{barcode}} toegevoegd. Plak het label op het boek."
+      "added": "Exemplaar {{barcode}} toegevoegd. Plak het label op het boek.",
+      "origin": "Herkomst",
+      "ownCopy": "Eigen collectie"
     }
   },
   "manageNav": {
@@ -266,7 +270,8 @@
     "settings": "Instellingen",
     "labels": "Labels",
     "staff": "Medewerkers",
-    "statistics": "Statistieken"
+    "statistics": "Statistieken",
+    "exchanges": "Wisselcollecties"
   },
   "readers": {
     "heading": "Lezers",
@@ -714,7 +719,8 @@
     "pupilsCount_one": "{{count}} leerling",
     "pupilsCount_other": "{{count}} leerlingen",
     "teachersCount_one": "{{count}} leerkracht",
-    "teachersCount_other": "{{count}} leerkrachten"
+    "teachersCount_other": "{{count}} leerkrachten",
+    "exchanges": "Wisselcollecties van de openbare bib"
   },
   "ticket": {
     "print": "Ticket afdrukken",
@@ -724,5 +730,115 @@
     "dueOn": "Terugbrengen op {{date}}",
     "footer": "Breng je boeken op tijd terug. Veel leesplezier!",
     "late": "Te laat! Moest terug op {{date}}"
+  },
+  "exchange": {
+    "heading": "Wisselcollecties",
+    "new": "Nieuwe wisselcollectie",
+    "intro": "Boeken die de openbare bib tijdelijk uitleent aan de school. Ze houden het etiket van de bib, je leent ze gewoon uit aan de balie, en als de collectie teruggaat verdwijnen ze in één keer uit de catalogus.",
+    "none": "Nog geen wisselcollecties",
+    "noneHint": "Krijgt de school boeken van de openbare bib? Maak een wisselcollectie en lees de lijst van de bib in, of scan de boeken één voor één.",
+    "active": "Bij de school",
+    "returned": "Teruggebracht",
+    "returnBy": "Terug naar de bib op {{date}}",
+    "returnedOn": "Teruggebracht op {{date}}",
+    "books_one": "{{count}} boek",
+    "books_other": "{{count}} boeken",
+    "onLoan_one": "{{count}} uitgeleend",
+    "onLoan_other": "{{count}} uitgeleend",
+    "loans_one": "{{count}} keer uitgeleend",
+    "loans_other": "{{count}} keer uitgeleend",
+    "back": "Terug naar de wisselcollecties",
+    "closedHint_one": "Deze collectie is teruggebracht; haar boeken staan niet meer in de catalogus. Ze werden samen {{count}} keer uitgeleend.",
+    "closedHint_other": "Deze collectie is teruggebracht; haar boeken staan niet meer in de catalogus. Ze werden samen {{count}} keer uitgeleend.",
+    "form": {
+      "lender": "Van welke bib",
+      "lenderHint": "Bijvoorbeeld: Bibliotheek Zele",
+      "name": "Naam",
+      "nameHint": "Bijvoorbeeld: Najaar 2026",
+      "returnBy": "Terug naar de bib op",
+      "returnByHint": "Leerlingen moeten hun boeken een week eerder terugbrengen.",
+      "required": "Vul dit in.",
+      "create": "Aanmaken en boeken toevoegen",
+      "cancel": "Annuleren"
+    },
+    "add": {
+      "heading": "Boeken toevoegen",
+      "scanHeading": "Scannen",
+      "scanHint": "Scan eerst de streepjescode op de achterkant (ISBN), daarna het etiket van de bib. Het boek krijgt geen nieuw etiket.",
+      "isbn": "ISBN",
+      "find": "Zoeken",
+      "noIsbn": "Geen ISBN? Typ de titel",
+      "invalidIsbn": "Dit is geen geldig ISBN. Scan de streepjescode op de achterkant van het boek.",
+      "notFound": "Dit ISBN vonden we niet. Typ de titel en de auteur.",
+      "typeTitle": "Typ de titel en de auteur.",
+      "author": "Auteur",
+      "next": "Verder",
+      "titleRequired": "Vul minstens de titel in.",
+      "barcode": "Scan nu het etiket (de barcode) van de bib",
+      "addBook": "Toevoegen",
+      "otherBook": "Ander boek",
+      "added": "Toegevoegd: {{title}} ({{barcode}})",
+      "cameraLabelHint": "Houd het etiket van de bib (niet het ISBN op de achterkant) in het kader.",
+      "thatIsTheIsbn": "Dit is het ISBN van het boek. Scan nu het etiket van de bib (meestal binnenin of op de voorkant)."
+    },
+    "import": {
+      "heading": "Lijst van de bib inlezen",
+      "hint": "Een Excel- of CSV-bestand van de bib met één regel per boek, zoals hieronder. Een titelregel bovenaan en extra kolommen mogen.",
+      "ready_one": "{{count}} boek klaar om toe te voegen.",
+      "ready_other": "{{count}} boeken klaar om toe te voegen.",
+      "skipped_one": "{{count}} regel wordt overgeslagen (geen barcode, of geen titel en ISBN).",
+      "skipped_other": "{{count}} regels worden overgeslagen (geen barcode, of geen titel en ISBN).",
+      "run_one": "{{count}} boek toevoegen",
+      "run_other": "{{count}} boeken toevoegen",
+      "result": "{{added}} toegevoegd, {{failed}} niet gelukt.",
+      "errors": {
+        "missingColumns": "We vonden geen kolommen ‘barcode’ en ‘titel’ of ‘ISBN’. Controleer de kolomnamen."
+      },
+      "failed": {
+        "NOT_FOUND": "ISBN niet gevonden en geen titel in de lijst."
+      },
+      "example": {
+        "barcode": "Barcode",
+        "title": "Titel",
+        "author": "Auteur",
+        "isbn": "ISBN",
+        "avi": "AVI",
+        "caption": "Voorbeeld van een lijst",
+        "explain": "Verplicht: de barcode op het etiket van de bib, en de titel of het ISBN (of beide). Niet verplicht: auteur en AVI-niveau. Met alleen een ISBN zoeken we titel, auteur en omslag zelf op, zoals op de derde regel.",
+        "download": "Download dit voorbeeld (voor de bib)",
+        "fileName": "voorbeeld-lijst-wisselcollectie"
+      }
+    },
+    "list": {
+      "heading": "Boeken in deze collectie",
+      "barcode": "Barcode van de bib",
+      "where": "Waar is het?",
+      "inLibrary": "In de bib",
+      "until": "tot {{date}}",
+      "loans": "Keer uitgeleend",
+      "download": "Download lijst (CSV)",
+      "returnedHeading_one": "{{count}} boek in deze collectie",
+      "returnedHeading_other": "{{count}} boeken in deze collectie",
+      "notSaved": "De lijst met boeken werd niet bewaard: deze collectie werd teruggebracht vóór die mogelijkheid bestond."
+    },
+    "return": {
+      "heading": "Terugbrengen naar de bib",
+      "stillOut_one": "Nog {{count}} boek is uitgeleend. In de lijst hierboven zie je bij wie; laat het eerst terugbrengen.",
+      "stillOut_other": "Nog {{count}} boeken zijn uitgeleend. In de lijst hierboven zie je bij wie; laat ze eerst terugbrengen.",
+      "allIn_one": "Het boek is binnen.",
+      "allIn_other": "Alle {{count}} boeken zijn binnen.",
+      "button": "Collectie terugbrengen",
+      "confirm_one": "Het boek verdwijnt uit de catalogus en de barcode wordt vrijgegeven. Doorgaan?",
+      "confirm_other": "De {{count}} boeken verdwijnen uit de catalogus en hun barcodes worden vrijgegeven. Doorgaan?",
+      "yes": "Ja, terugbrengen"
+    },
+    "copy": {
+      "label": "Wisselcollectie",
+      "until": "terug naar de bib op {{date}}",
+      "titleNotice": "Dit boek komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. Dan verdwijnt het ook uit de catalogus.",
+      "copyNotice_one": "{{count}} exemplaar komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
+      "copyNotice_other": "{{count}} exemplaren komen uit de wisselcollectie {{name}} en gaan op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
+      "open": "Naar de wisselcollectie"
+    }
   }
 }

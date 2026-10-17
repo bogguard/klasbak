@@ -60,7 +60,7 @@ export function Button({
       : 'border border-line bg-surface text-ink hover:bg-surface-sunken';
   return (
     <button
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 font-medium transition ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
       {...props}
     />
   );

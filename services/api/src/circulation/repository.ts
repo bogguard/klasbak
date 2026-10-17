@@ -6,6 +6,7 @@ import { ConflictError } from '../lib/errors';
 import {
   ACTIVE_LOANS_INDEX_PK,
   copyKey,
+  exchangeKey,
   GSI1,
   loanKey,
   readerKey,
@@ -92,14 +93,20 @@ export async function checkOut(params: {
   copy: Copy;
   maxLoans: number;
   audit: Item;
-  /** Month (YYYY-MM, Brussels time) and, for pupils, the class to count the loan under. */
-  stats: { month: string; group?: string };
+  /**
+   * Month (YYYY-MM, Brussels time), for pupils the class, and the title's AVI level to count
+   * the loan under; for a book of an exchange collection also that collection (its loan
+   * counter, for the library).
+   */
+  stats: { month: string; group?: string; aviLevel?: string; exchangeId?: string };
 }): Promise<CheckOutFailure | undefined> {
   const { loan, copy, maxLoans, audit, stats } = params;
-  const counters = [
-    'TOTAL',
-    `TITLE#${loan.titleId}`,
-    ...(stats.group ? [`GROUP#${stats.group}`] : []),
+  // The title counter keeps the name too: the title may leave the catalogue later.
+  const counters: Array<{ sk: string; title?: string }> = [
+    { sk: 'TOTAL' },
+    { sk: `TITLE#${loan.titleId}`, title: loan.titleTitle },
+    ...(stats.group ? [{ sk: `GROUP#${stats.group}` }] : []),
+    ...(stats.aviLevel ? [{ sk: `AVI#${stats.aviLevel}` }] : []),
   ];
   try {
     await db.send(
@@ -119,10 +126,13 @@ export async function checkOut(params: {
             Update: {
               TableName: env.tableName,
               Key: copyKey(copy.titleId, copy.id),
-              UpdateExpression: 'SET #status = :onLoan, currentLoan = :loan, updatedAt = :now',
+              // The copy counts its own loans too (e.g. per book of an exchange collection).
+              UpdateExpression:
+                'SET #status = :onLoan, currentLoan = :loan, updatedAt = :now ADD loanCount :one',
               ConditionExpression: '#status = :available',
               ExpressionAttributeNames: { '#status': 'status' },
               ExpressionAttributeValues: {
+                ':one': 1,
                 ':onLoan': 'onLoan',
                 ':available': 'available',
                 ':now': loan.loanedAt,
@@ -148,14 +158,28 @@ export async function checkOut(params: {
             },
           },
           { Put: { TableName: env.tableName, Item: audit } },
-          ...counters.map((sk) => ({
+          ...counters.map(({ sk, title }) => ({
             Update: {
               TableName: env.tableName,
               Key: statsKey(stats.month, sk),
-              UpdateExpression: 'ADD loans :one',
-              ExpressionAttributeValues: { ':one': 1 },
+              UpdateExpression: title ? 'ADD loans :one SET #title = :title' : 'ADD loans :one',
+              ...(title ? { ExpressionAttributeNames: { '#title': 'title' } } : {}),
+              ExpressionAttributeValues: { ':one': 1, ...(title ? { ':title': title } : {}) },
             },
           })),
+          ...(stats.exchangeId
+            ? [
+                {
+                  Update: {
+                    TableName: env.tableName,
+                    Key: exchangeKey(stats.exchangeId),
+                    UpdateExpression: 'ADD loans :one',
+                    ConditionExpression: 'attribute_exists(pk)',
+                    ExpressionAttributeValues: { ':one': 1 },
+                  },
+                },
+              ]
+            : []),
         ],
       }),
     );
@@ -265,14 +289,19 @@ export async function checkIn(params: {
 /** All counters of these months (one small partition per month). */
 export async function statisticsOf(
   months: string[],
-): Promise<Array<{ month: string; sk: string; loans: number }>> {
+): Promise<Array<{ month: string; sk: string; loans: number; title?: string }>> {
   const perMonth = await Promise.all(
     months.map(async (month) => {
       const items = await queryAll({
         KeyConditionExpression: 'pk = :pk',
         ExpressionAttributeValues: { ':pk': statsKey(month, '').pk },
       });
-      return items.map((item) => ({ month, sk: String(item.sk), loans: Number(item.loans ?? 0) }));
+      return items.map((item) => ({
+        month,
+        sk: String(item.sk),
+        loans: Number(item.loans ?? 0),
+        title: typeof item.title === 'string' ? item.title : undefined,
+      }));
     }),
   );
   return perMonth.flat();

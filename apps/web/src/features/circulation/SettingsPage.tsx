@@ -129,7 +129,7 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
     <form onSubmit={(e) => void submit(e)} noValidate className="space-y-8">
       <fieldset className="space-y-3">
         <legend className="mb-2 text-xl font-semibold">{t('settings.rules.heading')}</legend>
-        <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+        <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
           <table className="w-full min-w-[28rem] text-left text-sm">
             <thead className="border-b border-line text-muted">
               <tr>

@@ -3,8 +3,21 @@
 // Keep this version equal to the one barcode-detector depends on (see apps/web/package.json).
 import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url';
 
-/** Formats we read: our own labels and cards are Code 128; book ISBNs are EAN-13. */
-export type ScanFormat = 'code_128' | 'ean_13';
+/**
+ * Formats we read: our own labels and cards are Code 128; book ISBNs are EAN-13. Public
+ * libraries' labels (exchange collections) also come as Code 39, Codabar, ITF or EAN-8.
+ */
+export type ScanFormat = 'code_128' | 'ean_13' | 'code_39' | 'codabar' | 'itf' | 'ean_8';
+
+/** Any label a public library may have put on its books. */
+export const LIBRARY_LABEL_FORMATS: ScanFormat[] = [
+  'code_128',
+  'code_39',
+  'codabar',
+  'itf',
+  'ean_8',
+  'ean_13',
+];
 
 export type Detector = {
   detect(source: HTMLVideoElement): Promise<{ rawValue: string; format: string }[]>;
@@ -33,6 +46,15 @@ export async function createDetector(formats: ScanFormat[]): Promise<Detector> {
     },
   });
   return new BarcodeDetector({ formats });
+}
+
+/**
+ * What a camera read, as a hand scanner would type it: Codabar labels (common in libraries)
+ * can come with their start and stop letters ("A1234567B"), which aren't part of the number.
+ */
+export function normalizeScan(rawValue: string, format: string): string {
+  const value = rawValue.trim();
+  return format === 'codabar' ? value.replace(/^[A-D](.+)[A-D]$/i, '$1') : value;
 }
 
 export function cameraAvailable(): boolean {

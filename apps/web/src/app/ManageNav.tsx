@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   BarChart3,
   BookCopy,
   ClipboardList,
@@ -16,6 +17,7 @@ const items = [
   { to: '/manage/desk', key: 'desk', icon: ScanBarcode },
   { to: '/manage/loans', key: 'loans', icon: ClipboardList },
   { to: '/manage', key: 'collection', icon: BookCopy, end: true },
+  { to: '/manage/exchanges', key: 'exchanges', icon: ArrowLeftRight },
   { to: '/manage/readers', key: 'readers', icon: Users },
   { to: '/manage/labels', key: 'labels', icon: Tags },
   { to: '/manage/statistics', key: 'statistics', icon: BarChart3 },
@@ -28,7 +30,10 @@ export function ManageNav() {
   const { t } = useTranslation();
   const isAdmin = useIsAdmin();
   return (
-    <nav aria-label={t('manageNav.label')} className="-mx-4 mb-8 overflow-x-auto px-4 print:hidden">
+    <nav
+      aria-label={t('manageNav.label')}
+      className="-mx-4 mb-8 relative overflow-x-auto px-4 print:hidden"
+    >
       <ul className="flex min-w-max gap-1 border-b border-line">
         {items
           .filter((item) => isAdmin || !('adminOnly' in item))

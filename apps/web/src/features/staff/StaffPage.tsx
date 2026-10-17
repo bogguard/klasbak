@@ -84,7 +84,7 @@ function StaffTable({
       <h2 id="staff-list" className="sr-only">
         {t('staff.heading')}
       </h2>
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+      <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <thead className="border-b border-line text-muted">
             <tr>

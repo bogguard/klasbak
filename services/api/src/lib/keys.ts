@@ -5,6 +5,8 @@
  *   Title         pk TITLE#<titleId>    sk TITLE
  *   Copy          pk TITLE#<titleId>    sk COPY#<copyId>  gsi1 while its label isn't printed:
  *                                                         LABELS#PENDING / <barcode>
+ *                                                         or, in an exchange collection:
+ *                                                         EXCHANGE#<exchangeId> / <barcode>
  *   Code pointer  pk CODE#<code>        sk CODE          { kind: 'copy', titleId, copyId }
  *                                                        { kind: 'reader', readerId }
  *                 One namespace for book barcodes and reader cards: a scanned code always
@@ -15,7 +17,10 @@
  *   Branding      pk SETTINGS           sk BRANDING      name and logo, also published as a file
  *   Counter       pk COUNTER            sk <name>        last generated number
  *   Audit         pk AUDIT#<entity>     sk <timestamp>#<ulid>   (expires via TTL)
- *   Statistics    pk STATS#<yyyy-mm>    sk TOTAL | TITLE#<titleId> | GROUP#<class>   { loans }
+ *   Exchange      pk EXCHANGE           sk <exchangeId>  a public library's collection on loan
+ *                                                        to the school, with its loan counter
+ *   Statistics    pk STATS#<yyyy-mm>    sk TOTAL | TITLE#<titleId> | GROUP#<class> | AVI#<level>
+ *                                       { loans, title (TITLE# only: the name when lent) }
  *                 Anonymous counters, added to when a book is lent (decision 028).
  */
 
@@ -40,6 +45,10 @@ export const statsKey = (month: string, sk: string) => ({ pk: `STATS#${month}`, 
 
 export const settingsKey = { pk: 'SETTINGS', sk: 'LIBRARY' };
 export const brandingKey = { pk: 'SETTINGS', sk: 'BRANDING' };
+
+/** Exchange collections: few per school, so one partition lists them all. */
+export const exchangeKey = (exchangeId: string) => ({ pk: 'EXCHANGE', sk: exchangeId });
+export const exchangeCopiesIndexPk = (exchangeId: string) => `EXCHANGE#${exchangeId}`;
 
 export const READERS_INDEX_PK = 'READERS';
 export const ACTIVE_LOANS_INDEX_PK = 'LOANS#ACTIVE';

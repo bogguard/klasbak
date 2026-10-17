@@ -1,4 +1,5 @@
 import { ReaderInputSchema, type ReaderInput } from '@library/shared';
+import { splitRecords } from '../../lib/spreadsheet';
 
 /*
  * Reads class lists exported from spreadsheets or school administration software (e.g. the
@@ -114,48 +115,4 @@ function toCategory(value: string | undefined): ReaderInput['category'] | undefi
   return /^(leerkracht|leraar|juf|meester|teacher|staff|personeel)/i.test(value)
     ? 'teacher'
     : 'pupil';
-}
-
-/** Splits CSV text into records and cells, handling quotes, and guesses the separator. */
-function splitRecords(text: string): string[][] {
-  const firstLine = text.split(/\r?\n/, 1)[0] ?? '';
-  const separator = [';', '\t', ','].reduce((best, candidate) =>
-    firstLine.split(candidate).length > firstLine.split(best).length ? candidate : best,
-  );
-
-  const records: string[][] = [];
-  let record: string[] = [];
-  let cell = '';
-  let quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (quoted) {
-      if (char === '"' && text[i + 1] === '"') {
-        cell += '"';
-        i++;
-      } else if (char === '"') {
-        quoted = false;
-      } else {
-        cell += char;
-      }
-    } else if (char === '"') {
-      quoted = true;
-    } else if (char === separator) {
-      record.push(cell);
-      cell = '';
-    } else if (char === '\n' || char === '\r') {
-      if (char === '\r' && text[i + 1] === '\n') i++;
-      record.push(cell);
-      records.push(record);
-      record = [];
-      cell = '';
-    } else {
-      cell += char;
-    }
-  }
-  if (cell !== '' || record.length > 0) {
-    record.push(cell);
-    records.push(record);
-  }
-  return records;
 }

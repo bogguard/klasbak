@@ -13,8 +13,8 @@ import { AdminOnly } from '../../app/AdminOnly';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert } from '../../components/ui/Form';
 import { useDeactivateReaders, useImportReaders, useReaders } from './api';
-import { parseReaderRecords, parseReadersCsv, type CsvParseResult, type ParsedRow } from './csv';
-import { readXlsx } from './xlsx';
+import { readSpreadsheet, SPREADSHEET_ACCEPT } from '../../lib/spreadsheet';
+import { parseReaderRecords, type CsvParseResult, type ParsedRow } from './csv';
 
 type FileResult = CsvParseResult | { ok: false; error: 'oldExcel' | 'unreadable' };
 
@@ -50,17 +50,8 @@ function ImportReaders() {
     setOutcomes(undefined);
     setDeactivated(undefined);
     setDeactivateMissing(false);
-    const name = file.name.toLowerCase();
-    if (name.endsWith('.xls')) return setParsed({ ok: false, error: 'oldExcel' });
-    try {
-      setParsed(
-        name.endsWith('.xlsx')
-          ? parseReaderRecords(readXlsx(new Uint8Array(await file.arrayBuffer())))
-          : parseReadersCsv(await file.text()),
-      );
-    } catch {
-      setParsed({ ok: false, error: 'unreadable' });
-    }
+    const sheet = await readSpreadsheet(file);
+    setParsed(sheet.ok ? parseReaderRecords(sheet.rows) : sheet);
   }
 
   const valid = useMemo(
@@ -133,7 +124,7 @@ function ImportReaders() {
 
       <section className="space-y-3 rounded-xl border border-line bg-surface p-4">
         <p>{t('readers.importPage.explanation')}</p>
-        <pre className="overflow-x-auto rounded-lg bg-surface-sunken p-3 text-sm">
+        <pre className="relative overflow-x-auto rounded-lg bg-surface-sunken p-3 text-sm">
           voornaam;naam;klas;stamboeknummer{'\n'}Lotte;Peeters;3B;1234567{'\n'}
           Amir;Claes;1A;1234568
         </pre>
@@ -143,7 +134,7 @@ function ImportReaders() {
           {t('readers.importPage.chooseFile')}
           <input
             type="file"
-            accept=".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            accept={SPREADSHEET_ACCEPT}
             className="sr-only"
             onChange={(e) => void readFile(e.target.files?.[0])}
           />
