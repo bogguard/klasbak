@@ -79,13 +79,23 @@
   }
 }
 
+/* Charts: print their coloured bars even when the browser leaves out backgrounds. */
+.print-colors {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Paper is white: lists and reports print without the screen's tinted background. */
+@media print {
+  html,
+  body {
+    background: white;
+  }
+}
+
 /* Printing a loan ticket at the desk: only the ticket, nothing of the app behind it. */
 @media print {
   html.printing-ticket #root {
     display: none;
-  }
-  html.printing-ticket,
-  html.printing-ticket body {
-    background: white;
   }
 }

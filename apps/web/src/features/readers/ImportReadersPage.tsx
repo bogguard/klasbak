@@ -1,19 +1,29 @@
-import { IMPORT_BATCH_SIZE, type ImportRowResult } from '@library/shared';
+import {
+  IMPORT_BATCH_SIZE,
+  matchReader,
+  readerName,
+  type ImportRowResult,
+  type Reader,
+} from '@library/shared';
 import { ArrowLeft, FileUp, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AdminOnly } from '../../app/AdminOnly';
 import { Badge, Button, useErrorMessage } from '../../components/ui/Feedback';
 import { Alert } from '../../components/ui/Form';
-import { useImportReaders } from './api';
-import { parseReadersCsv, type CsvParseResult, type ParsedRow } from './csv';
+import { useDeactivateReaders, useImportReaders, useReaders } from './api';
+import { parseReaderRecords, parseReadersCsv, type CsvParseResult, type ParsedRow } from './csv';
+import { readXlsx } from './xlsx';
+
+type FileResult = CsvParseResult | { ok: false; error: 'oldExcel' | 'unreadable' };
 
 type Outcome = { line: number; result: ImportRowResult };
 
 /**
  * Import a class list in three steps: choose a file, check the preview, import.
- * Nothing is saved before the librarian has seen exactly what will happen.
+ * Nothing is saved before the librarian has seen exactly what will happen: which readers are
+ * new, which are updated, and (for a new school year) which pupils are no longer in the list.
  */
 export function ImportReadersPage() {
   return (
@@ -26,21 +36,53 @@ export function ImportReadersPage() {
 function ImportReaders() {
   const { t } = useTranslation();
   const importReaders = useImportReaders();
+  const deactivate = useDeactivateReaders();
+  const existing = useReaders();
   const errorMessage = useErrorMessage();
-  const [parsed, setParsed] = useState<CsvParseResult>();
+  const [parsed, setParsed] = useState<FileResult>();
   const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [outcomes, setOutcomes] = useState<Outcome[]>();
+  const [deactivateMissing, setDeactivateMissing] = useState(false);
+  const [deactivated, setDeactivated] = useState<number>();
 
   async function readFile(file: File | undefined) {
     if (!file) return;
     setOutcomes(undefined);
-    setParsed(parseReadersCsv(await file.text()));
+    setDeactivated(undefined);
+    setDeactivateMissing(false);
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.xls')) return setParsed({ ok: false, error: 'oldExcel' });
+    try {
+      setParsed(
+        name.endsWith('.xlsx')
+          ? parseReaderRecords(readXlsx(new Uint8Array(await file.arrayBuffer())))
+          : parseReadersCsv(await file.text()),
+      );
+    } catch {
+      setParsed({ ok: false, error: 'unreadable' });
+    }
   }
 
-  const valid = parsed?.ok
-    ? parsed.rows.filter((r): r is Extract<ParsedRow, { ok: true }> => r.ok)
-    : [];
+  const valid = useMemo(
+    () =>
+      parsed?.ok ? parsed.rows.filter((r): r is Extract<ParsedRow, { ok: true }> => r.ok) : [],
+    [parsed],
+  );
   const invalid = parsed?.ok ? parsed.rows.filter((r) => !r.ok) : [];
+
+  // What will happen to each row, and which active pupils the file doesn't mention.
+  const plan = useMemo(() => {
+    const readers = existing.data ?? [];
+    const matches = new Map<number, Reader | undefined>(
+      valid.map((row) => [row.line, matchReader(row.reader, readers)]),
+    );
+    const mentioned = new Set([...matches.values()].map((r) => r?.id));
+    const missing = readers
+      .filter((r) => r.active && r.category === 'pupil' && !mentioned.has(r.id))
+      .sort((a, b) => (a.group ?? '').localeCompare(b.group ?? '', 'nl', { numeric: true }));
+    return { matches, missing };
+  }, [existing.data, valid]);
+  const updates = [...plan.matches.values()].filter(Boolean).length;
 
   async function runImport() {
     const results: Outcome[] = [];
@@ -54,6 +96,17 @@ function ImportReaders() {
           results.push({ line: batch[result.index]?.line ?? 0, result });
         }
         setProgress({ done: Math.min(start + batch.length, valid.length), total: valid.length });
+      }
+      if (deactivateMissing && plan.missing.length > 0) {
+        let count = 0;
+        const ids = plan.missing.map((r) => r.id);
+        for (let start = 0; start < ids.length; start += IMPORT_BATCH_SIZE) {
+          const response = await deactivate.mutateAsync(
+            ids.slice(start, start + IMPORT_BATCH_SIZE),
+          );
+          count += response.deactivated;
+        }
+        setDeactivated(count);
       }
     } finally {
       setOutcomes(results);
@@ -81,8 +134,8 @@ function ImportReaders() {
       <section className="space-y-3 rounded-xl border border-line bg-surface p-4">
         <p>{t('readers.importPage.explanation')}</p>
         <pre className="overflow-x-auto rounded-lg bg-surface-sunken p-3 text-sm">
-          voornaam;achternaam;klas;kaartnummer;e-mail{'\n'}Lotte;Peeters;3B;;{'\n'}
-          An;Wouters;;K-100;an@school.be
+          voornaam;naam;klas;stamboeknummer{'\n'}Lotte;Peeters;3B;1234567{'\n'}
+          Amir;Claes;1A;1234568
         </pre>
         <p className="text-sm text-muted">{t('readers.importPage.columns')}</p>
         <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-line px-4 font-medium hover:bg-surface-sunken focus-within:outline-2 focus-within:outline-accent">
@@ -90,7 +143,7 @@ function ImportReaders() {
           {t('readers.importPage.chooseFile')}
           <input
             type="file"
-            accept=".csv,.txt,text/csv"
+            accept=".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             className="sr-only"
             onChange={(e) => void readFile(e.target.files?.[0])}
           />
@@ -107,7 +160,10 @@ function ImportReaders() {
             {t('readers.importPage.preview')}
           </h2>
           <p>
-            {t('readers.importPage.validCount', { count: valid.length })}
+            {t('readers.importPage.planCount', {
+              created: valid.length - updates,
+              updated: updates,
+            })}
             {invalid.length > 0 &&
               ` ${t('readers.importPage.invalidCount', { count: invalid.length })}`}
           </p>
@@ -125,7 +181,7 @@ function ImportReaders() {
                     {t('readers.group')}
                   </th>
                   <th scope="col" className="px-3 py-2 font-medium">
-                    {t('readers.memberNumber')}
+                    {t('readers.form.schoolNumber')}
                   </th>
                   <th scope="col" className="px-3 py-2 font-medium">
                     {t('readers.importPage.check')}
@@ -142,12 +198,14 @@ function ImportReaders() {
                         {data.firstName} {data.lastName}
                       </td>
                       <td className="px-3 py-2">{data.group}</td>
-                      <td className="px-3 py-2 font-mono">
-                        {data.memberNumber || t('manage.copies.automatic')}
-                      </td>
+                      <td className="px-3 py-2 font-mono">{data.schoolNumber}</td>
                       <td className="px-3 py-2">
                         {row.ok ? (
-                          <Badge tone="success">{t('readers.importPage.ok')}</Badge>
+                          plan.matches.get(row.line) ? (
+                            <Badge>{t('readers.importPage.willUpdate')}</Badge>
+                          ) : (
+                            <Badge tone="success">{t('readers.importPage.willCreate')}</Badge>
+                          )
                         ) : (
                           <Badge tone="danger">{t('readers.importPage.skipped')}</Badge>
                         )}
@@ -158,6 +216,38 @@ function ImportReaders() {
               </tbody>
             </table>
           </div>
+          {plan.missing.length > 0 && (
+            <div className="space-y-2 rounded-xl border border-line bg-surface p-4">
+              <p className="font-medium">
+                {t('readers.importPage.missing', { count: plan.missing.length })}
+              </p>
+              <details className="text-sm text-muted">
+                <summary className="cursor-pointer">{t('readers.importPage.showMissing')}</summary>
+                <ul className="mt-2 columns-2 gap-6">
+                  {plan.missing.map((r) => (
+                    <li key={r.id}>
+                      {r.group ? `${r.group} · ` : ''}
+                      {readerName(r)}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+              <label className="flex min-h-11 items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={deactivateMissing}
+                  onChange={(e) => setDeactivateMissing(e.target.checked)}
+                  className="mt-1 size-5 accent-accent"
+                />
+                <span>
+                  {t('readers.importPage.deactivateMissing', { count: plan.missing.length })}
+                  <span className="block text-sm text-muted">
+                    {t('readers.importPage.deactivateHint')}
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
           {progress ? (
             <p role="status">
               {t('readers.importPage.progress', { done: progress.done, total: progress.total })}
@@ -168,8 +258,8 @@ function ImportReaders() {
               {t('readers.importPage.run', { count: valid.length })}
             </Button>
           )}
-          {importReaders.isError && (
-            <Alert tone="danger">{errorMessage(importReaders.error)}</Alert>
+          {(importReaders.isError || deactivate.isError) && (
+            <Alert tone="danger">{errorMessage(importReaders.error ?? deactivate.error)}</Alert>
           )}
         </section>
       )}
@@ -185,6 +275,8 @@ function ImportReaders() {
               updated: counts.updated,
               failed: counts.failed.length,
             })}
+            {deactivated !== undefined &&
+              ` ${t('readers.importPage.deactivated', { count: deactivated })}`}
           </Alert>
           {counts.failed.length > 0 && (
             <ul className="list-disc space-y-1 pl-6 text-sm">

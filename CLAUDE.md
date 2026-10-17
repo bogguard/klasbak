@@ -54,7 +54,7 @@ Local development: the API runs as plain Hono apps on Node (`services/api/src/lo
 
 - **Personas**: the librarian at the desk with a queue of children; a pupil (often young) at the "Mijn boeken" screen; the school's administrator a few times a year; the class teacher handing out reminder slips; parents and pupils browsing the public catalogue on a phone.
 - **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin` and `librarian`, enforced by the API.
-- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional email; their loans. No birth dates, addresses or photos. Staff: name, username, optional email, role.
+- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional school number (stamboeknummer, only to recognise pupils in imports; never printed), optional email; their loans. No birth dates, addresses or photos. Staff: name, username, optional email, role.
 - **Third parties** receive only ISBNs (book lookups); covers are stored on our own server, so visitors never contact them.
 - **Statistics** are anonymous counters (month, title, class), never per pupil.
 - **Privacy notice**: `/privacy`, in plain Dutch for parents and children. A data processing agreement (verwerkersovereenkomst) exists between the school and ITRW; keep the app consistent with what it promises (e.g. retention, MFA, dependency checks).

@@ -307,8 +307,11 @@
         "lastName": "Vul een achternaam in.",
         "email": "Dit e-mailadres klopt niet.",
         "memberNumber": "3 tot 32 letters, cijfers of streepjes.",
-        "group": "Maximaal 30 tekens."
-      }
+        "group": "Maximaal 30 tekens.",
+        "schoolNumber": "Maximaal 40 tekens."
+      },
+      "schoolNumber": "Stamboeknummer",
+      "schoolNumberHint": "Niet verplicht. Het nummer uit de schooladministratie, om de leerling bij een volgende import te herkennen. Komt niet op de kaart."
     },
     "loans": {
       "active_one": "{{count}} boek uitgeleend",
@@ -321,21 +324,20 @@
     },
     "importPage": {
       "heading": "Lezers importeren",
-      "explanation": "Kies een CSV-bestand, bijvoorbeeld een klaslijst uit Excel of je schooladministratie. De eerste regel bevat de kolomnamen, zoals hieronder:",
-      "columns": "Verplicht: voornaam en achternaam. Niet verplicht: klas, kaartnummer, e-mail, soort (leerling of leerkracht). Bestaat een kaartnummer al, dan wordt die lezer bijgewerkt.",
+      "explanation": "Kies een Excel- (.xlsx) of CSV-bestand, bijvoorbeeld de leerlingenlijst uit Informat, Wisa of Smartschool. Een titelregel boven de kolomnamen mag. Bijvoorbeeld:",
+      "columns": "Verplicht: voornaam en naam. Niet verplicht: klas, stamboeknummer (of stamnummer), kaartnummer, e-mail, soort (leerling of leerkracht). Wie al bestaat (zelfde stamboeknummer, kaartnummer of, voor met de hand ingevoerde lezers, exact dezelfde naam) wordt bijgewerkt; zo kan je elk schooljaar gewoon de nieuwe lijst importeren. Gegevens die niet in het bestand staan, blijven behouden.",
       "chooseFile": "Kies een bestand",
       "errors": {
         "empty": "Dit bestand is leeg of bevat alleen kolomnamen.",
-        "missingColumns": "We vonden geen kolommen ‘voornaam’ en ‘achternaam’. Controleer de eerste regel."
+        "missingColumns": "We vonden geen kolommen ‘voornaam’ en ‘naam’ (of ‘achternaam’). Controleer de kolomnamen.",
+        "oldExcel": "Oude Excel-bestanden (.xls) kunnen we niet lezen. Open het in Excel en bewaar het als .xlsx of .csv.",
+        "unreadable": "Dit bestand konden we niet lezen. Is het een Excel- (.xlsx) of CSV-bestand?"
       },
       "preview": "Controleer voor je importeert",
-      "validCount_one": "{{count}} regel is in orde.",
-      "validCount_other": "{{count}} regels zijn in orde.",
       "invalidCount_one": "{{count}} regel wordt overgeslagen (naam ontbreekt of gegevens kloppen niet).",
       "invalidCount_other": "{{count}} regels worden overgeslagen (naam ontbreekt of gegevens kloppen niet).",
       "line": "Regel",
-      "check": "Controle",
-      "ok": "In orde",
+      "check": "Wat gebeurt er",
       "skipped": "Overgeslagen",
       "progress": "Bezig: {{done}} van {{total}}…",
       "run_one": "{{count}} lezer importeren",
@@ -343,7 +345,18 @@
       "result": "Resultaat",
       "summary": "{{created}} nieuw, {{updated}} bijgewerkt, {{failed}} mislukt.",
       "failedLine": "Regel {{line}}:",
-      "toList": "Naar de lezers"
+      "toList": "Naar de lezers",
+      "planCount": "{{created}} nieuw, {{updated}} bijwerken.",
+      "willCreate": "Nieuw",
+      "willUpdate": "Bijwerken",
+      "missing_one": "{{count}} actieve leerling staat niet in dit bestand.",
+      "missing_other": "{{count}} actieve leerlingen staan niet in dit bestand.",
+      "showMissing": "Toon wie",
+      "deactivateMissing_one": "Zet deze leerling op inactief (nieuw schooljaar)",
+      "deactivateMissing_other": "Zet deze {{count}} leerlingen op inactief (nieuw schooljaar)",
+      "deactivateHint": "Alleen aanvinken als dit bestand alle leerlingen van de school bevat. Inactieve lezers kunnen niet lenen; hun boeken blijven op de lijst ‘Te laat’ staan en je kan ze later altijd weer actief zetten.",
+      "deactivated_one": "{{count}} leerling op inactief gezet.",
+      "deactivated_other": "{{count}} leerlingen op inactief gezet."
     },
     "privacy": {
       "heading": "Privacy van deze lezer",
@@ -679,7 +692,29 @@
     "notLent_other": "{{count}} titels niet uitgeleend",
     "notLentHint": "Dit schooljaar nog niet uitgeleend, de oudste eerst. Misschien verdienen ze een plaatsje in de kijker, of mogen ze weg.",
     "andMore_one": "en nog {{count}}",
-    "andMore_other": "en nog {{count}}"
+    "andMore_other": "en nog {{count}}",
+    "activeReaders": "Actieve lezers",
+    "activePupils": "Actieve leerlingen",
+    "activeTeachers": "Actieve leerkrachten",
+    "collection": "Collectie",
+    "collectionValue": "{{titles}} titels, {{copies}} exemplaren",
+    "titles": "Titels",
+    "copies": "Exemplaren",
+    "added": "Nieuwe titels dit schooljaar",
+    "perAvi": "Uitleningen per AVI-niveau",
+    "report": {
+      "print": "Rapport afdrukken",
+      "section": "Onderdeel",
+      "item": "Wat",
+      "value": "Aantal",
+      "totals": "Totaal",
+      "fileName": "rapport-bib",
+      "printHeader": "{{library}} · rapport schooljaar {{year}} · afgedrukt op {{date}}. Anonieme cijfers: per maand, per titel en per klas, niet per leerling."
+    },
+    "pupilsCount_one": "{{count}} leerling",
+    "pupilsCount_other": "{{count}} leerlingen",
+    "teachersCount_one": "{{count}} leerkracht",
+    "teachersCount_other": "{{count}} leerkrachten"
   },
   "ticket": {
     "print": "Ticket afdrukken",

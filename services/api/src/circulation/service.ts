@@ -258,6 +258,10 @@ export async function statistics(from: string, to: string): Promise<LoanStatisti
       loans: groups.get(group) ?? 0,
       pupils: pupils.get(group) ?? 0,
     })),
+    readers: {
+      pupils: readers.filter((r) => r.active && r.category === 'pupil').length,
+      teachers: readers.filter((r) => r.active && r.category === 'teacher').length,
+    },
   };
 }
 

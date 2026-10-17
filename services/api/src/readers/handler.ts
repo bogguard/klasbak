@@ -1,4 +1,5 @@
 import {
+  DeactivateReadersRequestSchema,
   ImportReadersRequestSchema,
   ReaderInputSchema,
   UpdateReaderRequestSchema,
@@ -28,6 +29,13 @@ app.post('/import', async (c) => {
   const actor = requireRole(getActor(c), ADMIN);
   const { rows } = parse(ImportReadersRequestSchema, await readJson(c));
   return c.json(await readers.importReaders(actor, rows));
+});
+
+// New school year: pupils missing from the imported list are set inactive (administrators).
+app.post('/deactivate', async (c) => {
+  const actor = requireRole(getActor(c), ADMIN);
+  const { readerIds } = parse(DeactivateReadersRequestSchema, await readJson(c));
+  return c.json(await readers.deactivateReaders(actor, readerIds));
 });
 
 app.get('/:id', async (c) => {

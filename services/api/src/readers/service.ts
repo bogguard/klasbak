@@ -1,5 +1,6 @@
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import {
+  matchReader,
   ReaderInputSchema,
   type ImportRowResult,
   type Loan,
@@ -97,11 +98,15 @@ export async function deleteReader(
 }
 
 /**
- * Imports a batch of rows (e.g. a class list). A row with a known card number updates that
- * reader, so the same list can be imported again next school year; other rows create readers.
- * Every row gets its own result; one bad row never blocks the others.
+ * Imports a batch of rows (e.g. a class list exported from the school administration). A row
+ * about an existing reader (same school number, card number, or unique name; see
+ * `matchReader`) updates that reader, so next school year's list can simply be imported again;
+ * other rows create readers. Fields the file doesn't have (no email column, no category
+ * column) keep their current value. One bad row never blocks the others.
  */
 export async function importReaders(actor: Actor, rows: unknown[]): Promise<ImportRowResult[]> {
+  // A few hundred readers at school scale: matching in memory is simple and cheap.
+  const readers = await repository.listReaders();
   const results: ImportRowResult[] = [];
   // Sequential on purpose: batches are small and this keeps generated card numbers in order.
   for (const [index, row] of rows.entries()) {
@@ -111,7 +116,11 @@ export async function importReaders(actor: Actor, rows: unknown[]): Promise<Impo
       continue;
     }
     try {
-      results.push({ index, ...(await importRow(actor, parsed.data)) });
+      const { status, reader } = await importRow(actor, parsed.data, row, readers);
+      const known = readers.findIndex((r) => r.id === reader.id);
+      if (known >= 0) readers[known] = reader;
+      else readers.push(reader);
+      results.push({ index, status, memberNumber: reader.memberNumber });
     } catch (error) {
       if (!(error instanceof AppError)) throw error;
       results.push({ index, status: 'failed', code: error.code });
@@ -123,19 +132,54 @@ export async function importReaders(actor: Actor, rows: unknown[]): Promise<Impo
 async function importRow(
   actor: Actor,
   input: ReaderInput,
-): Promise<{ status: 'created' | 'updated'; memberNumber: string }> {
+  raw: unknown,
+  readers: Reader[],
+): Promise<{ status: 'created' | 'updated'; reader: Reader }> {
   const pointer = input.memberNumber ? await getCodePointer(input.memberNumber) : undefined;
   if (pointer?.kind === 'copy') {
     throw new AppError(409, 'CODE_IN_USE', 'This number is used by a copy');
   }
-  if (pointer?.kind === 'reader') {
-    const existing = await repository.getReader(pointer.readerId);
-    if (existing) {
-      const { memberNumber: _ignored, ...details } = input;
-      await updateReader(actor, existing.id, details, existing.version);
-      return { status: 'updated', memberNumber: existing.memberNumber };
-    }
+  const existing = matchReader(input, readers);
+  if (!existing) return { status: 'created', reader: await createReader(actor, input) };
+
+  // Only what the file has: a list without an email column must not erase emails.
+  const sent = (field: keyof ReaderInput) =>
+    typeof raw === 'object' && raw !== null && field in raw;
+  const { memberNumber: _fixed, ...details } = input;
+  const merged = {
+    ...details,
+    group: sent('group') ? details.group : existing.group,
+    email: sent('email') ? details.email : existing.email,
+    schoolNumber: sent('schoolNumber') ? details.schoolNumber : existing.schoolNumber,
+    category: sent('category') ? details.category : existing.category,
+  };
+  return {
+    status: 'updated',
+    reader: await updateReader(actor, existing.id, merged, existing.version),
+  };
+}
+
+/**
+ * Sets readers inactive (pupils who left, after importing the new school year's list). They
+ * keep their card number and history until the retention period or an administrator removes
+ * them; books they still have stay on the overdue lists.
+ */
+export async function deactivateReaders(
+  actor: Actor,
+  readerIds: string[],
+): Promise<{ deactivated: number }> {
+  let deactivated = 0;
+  for (const id of readerIds) {
+    const reader = await repository.getReader(id);
+    if (!reader?.active) continue;
+    const { firstName, lastName, group, schoolNumber, category, email } = reader;
+    await updateReader(
+      actor,
+      id,
+      { firstName, lastName, group, schoolNumber, category, email, active: false },
+      reader.version,
+    );
+    deactivated++;
   }
-  const created = await createReader(actor, input);
-  return { status: 'created', memberNumber: created.memberNumber };
+  return { deactivated };
 }

@@ -4,17 +4,18 @@ Features a school library needs, from cataloguing to lending to reading promotio
 
 ## Status
 
-| Area                                                                     | State                          |
-| ------------------------------------------------------------------------ | ------------------------------ |
-| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit      | Built and tested; runs locally |
-| Public catalogue: search (in browser) and title page                     | Built; runs locally            |
-| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens       | Built; tested on AWS (dev)     |
-| Readers: list, add/edit, CSV import                                      | Built; runs locally            |
-| Lending desk, overdue/loan lists (printable), loan rules and closed days | Built and tested; runs locally |
-| Barcode labels and reader cards (PDF)                                    | Built; runs locally            |
-| Staff two-step verification, privacy page, history retention, erasure    | Built; runs locally            |
-| Reminder slips, "Mijn boeken" screen, anonymous statistics               | Built; runs locally            |
-| Loan ticket at the desk (browser print, receipt or A4)                   | Built; runs locally            |
+| Area                                                                       | State                          |
+| -------------------------------------------------------------------------- | ------------------------------ |
+| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit        | Built and tested; runs locally |
+| Public catalogue: search (in browser) and title page                       | Built; runs locally            |
+| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens         | Built; tested on AWS (dev)     |
+| Readers: list, add/edit, CSV import                                        | Built; runs locally            |
+| Lending desk, overdue/loan lists (printable), loan rules and closed days   | Built and tested; runs locally |
+| Barcode labels and reader cards (PDF)                                      | Built; runs locally            |
+| Staff two-step verification, privacy page, history retention, erasure      | Built; runs locally            |
+| Reminder slips, "Mijn boeken" screen, anonymous statistics                 | Built; runs locally            |
+| Loan ticket at the desk (browser print, receipt or A4)                     | Built; runs locally            |
+| Import from Informat/Wisa/Smartschool (xlsx, CSV), new school year, report | Built; runs locally            |
 
 ## Phase 1 — MVP: run a school library
 

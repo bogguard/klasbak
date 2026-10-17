@@ -104,6 +104,8 @@ export type LoanStatistics = {
   months: Array<{ month: string; loans: number }>;
   titles: Array<{ titleId: string; loans: number }>;
   groups: Array<{ group: string; loans: number; pupils: number }>;
+  /** Active readers now, for the report. */
+  readers: { pupils: number; teachers: number };
 };
 
 /** "2026-09" … "2027-08". */

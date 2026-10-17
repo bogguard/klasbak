@@ -289,5 +289,6 @@ describe('statistics', () => {
       ]),
     );
     expect(result.groups).toHaveLength(2);
+    expect(result.readers).toEqual({ pupils: 2, teachers: 1 });
   });
 });

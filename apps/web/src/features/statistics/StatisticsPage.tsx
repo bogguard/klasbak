@@ -1,13 +1,16 @@
 import { localDate, schoolYear } from '@library/shared';
 import MiniSearch from 'minisearch';
-import { BarChart3, TriangleAlert } from 'lucide-react';
+import { BarChart3, Download, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
 import { TitleCover } from '../catalog/TitleCover';
 import { useSearchIndex } from '../catalog/useSearchIndex';
+import { useConfig } from '../../lib/config';
+import { formatDate } from '../../lib/format';
 import { useStatistics } from '../circulation/api';
+import { statisticsCsv } from './reportCsv';
 import { summarize, type CatalogueTitle } from './summary';
 
 /** The current school year and the two before it. */
@@ -24,6 +27,8 @@ function schoolYears(today: string) {
 /**
  * Anonymous figures for the librarian (decision 028): what is read, when and per class.
  * Never per pupil: a ranking of children is profiling, and the counters don't know who read.
+ * Printed (or saved as PDF) and downloaded as CSV, it is also the report for the municipality
+ * or the public library.
  */
 export function StatisticsPage() {
   const { t, i18n } = useTranslation();
@@ -33,6 +38,7 @@ export function StatisticsPage() {
   const stats = useStatistics({ from: year?.from ?? '', to: year?.to ?? '' });
   const index = useSearchIndex();
   const errorMessage = useErrorMessage();
+  const { libraryName } = useConfig();
 
   const summary = useMemo(() => {
     if (!stats.data || !index.data) return undefined;
@@ -50,26 +56,81 @@ export function StatisticsPage() {
       new Date(`${month}-15T00:00:00Z`),
     );
 
+  function downloadCsv() {
+    if (!stats.data || !summary || !year) return;
+    const csv = statisticsCsv(stats.data, summary, {
+      columns: {
+        section: t('statistics.report.section'),
+        item: t('statistics.report.item'),
+        value: t('statistics.report.value'),
+      },
+      totals: t('statistics.report.totals'),
+      loans: t('statistics.total'),
+      perPupil: t('statistics.perPupil'),
+      activePupils: t('statistics.activePupils'),
+      activeTeachers: t('statistics.activeTeachers'),
+      collection: t('statistics.collection'),
+      titles: t('statistics.titles'),
+      copies: t('statistics.copies'),
+      added: t('statistics.added'),
+      perMonth: t('statistics.perMonth'),
+      perClass: t('statistics.perClass'),
+      perAvi: t('statistics.perAvi'),
+      topTitles: t('statistics.topTitles'),
+    });
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${t('statistics.report.fileName')}-${year.label}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-8">
+      {/* On paper: whose figures, which period, printed when. */}
+      <p className="hidden text-sm print:block">
+        {t('statistics.report.printHeader', {
+          library: libraryName,
+          year: year?.label,
+          date: formatDate(localDate(), i18n.language),
+        })}
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight">{t('statistics.heading')}</h1>
-        <label className="flex items-center gap-2 text-sm text-muted">
-          {t('statistics.schoolYear')}
-          <select
-            value={yearIndex}
-            onChange={(e) => setYearIndex(Number(e.target.value))}
-            className="min-h-11 rounded-lg border border-line bg-surface px-3 text-base text-ink"
-          >
-            {years.map((y, i) => (
-              <option key={y.from} value={i}>
-                {y.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          {t('statistics.heading')}
+          <span className="hidden print:inline"> {year?.label}</span>
+        </h1>
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
+          {summary && summary.total > 0 && (
+            <>
+              <Button variant="secondary" onClick={() => window.print()}>
+                <Printer className="size-4" aria-hidden="true" />
+                {t('statistics.report.print')}
+              </Button>
+              <Button variant="secondary" onClick={downloadCsv}>
+                <Download className="size-4" aria-hidden="true" />
+                CSV
+              </Button>
+            </>
+          )}
+          <label className="flex items-center gap-2 text-sm text-muted">
+            {t('statistics.schoolYear')}
+            <select
+              value={yearIndex}
+              onChange={(e) => setYearIndex(Number(e.target.value))}
+              className="min-h-11 rounded-lg border border-line bg-surface px-3 text-base text-ink"
+            >
+              {years.map((y, i) => (
+                <option key={y.from} value={i}>
+                  {y.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
-      <p className="max-w-2xl text-muted">{t('statistics.intro')}</p>
+      <p className="max-w-2xl text-muted print:hidden">{t('statistics.intro')}</p>
 
       {stats.isError || index.isError ? (
         <StatusMessage
@@ -89,7 +150,7 @@ export function StatisticsPage() {
         </StatusMessage>
       ) : (
         <>
-          <dl className="grid gap-4 sm:grid-cols-3">
+          <dl className="grid gap-4 sm:grid-cols-3 print:grid-cols-3">
             <Tile label={t('statistics.total')} value={number(summary.total)} />
             <Tile
               label={t('statistics.perPupil')}
@@ -99,9 +160,23 @@ export function StatisticsPage() {
               label={t('statistics.busiestMonth')}
               value={summary.busiestMonth ? monthName(summary.busiestMonth.month, 'long') : '—'}
             />
+            <Tile
+              label={t('statistics.activeReaders')}
+              value={`${t('statistics.pupilsCount', { count: stats.data.readers.pupils })}, ${t('statistics.teachersCount', { count: stats.data.readers.teachers })}`}
+              small
+            />
+            <Tile
+              label={t('statistics.collection')}
+              value={t('statistics.collectionValue', {
+                titles: number(summary.collection.titles),
+                copies: number(summary.collection.copies),
+              })}
+              small
+            />
+            <Tile label={t('statistics.added')} value={number(summary.collection.added)} small />
           </dl>
 
-          <section aria-labelledby="per-month" className="space-y-3">
+          <section aria-labelledby="per-month" className="space-y-3 break-inside-avoid">
             <h2 id="per-month" className="text-xl font-semibold">
               {t('statistics.perMonth')}
             </h2>
@@ -112,7 +187,7 @@ export function StatisticsPage() {
             />
           </section>
 
-          <section aria-labelledby="top-titles" className="space-y-3">
+          <section aria-labelledby="top-titles" className="space-y-3 break-inside-avoid">
             <h2 id="top-titles" className="text-xl font-semibold">
               {t('statistics.topTitles')}
             </h2>
@@ -150,11 +225,30 @@ export function StatisticsPage() {
           </section>
 
           {summary.groups.length > 0 && (
-            <section aria-labelledby="per-class" className="space-y-3">
+            <section aria-labelledby="per-class" className="space-y-3 break-inside-avoid">
               <h2 id="per-class" className="text-xl font-semibold">
                 {t('statistics.perClass')}
               </h2>
               <GroupTable groups={summary.groups} format={number} />
+            </section>
+          )}
+
+          {summary.perAvi.length > 0 && (
+            <section aria-labelledby="per-avi" className="space-y-3 break-inside-avoid">
+              <h2 id="per-avi" className="text-xl font-semibold">
+                {t('statistics.perAvi')}
+              </h2>
+              <ul className="flex flex-wrap gap-2">
+                {summary.perAvi.map((a) => (
+                  <li
+                    key={a.level}
+                    className="rounded-xl border border-line bg-surface px-4 py-2 text-center"
+                  >
+                    <span className="block text-sm text-muted">{a.level}</span>
+                    <span className="font-display text-xl font-semibold">{number(a.loans)}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 
@@ -189,11 +283,13 @@ export function StatisticsPage() {
   );
 }
 
-function Tile({ label, value }: { label: string; value: string }) {
+function Tile({ label, value, small = false }: { label: string; value: string; small?: boolean }) {
   return (
     <div className="rounded-xl border border-line bg-surface p-5">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className="mt-1 font-display text-3xl font-semibold">{value}</dd>
+      <dd className={`mt-1 font-display font-semibold ${small ? 'text-xl' : 'text-3xl'}`}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -209,14 +305,24 @@ function MonthBars({
   format: (n: number) => string;
 }) {
   const max = Math.max(1, ...months.map((m) => m.loans));
+  const thisMonth = localDate().slice(0, 7);
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface p-4">
-      <ol className="flex h-48 min-w-[36rem] items-end gap-2">
+    // print-colors: browsers leave out background colours when printing, and the bars are one.
+    <div className="print-colors overflow-x-auto rounded-xl border border-line bg-surface p-4 print:bg-transparent">
+      <ol className="flex h-48 min-w-[36rem] items-end gap-2 print:h-40 print:min-w-0">
         {months.map((m) => (
           <li key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-            <span className="text-xs text-muted">{m.loans > 0 ? format(m.loans) : ''}</span>
+            {/* An empty month shows nothing on screen but "0" on paper, where a blank reads as
+                missing; months still to come stay blank everywhere. */}
+            <span
+              className={`text-xs text-muted ${
+                m.loans > 0 ? '' : m.month <= thisMonth ? 'invisible print:visible' : 'invisible'
+              }`}
+            >
+              {format(m.loans)}
+            </span>
             <div
-              className="w-full rounded-t-md bg-accent"
+              className="w-full rounded-t-md bg-accent print:rounded-none"
               style={{ height: `${(m.loans / max) * 100}%`, minHeight: m.loans > 0 ? 2 : 0 }}
               aria-hidden="true"
             />
@@ -241,7 +347,7 @@ function GroupTable({
   const { t } = useTranslation();
   const max = Math.max(0.1, ...groups.map((g) => g.perPupil ?? 0));
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+    <div className="print-colors overflow-x-auto rounded-xl border border-line bg-surface">
       <table className="w-full min-w-[32rem] text-left text-sm">
         <thead className="border-b border-line text-muted">
           <tr>

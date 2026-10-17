@@ -111,7 +111,7 @@ export async function updateReaderDetails(
     gsi1sk: readerIndexKeys(reader).gsi1sk,
   };
   const remove: string[] = [];
-  for (const field of ['group', 'email'] as const) {
+  for (const field of ['group', 'email', 'schoolNumber'] as const) {
     if (reader[field] === undefined) remove.push(field);
     else set[field] = reader[field];
   }

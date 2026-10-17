@@ -307,8 +307,11 @@
         "lastName": "Please enter a last name.",
         "email": "This email address is not valid.",
         "memberNumber": "3 to 32 letters, digits or dashes.",
-        "group": "At most 30 characters."
-      }
+        "group": "At most 30 characters.",
+        "schoolNumber": "At most 40 characters."
+      },
+      "schoolNumber": "School number",
+      "schoolNumberHint": "Optional. The number from the school administration, to recognise the pupil in a next import. Not printed on the card."
     },
     "loans": {
       "active_one": "{{count}} book on loan",
@@ -321,21 +324,20 @@
     },
     "importPage": {
       "heading": "Import readers",
-      "explanation": "Choose a CSV file, for example a class list from Excel or your school administration. The first line holds the column names, like below:",
-      "columns": "Required: first name and last name. Optional: class, card number, email, type (pupil or teacher). If a card number already exists, that reader is updated.",
+      "explanation": "Choose an Excel (.xlsx) or CSV file, for example the pupil list from your school administration software. A title row above the column names is fine. For example:",
+      "columns": "Required: first name and last name. Optional: class, school number (stamboeknummer), card number, email, type (pupil or teacher). Existing readers (same school number, card number or, for readers entered by hand, exactly the same name) are updated, so you can simply import the new list every school year. Data that isn't in the file is kept.",
       "chooseFile": "Choose a file",
       "errors": {
         "empty": "This file is empty or only has column names.",
-        "missingColumns": "We found no ‘first name’ and ‘last name’ columns. Please check the first line."
+        "missingColumns": "We found no ‘first name’ and ‘last name’ columns. Check the column names.",
+        "oldExcel": "Old Excel files (.xls) can't be read. Open it in Excel and save it as .xlsx or .csv.",
+        "unreadable": "This file couldn't be read. Is it an Excel (.xlsx) or CSV file?"
       },
       "preview": "Check before importing",
-      "validCount_one": "{{count}} line is fine.",
-      "validCount_other": "{{count}} lines are fine.",
       "invalidCount_one": "{{count}} line will be skipped (missing name or invalid data).",
       "invalidCount_other": "{{count}} lines will be skipped (missing name or invalid data).",
       "line": "Line",
-      "check": "Check",
-      "ok": "OK",
+      "check": "What happens",
       "skipped": "Skipped",
       "progress": "Working: {{done}} of {{total}}…",
       "run_one": "Import {{count}} reader",
@@ -343,7 +345,18 @@
       "result": "Result",
       "summary": "{{created}} new, {{updated}} updated, {{failed}} failed.",
       "failedLine": "Line {{line}}:",
-      "toList": "Go to readers"
+      "toList": "Go to readers",
+      "planCount": "{{created}} new, {{updated}} to update.",
+      "willCreate": "New",
+      "willUpdate": "Update",
+      "missing_one": "{{count}} active pupil is not in this file.",
+      "missing_other": "{{count}} active pupils are not in this file.",
+      "showMissing": "Show who",
+      "deactivateMissing_one": "Set this pupil inactive (new school year)",
+      "deactivateMissing_other": "Set these {{count}} pupils inactive (new school year)",
+      "deactivateHint": "Only tick this if the file contains all pupils of the school. Inactive readers can't borrow; their books stay on the overdue list and you can make them active again at any time.",
+      "deactivated_one": "{{count}} pupil set inactive.",
+      "deactivated_other": "{{count}} pupils set inactive."
     },
     "privacy": {
       "heading": "Privacy of this reader",
@@ -679,7 +692,29 @@
     "notLent_other": "{{count}} titles not borrowed",
     "notLentHint": "Not borrowed this school year yet, oldest first. Maybe they deserve a spot in the spotlight, or they can go.",
     "andMore_one": "and {{count}} more",
-    "andMore_other": "and {{count}} more"
+    "andMore_other": "and {{count}} more",
+    "activeReaders": "Active readers",
+    "activePupils": "Active pupils",
+    "activeTeachers": "Active teachers",
+    "collection": "Collection",
+    "collectionValue": "{{titles}} titles, {{copies}} copies",
+    "titles": "Titles",
+    "copies": "Copies",
+    "added": "New titles this school year",
+    "perAvi": "Loans per AVI level",
+    "report": {
+      "print": "Print report",
+      "section": "Section",
+      "item": "Item",
+      "value": "Count",
+      "totals": "Totals",
+      "fileName": "library-report",
+      "printHeader": "{{library}} · report for school year {{year}} · printed on {{date}}. Anonymous figures: per month, title and class, not per pupil."
+    },
+    "pupilsCount_one": "{{count}} pupil",
+    "pupilsCount_other": "{{count}} pupils",
+    "teachersCount_one": "{{count}} teacher",
+    "teachersCount_other": "{{count}} teachers"
   },
   "ticket": {
     "print": "Print ticket",

@@ -31,6 +31,7 @@ type Values = {
   group: string;
   category: ReaderInput['category'];
   email: string;
+  schoolNumber: string;
   memberNumber: string;
   active: boolean;
 };
@@ -41,6 +42,7 @@ const empty: Values = {
   group: '',
   category: 'pupil',
   email: '',
+  schoolNumber: '',
   memberNumber: '',
   active: true,
 };
@@ -52,6 +54,7 @@ function toValues(reader: Reader): Values {
     group: reader.group ?? '',
     category: reader.category,
     email: reader.email ?? '',
+    schoolNumber: reader.schoolNumber ?? '',
     memberNumber: reader.memberNumber,
     active: reader.active,
   };
@@ -63,6 +66,7 @@ const ERROR_KEYS: Partial<Record<keyof Values, string>> = {
   email: 'readers.form.errors.email',
   memberNumber: 'readers.form.errors.memberNumber',
   group: 'readers.form.errors.group',
+  schoolNumber: 'readers.form.errors.schoolNumber',
 };
 
 function parseValues(values: Values) {
@@ -73,6 +77,7 @@ function parseValues(values: Values) {
     group: optional(values.group),
     category: values.category,
     email: optional(values.email),
+    schoolNumber: optional(values.schoolNumber),
     memberNumber: optional(values.memberNumber),
     active: values.active,
   });
@@ -331,6 +336,21 @@ function ReaderForm({ reader }: { reader?: Reader }) {
               type="email"
               value={values.email}
               onChange={(e) => set('email', e.target.value)}
+              autoComplete="off"
+            />
+          )}
+        </Field>
+        <Field
+          label={t('readers.form.schoolNumber')}
+          error={error('schoolNumber')}
+          hint={t('readers.form.schoolNumberHint')}
+        >
+          {(props) => (
+            <input
+              {...props}
+              className={`${props.className} ${inputHeight} font-mono`}
+              value={values.schoolNumber}
+              onChange={(e) => set('schoolNumber', e.target.value)}
               autoComplete="off"
             />
           )}

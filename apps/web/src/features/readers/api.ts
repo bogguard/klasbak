@@ -59,6 +59,20 @@ export function useImportReaders() {
   });
 }
 
+/** New school year: pupils missing from the imported list are set inactive. */
+export function useDeactivateReaders() {
+  const api = useAuthorizedApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (readerIds: string[]) =>
+      api<{ deactivated: number }>('/api/readers/deactivate', {
+        method: 'POST',
+        body: { readerIds },
+      }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: readersKey }),
+  });
+}
+
 export function useDeleteReader(id: string) {
   const api = useAuthorizedApi();
   const queryClient = useQueryClient();
