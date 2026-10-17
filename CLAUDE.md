@@ -2,7 +2,7 @@
 
 School library software: a public online catalogue, a circulation desk for librarians, a self-service kiosk and a portal for readers (pupils, teachers). Feature scope and roadmap: `docs/features.md`.
 
-**Always follow the `pragmatic-serverless` skill** (`.claude/skills/pragmatic-serverless/`) for code, infrastructure, UI and reviews. Architecture decisions are logged in `docs/decisions.md` — read it before changing architecture and add an entry when you make a new decision.
+**Always follow the `pragmatic-serverless` skill** (`.claude/skills/pragmatic-serverless/`) for code, infrastructure, UI and reviews. The skill is generic and maintained in [bogguard/pragmatic-serverless-skill](https://github.com/bogguard/pragmatic-serverless-skill); the copy here is updated from there, so improve it there first. This file holds what is specific to this project and wins where it is more specific. Architecture decisions are logged in `docs/decisions.md` — read it before changing architecture and add an entry when you make a new decision.
 
 ## Language rules
 
@@ -16,13 +16,17 @@ TypeScript everywhere · React + Vite (frontend) · Node.js Lambdas on AWS (back
 
 ## Repository layout
 
+The layout from the skill (section 3), with these domain areas:
+
 ```
-apps/web/            React frontend (public catalogue, desk, kiosk, reader portal, admin)
-services/api/        Lambda functions per domain: catalog, circulation, readers, admin, jobs
-packages/shared/     Zod schemas, types and pure domain rules shared by web and api
-infra/               SAM template(s) and samconfig.toml
-scripts/             deploy helpers
-docs/                features.md, decisions.md, runbook.md
+apps/web/src/features/   catalog, manage (titles and copies), circulation (desk, loans, kiosk, settings),
+                         readers, labels, statistics, staff, export, auth
+services/api/src/        catalog, circulation, readers, staff (API functions); search-indexer, retention (jobs);
+                         branding, export (used by the circulation function); local/ (local dev server)
+packages/shared/src/     one file per domain: auth, branding, catalog, circulation, export, isbn, readers, search, staff
+infra/                   template.yaml, samconfig.toml ([dev] and [prod])
+scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
+docs/                    features.md, decisions.md
 ```
 
 npm workspaces monorepo. Shared code goes in `packages/shared` only when used by both web and api.
@@ -45,6 +49,16 @@ scripts/deploy-web.sh dev       # publish the frontend to the dev stack (name an
 The table's key design is documented in `services/api/src/lib/keys.ts`; keep it the single place for item keys.
 
 Local development: the API runs as plain Hono apps on Node (`services/api/src/local/`). Keep Lambda handlers free of AWS-only assumptions so they keep working there; anything that writes public files goes through `lib/public-files.ts`.
+
+## Users, roles and privacy
+
+- **Personas**: the librarian at the desk with a queue of children; a pupil (often young) at the "Mijn boeken" screen; the school's administrator a few times a year; the class teacher handing out reminder slips; parents and pupils browsing the public catalogue on a phone.
+- **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin` and `librarian`, enforced by the API.
+- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional email; their loans. No birth dates, addresses or photos. Staff: name, username, optional email, role.
+- **Third parties** receive only ISBNs (book lookups); covers are stored on our own server, so visitors never contact them.
+- **Statistics** are anonymous counters (month, title, class), never per pupil.
+- **Privacy notice**: `/privacy`, in plain Dutch for parents and children. A data processing agreement (verwerkersovereenkomst) exists between the school and ITRW; keep the app consistent with what it promises (e.g. retention, MFA, dependency checks).
+- **Region**: `eu-west-1`; one AWS account per installation (school) and one for testing.
 
 ## Domain glossary (code → UI nl-BE)
 

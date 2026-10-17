@@ -4,7 +4,7 @@ Use this when reviewing a change (your own or someone else's). Report only real 
 
 ## Correctness
 
-- Does it do what the feature needs, including edge cases (empty, duplicates, concurrency, double scans, time zones, school holidays)?
+- Does it do what the feature needs, including edge cases (empty, duplicates, concurrency, double submits, time zones, closed days and holidays, odd data)?
 - Are invariants enforced in the database (conditions/transactions), not only in code?
 - Are retries safe (idempotent)?
 
@@ -30,7 +30,8 @@ Use this when reviewing a change (your own or someone else's). Report only real 
 
 - Loading/empty/error/success states?
 - Keyboard and screen reader friendly? Contrast OK?
-- Text translated in nl-BE and en, wording clear for the target user?
+- Text translated into the project's languages, wording clear for the target user?
+- Checked visually (desktop, phone, dark mode; generated PDFs) and walked through as each persona?
 
 ## Cost
 

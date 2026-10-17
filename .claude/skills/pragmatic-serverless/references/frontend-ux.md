@@ -2,18 +2,11 @@
 
 ## Structure
 
-```
-apps/web/src/
-  app/            # routing, providers, layout shells
-  features/       # one folder per domain: catalog/, circulation/, readers/ ...
-    catalog/
-      components/
-      api.ts      # TanStack Query hooks for this feature
-      routes.tsx
-  components/ui/  # shared design-system components (Button, Dialog, Table ...)
-  lib/            # api client, i18n setup, formatting helpers
-  locales/        # nl-BE.json, en.json
-```
+The full repository layout is in `SKILL.md` (section 3). In the frontend:
+
+- `features/<domain>/` holds everything for one domain area: `<Name>Page.tsx` per route, components used only there, `api.ts` with its TanStack Query hooks, and pure helpers with their tests next to them.
+- `components/ui/` holds the shared design-system components; `app/` routing, layout and guards; `lib/` app-wide helpers.
+- A component used by two domains moves to `components/`; a helper used by two domains moves to `lib/` (or `packages/shared` when the API needs it too).
 
 ## Principles
 
@@ -30,7 +23,7 @@ Features are not done when they work; they are done when the real person, in the
 **Start from people and their moments**
 
 - Name the personas and their context before designing (the librarian with a queue of children, the child at a shared screen, the administrator once a year, the teacher handing out slips). Design the most frequent moment first and make it fast.
-- Write the workflow as steps ("scan card → scan books → next child") and count clicks, keystrokes and decisions. Every decision you can take for the user is one less mistake.
+- Write the workflow as steps (e.g. "scan card → scan books → next child") and count clicks, keystrokes and decisions. Every decision you can take for the user is one less mistake.
 - Use the users' own words (glossary) and their real-world artefacts (class lists, label sheets, receipt paper, the school's printer) instead of inventing new ones.
 
 **Remove modes and decisions**
@@ -50,8 +43,8 @@ Features are not done when they work; they are done when the real person, in the
 **Feedback and errors**
 
 - Respond within 100 ms (button state); skeletons for loads over 300 ms; changes appear immediately (update the local cache or search index instead of waiting for a background rebuild).
-- After an action, say what happened in the user's terms ("Uitgeleend: Dolfje Weerwolfje — terug op do 5 nov") and keep the last few results visible.
-- Errors say what happened and what to do next, with the details filled in ("Deze lezer heeft al 3 boeken. Eerst iets terugbrengen."). API errors carry a code and details; the UI translates them. Never show technical text.
+- After an action, say what happened in the user's terms ("Lent: The Gruffalo — due Thu 5 Nov") and keep the last few results visible.
+- Errors say what happened and what to do next, with the details filled in ("This reader already has 3 books. Return one first."). API errors carry a code and details; the UI translates them. Never show technical text.
 - Keep the user's place: refocus the main input after every action, dialog or print; keep filters and queries in the URL.
 - Undo over confirm for reversible actions; confirm only destructive ones and name the consequence ("Delete 3 copies?").
 
@@ -85,7 +78,7 @@ The bar is not "a clean admin template" but a product that feels made for its pl
 - One icon set (e.g. Lucide), icons always next to text or with `aria-label`.
 - Light and dark mode from the same tokens; check both, and check that print ignores dark mode (white paper, black text).
 - Numbers are formatted with `Intl` in the user's language (`1,7`, not `1.7` in Dutch); charts are simple bars with the value written on them, so nothing depends on reading a height or a colour.
-- Copy is part of the design: short, warm, in the user's language ("Niets te laat. Goed zo!"), and it tells people what to do next.
+- Copy is part of the design: short, warm, in the user's language ("Nothing overdue. Well done!"), and it tells people what to do next.
 
 **Per context**
 
@@ -119,7 +112,7 @@ Print is part of the product: people hold it in their hands, so it gets the same
 
 ## i18n
 
-- All user-visible text goes through `t('feature.key')`. Keys and code are English; Dutch (nl-BE) is the default locale, English the fallback.
-- Use ICU/plural support for counts; format dates and numbers with `Intl` using the active locale and the library's time zone.
-- Emails and PDFs (labels, reminders) are translated too.
+- All user-visible text goes through `t('feature.key')`. Keys and code are in English; the default and other languages are named in the project's `CLAUDE.md`.
+- Use plural support for counts; format dates and numbers with `Intl` using the active locale and the configured time zone.
+- Emails, PDFs and printed material are translated too.
 - Never concatenate translated fragments; use interpolation.
