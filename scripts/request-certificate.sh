@@ -3,6 +3,8 @@
 # the settings for the next deploy. Safe to run again: it picks up where it left off.
 # Usage: scripts/request-certificate.sh bib.school.be
 set -euo pipefail
+# AWS CLI v2 shows some output in a pager (less), which waits for 'q'; scripts must not stop.
+export AWS_PAGER=""
 
 domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. bib.school.be>}"
 region="eu-west-1"       # where the library stack and its settings live

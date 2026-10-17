@@ -3,6 +3,8 @@
 # Usage: scripts/deploy-web.sh dev|prod
 # The library's name and logo are set in the app (Instellingen → Huisstijl), not here.
 set -euo pipefail
+# AWS CLI v2 shows some output in a pager (less), which waits for 'q'; scripts must not stop.
+export AWS_PAGER=""
 
 env="${1:?usage: deploy-web.sh dev|prod}"
 stack="library-${env}"
