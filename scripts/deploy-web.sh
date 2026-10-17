@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Builds the frontend and publishes it to the stack's web bucket.
-# Usage: scripts/deploy-web.sh dev|prod [library name]
+# Usage: scripts/deploy-web.sh dev|prod
+# The library's name and logo are set in the app (Instellingen → Huisstijl), not here.
 set -euo pipefail
 
-env="${1:?usage: deploy-web.sh dev|prod [library name]}"
-library_name="${2:-Bibliotheek}"
+env="${1:?usage: deploy-web.sh dev|prod}"
 stack="library-${env}"
 region="eu-west-1"
 
@@ -21,7 +21,6 @@ npm run build -w apps/web
 # Runtime config: one build works for every environment and school.
 cat > apps/web/dist/config.json <<EOF
 {
-  "libraryName": "${library_name}",
   "region": "${region}",
   "userPoolId": "$(output UserPoolId)",
   "userPoolClientId": "$(output UserPoolClientId)"

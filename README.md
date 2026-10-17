@@ -44,8 +44,10 @@ Run from the project folder, in one terminal session:
 4. Publish the website; it prints the app URL:
 
    ```bash
-   scripts/deploy-web.sh dev "Name of the library"
+   scripts/deploy-web.sh dev
    ```
+
+   The library's name and logo are set later in the app, under Instellingen → Huisstijl.
 
 5. Create the first admin. Find the `UserPoolId` with
    `aws cloudformation describe-stacks --region eu-west-1 --stack-name library-dev --query "Stacks[0].Outputs" --output table`:
@@ -71,7 +73,7 @@ CloudFront with a normal DNS record):
    the settings.
 2. `npm run deploy:dev` (or `deploy:prod`).
 3. Add a second DNS record: `CNAME bib.schoolnaam.be → <CloudFrontDomain output>`.
-4. `scripts/deploy-web.sh dev "<library name>"`; it prints the new address.
+4. `scripts/deploy-web.sh dev`; it prints the new address.
 
 To go back to the CloudFront address, set both `/library/domain-name` and
 `/library/certificate-arn` to `none` and deploy.

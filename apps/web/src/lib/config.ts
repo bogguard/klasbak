@@ -44,7 +44,7 @@ export function useConfig(): AppConfig {
       return {
         ...fallback,
         ...config,
-        libraryName: branding.libraryName ?? config.libraryName ?? fallback.libraryName,
+        libraryName: branding.libraryName ?? fallback.libraryName,
         logoKey: branding.logoKey,
         loaded: true,
       };

@@ -108,5 +108,5 @@ Certificate ready and stored. Next:
        Name:   ${domain%%.*}   (or the full name ${domain}, depending on the DNS panel)
        Value:  the CloudFrontDomain output of the deploy (e.g. d1234abcd.cloudfront.net),
                without a dot at the end
-  3. Publish the website again:  scripts/deploy-web.sh <env> "<library name>"
+  3. Publish the website again:  scripts/deploy-web.sh <env>
 NEXT

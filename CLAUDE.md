@@ -39,7 +39,7 @@ npm run build                    # build the frontend
 npm run validate:infra           # sam validate --lint
 npm run build:api                # bundle the Lambdas into services/api/dist (used by deploy)
 npm run deploy:dev               # build:api + sam deploy of the dev stack (no `sam build`, see decision 014)
-scripts/deploy-web.sh dev "Naam van de bib"   # publish the frontend to the dev stack
+scripts/deploy-web.sh dev       # publish the frontend to the dev stack (name and logo: in the app)
 ```
 
 The table's key design is documented in `services/api/src/lib/keys.ts`; keep it the single place for item keys.
