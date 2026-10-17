@@ -104,8 +104,11 @@ See `references/security-privacy.md` for the checklist. Non-negotiables:
 See `references/frontend-ux.md`. In short:
 
 - **Design for the real users and the real context** (a busy desk, a child at a kiosk, a teacher on a phone). Fast paths for frequent tasks; keyboard and barcode-scanner friendly.
+- **Usability reviewed like a demanding UX engineer**: one action instead of modes, defaults instead of settings, repeat-safe actions, no stale state on shared screens, the forgotten/lost/wrong cases handled, errors that say what to do, and every workflow walked end to end per persona before it's done.
 - **Accessible by default: WCAG 2.2 AA.** Semantic HTML, labels, focus states, sufficient contrast, works with keyboard only.
-- **Clean, calm, consistent visual design**: one design system (Tailwind tokens + shared components), generous whitespace, clear hierarchy, max two font weights per view, a restrained color palette with one accent color.
+- **Designed with character, like a good designer would**: a palette and typography that fit the place and its people (not default greys), semantic tokens so light/dark and the customer's branding change in one place, content (covers, names) as the visual, generated placeholders instead of empty boxes, max two font weights per view and one accent color.
+- **Verify visually**: screenshot changed pages (desktop, phone, dark) and render generated PDFs, then look at them before calling it done.
+- **Printed material is product too**: exact physical sizes, scannable barcodes, crop marks, text safe for PDF fonts.
 - **Every state is designed**: loading (skeletons), empty (helpful next step), error (what happened + what to do), success (clear feedback).
 - **Responsive and mobile-first**; the public catalogue must work great on a phone.
 - **Copy is short, friendly and in the user's language**; no jargon, no technical error text.
