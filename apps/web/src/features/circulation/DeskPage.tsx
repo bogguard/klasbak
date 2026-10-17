@@ -9,6 +9,7 @@ import {
   Barcode,
   BookCheck,
   Camera,
+  CameraOff,
   BookUp,
   CircleAlert,
   Info,
@@ -193,6 +194,8 @@ export function DeskPage() {
    */
   const clearDesk = useCallback(
     (reason: 'manual' | 'idle') => {
+      // Nobody at the desk for a minute: the camera stops too (battery, privacy).
+      if (reason === 'idle') setCameraOpen(false);
       if (!deskRef.current) return;
       deskRef.current = undefined;
       setDesk(undefined);
@@ -303,10 +306,20 @@ export function DeskPage() {
                   type="button"
                   variant="secondary"
                   className="h-16"
-                  onClick={() => setCameraOpen(true)}
+                  aria-pressed={cameraOpen}
+                  onClick={() => {
+                    setCameraOpen((open) => !open);
+                    inputRef.current?.focus();
+                  }}
                 >
-                  <Camera className="size-5" aria-hidden="true" />
-                  <span className="sr-only sm:not-sr-only">{t('camera.open')}</span>
+                  {cameraOpen ? (
+                    <CameraOff className="size-5" aria-hidden="true" />
+                  ) : (
+                    <Camera className="size-5" aria-hidden="true" />
+                  )}
+                  <span className="sr-only sm:not-sr-only">
+                    {cameraOpen ? t('camera.off') : t('camera.open')}
+                  </span>
                 </Button>
               )}
             </div>
@@ -320,6 +333,8 @@ export function DeskPage() {
               // Only our labels and reader cards; the ISBN on the back of a book is ignored.
               formats={['code_128']}
               mode="continuous"
+              // In the page, so the result of each scan and the reader stay in sight.
+              inline
               onCode={enqueue}
               onClose={() => {
                 setCameraOpen(false);

@@ -10,9 +10,14 @@ type CameraScannerProps = {
   mode: 'single' | 'continuous';
   onCode: (code: string) => void;
   onClose: () => void;
+  /**
+   * Inside the page instead of full screen, so what happens after each scan stays visible
+   * next to it (the lending desk). The page shows the on/off button; Escape belongs to the page.
+   */
+  inline?: boolean;
 };
 
-/** The same code seen again within this time is the same book still in view, not a new scan. */
+/** A code counts again only after it has been out of view this long (a book left in front of the camera is one scan). */
 const REPEAT_MS = 2500;
 const INTERVAL_MS = 150;
 
@@ -20,7 +25,13 @@ const INTERVAL_MS = 150;
  * Reads barcodes with the device's camera, for desks without a barcode scanner (a tablet or
  * laptop). Shown full-screen; the back camera is preferred on phones and tablets.
  */
-export function CameraScanner({ formats, mode, onCode, onClose }: CameraScannerProps) {
+export function CameraScanner({
+  formats,
+  mode,
+  onCode,
+  onClose,
+  inline = false,
+}: CameraScannerProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [problem, setProblem] = useState<'denied' | 'noCamera' | 'other'>();
@@ -57,8 +68,10 @@ export function CameraScanner({ formats, mode, onCode, onClose }: CameraScannerP
             if (video.readyState >= 2) {
               for (const { rawValue } of await detector.detect(video)) {
                 const now = Date.now();
-                if (now - (seen.get(rawValue) ?? 0) < REPEAT_MS) continue;
+                const lastSeen = seen.get(rawValue) ?? 0;
+                // Every sighting counts, so a code that stays in view is never read twice.
                 seen.set(rawValue, now);
+                if (now - lastSeen < REPEAT_MS) continue;
                 setLastCode(rawValue);
                 onCodeRef.current(rawValue);
                 if (mode === 'single') {
@@ -91,8 +104,9 @@ export function CameraScanner({ formats, mode, onCode, onClose }: CameraScannerP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Escape closes the camera only (it must not also clear the reader at the desk).
+  // Full screen: Escape closes the camera only (it must not also clear the reader at the desk).
   useEffect(() => {
+    if (inline) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.stopPropagation();
@@ -100,7 +114,42 @@ export function CameraScanner({ formats, mode, onCode, onClose }: CameraScannerP
     };
     window.addEventListener('keydown', onKey, { capture: true });
     return () => window.removeEventListener('keydown', onKey, { capture: true });
-  }, []);
+  }, [inline]);
+
+  const hint = t(`camera.hint.${formats.includes('ean_13') ? 'isbn' : 'label'}`);
+  const view = problem ? (
+    <div className="max-w-sm space-y-3 p-6 text-center">
+      <CameraOff className="mx-auto size-10" aria-hidden="true" />
+      <p>{t(`camera.problem.${problem}`)}</p>
+    </div>
+  ) : (
+    <>
+      <video
+        ref={videoRef}
+        playsInline
+        muted
+        className={inline ? 'h-full w-full object-cover' : 'max-h-full max-w-full'}
+      />
+      {/* Aiming frame: barcodes are wide and low. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute h-1/3 w-3/4 max-w-xl rounded-xl border-4 border-white/80"
+      />
+    </>
+  );
+
+  if (inline) {
+    return (
+      <section
+        aria-label={t('camera.title')}
+        className="overflow-hidden rounded-xl border border-line bg-black text-white"
+      >
+        <div className="relative flex h-52 items-center justify-center sm:h-64">{view}</div>
+        {/* Switched on and off by the page's own camera button, next to the scan field. */}
+        <p className="px-4 py-2 text-sm text-white/80">{hint}</p>
+      </section>
+    );
+  }
 
   return (
     <div
@@ -110,32 +159,14 @@ export function CameraScanner({ formats, mode, onCode, onClose }: CameraScannerP
       className="fixed inset-0 z-50 flex flex-col bg-black/90 text-white"
     >
       <div className="flex items-center justify-between p-4">
-        <p className="font-medium">
-          {t(`camera.hint.${formats.includes('ean_13') ? 'isbn' : 'label'}`)}
-        </p>
+        <p className="font-medium">{hint}</p>
         <Button variant="secondary" onClick={onClose} autoFocus>
           <X className="size-4" aria-hidden="true" />
           {mode === 'continuous' ? t('camera.done') : t('camera.cancel')}
         </Button>
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
-        {problem ? (
-          <div className="max-w-sm space-y-3 p-6 text-center">
-            <CameraOff className="mx-auto size-10" aria-hidden="true" />
-            <p>{t(`camera.problem.${problem}`)}</p>
-          </div>
-        ) : (
-          <>
-            <video ref={videoRef} playsInline muted className="max-h-full max-w-full" />
-            {/* Aiming frame: barcodes are wide and low. */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute h-1/4 w-3/4 max-w-xl rounded-xl border-4 border-white/80"
-            />
-          </>
-        )}
-      </div>
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden">{view}</div>
 
       <p aria-live="polite" className="min-h-14 p-4 text-center font-mono text-lg">
         {lastCode && t('camera.read', { code: lastCode })}

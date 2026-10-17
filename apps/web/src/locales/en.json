@@ -641,7 +641,8 @@
       "denied": "The camera may not be used. Allow the browser to use the camera (usually via the lock next to the web address) and try again.",
       "noCamera": "We can't find a camera on this device.",
       "other": "The camera couldn't start. Close other apps using the camera and try again."
-    }
+    },
+    "off": "Camera off"
   },
   "myBooks": {
     "heading": "My books",

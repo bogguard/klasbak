@@ -641,7 +641,8 @@
       "denied": "De camera mag niet gebruikt worden. Geef de browser toestemming voor de camera (meestal via het slotje naast het webadres) en probeer opnieuw.",
       "noCamera": "We vinden geen camera op dit toestel.",
       "other": "De camera kon niet starten. Sluit andere apps die de camera gebruiken en probeer opnieuw."
-    }
+    },
+    "off": "Camera uit"
   },
   "myBooks": {
     "heading": "Mijn boeken",
