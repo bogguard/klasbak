@@ -39,6 +39,7 @@ npm workspaces monorepo. Shared code goes in `packages/shared` only when used by
 npm install                      # install all workspaces
 npm run dev:local                # everything locally: DynamoDB Local + API (:3000) + frontend (:5173)
 npm run seed                     # sample catalogue for local development
+npm run demo                     # EMPTIES the local database and loads a demo school (keeps name and logo)
 npm run dev                      # frontend only, against a deployed stack (VITE_PROXY_TARGET in apps/web/.env.local)
 npm run typecheck && npm run lint && npm test
 npm run build                    # build the frontend

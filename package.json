@@ -25,7 +25,8 @@
     "validate:infra": "sam validate --lint --template infra/template.yaml",
     "deploy:dev": "npm run build:api && cd infra && sam deploy --config-env dev --template-file template.yaml",
     "deploy:prod": "npm run build:api && cd infra && sam deploy --config-env prod --template-file template.yaml",
-    "build:api": "node scripts/build-api.mjs"
+    "build:api": "node scripts/build-api.mjs",
+    "demo": "tsx services/api/src/local/demo.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
