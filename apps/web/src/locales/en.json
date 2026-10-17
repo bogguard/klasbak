@@ -678,5 +678,14 @@
     "notLentHint": "Not borrowed this school year yet, oldest first. Maybe they deserve a spot in the spotlight, or they can go.",
     "andMore_one": "and {{count}} more",
     "andMore_other": "and {{count}} more"
+  },
+  "ticket": {
+    "print": "Print ticket",
+    "printedOn": "Printed on {{date}}",
+    "books_one": "You have {{count}} library book:",
+    "books_other": "You have {{count}} library books:",
+    "dueOn": "Return by {{date}}",
+    "footer": "Please return your books on time. Happy reading!",
+    "late": "Late! Was due {{date}}"
   }
 }

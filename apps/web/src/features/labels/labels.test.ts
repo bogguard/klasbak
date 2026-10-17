@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { code128, expandRange } from './barcode';
+import { pdfText } from './pdf';
 import { CARD_SHEET, LABEL_SHEETS, labelPositions } from './sheets';
 
 describe('code128', () => {
@@ -95,5 +96,17 @@ describe('expandRange', () => {
     expect(expandRange('10', '2')).toBeUndefined();
     expect(expandRange('L1', 'L5')).toBeUndefined();
     expect(expandRange('1', '9999')).toBeUndefined();
+  });
+});
+
+describe('pdfText', () => {
+  it('joins separate accents to their letter, so jsPDF keeps its normal encoding', () => {
+    expect(pdfText('Pascale Génestine')).toBe('Pascale Génestine');
+  });
+
+  it('keeps Western European characters and replaces or drops what the PDF fonts lack', () => {
+    expect(pdfText('Œuvre – “Zoë” …')).toBe('Œuvre – “Zoë” …');
+    expect(pdfText('Czesław Miłosz, Erdős')).toBe('Czeslaw Milosz, Erdos');
+    expect(pdfText('Ge­nes​tine 📚')).toBe('Genestine ');
   });
 });

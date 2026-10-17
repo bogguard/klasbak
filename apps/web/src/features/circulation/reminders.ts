@@ -1,7 +1,7 @@
 import type { Loan } from '@library/shared';
 import type { jsPDF } from 'jspdf';
 import { compareGroups } from '../../lib/format';
-import { ACCENT, fit, MUTED, newDocument, PT, type PdfLogo } from '../labels/pdf';
+import { ACCENT, fit, MUTED, newDocument, pdfText, PT, type PdfLogo } from '../labels/pdf';
 
 /** One slip per reader with all their late books, for the class teacher to hand out. */
 export type ReminderSlip = {
@@ -110,7 +110,7 @@ function drawSlip(
     doc
       .setFont('helvetica', 'normal')
       .setTextColor(...MUTED)
-      .text(`  ·  ${slip.readerGroup}`, MARGIN + nameEnd, y);
+      .text(`  ·  ${pdfText(slip.readerGroup)}`, MARGIN + nameEnd, y);
   }
 
   y += 7;

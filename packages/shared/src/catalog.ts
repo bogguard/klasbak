@@ -34,7 +34,11 @@ export const COPY_STATUSES = ['available', 'onLoan', 'lost', 'damaged', 'withdra
 export const CopyStatusSchema = z.enum(COPY_STATUSES);
 export type CopyStatus = z.infer<typeof CopyStatusSchema>;
 
-export const text = (max: number) => z.string().trim().min(1).max(max);
+/**
+ * Text from people or book databases. NFC joins letters and separate accents ("e" + "́" → "é"),
+ * which some sources send apart; PDFs and search then treat them as one character.
+ */
+export const text = (max: number) => z.string().trim().normalize('NFC').min(1).max(max);
 
 /** Book barcodes and reader card numbers share one namespace (see docs/decisions.md 011). */
 export const CodeSchema = z

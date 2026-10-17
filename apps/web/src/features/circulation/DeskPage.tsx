@@ -13,6 +13,7 @@ import {
   CircleAlert,
   Info,
   MonitorSmartphone,
+  Printer,
   UserRound,
   Volume2,
   VolumeX,
@@ -26,6 +27,7 @@ import { useReaders } from '../readers/api';
 import { CameraScanner } from '../../components/CameraScanner';
 import { cameraAvailable } from '../../lib/barcodeScanner';
 import { useRenew, useScan } from './api';
+import { LoanTicket } from './LoanTicket';
 import { playFeedback } from './sound';
 
 type Tone = 'success' | 'info' | 'danger';
@@ -74,6 +76,7 @@ export function DeskPage() {
   const [log, setLog] = useState<Feedback[]>([]);
   const [soundOn, setSoundOn] = useState(storedSound);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [ticket, setTicket] = useState<ReaderAtDesk>();
   // Last scan or reader change; state for rendering the countdown, ref for the timer.
   const [lastActivity, setLastActivity] = useState(() => Date.now());
   const lastActivityRef = useRef(lastActivity);
@@ -358,6 +361,10 @@ export function DeskPage() {
             inputRef.current?.focus();
           }}
           desk={desk}
+          onPrintTicket={() => {
+            markActivity();
+            setTicket(deskRef.current);
+          }}
           onNextReader={() => clearDesk('manual')}
           onPickReader={(memberNumber) => enqueue(memberNumber)}
           onRenew={(loanId) => {
@@ -381,6 +388,16 @@ export function DeskPage() {
           }}
         />
       </div>
+      {ticket && (
+        <LoanTicket
+          desk={ticket}
+          onDone={() => {
+            setTicket(undefined);
+            markActivity();
+            inputRef.current?.focus();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -411,6 +428,7 @@ function ReaderPanel({
   desk,
   secondsLeft,
   onStay,
+  onPrintTicket,
   onNextReader,
   onPickReader,
   onRenew,
@@ -419,6 +437,7 @@ function ReaderPanel({
   /** Set during the last seconds before the reader is cleared automatically. */
   secondsLeft: number | undefined;
   onStay: () => void;
+  onPrintTicket: () => void;
   onNextReader: () => void;
   onPickReader: (memberNumber: string) => void;
   onRenew: (loanId: string) => void;
@@ -510,6 +529,12 @@ function ReaderPanel({
         </div>
       )}
 
+      {activeLoans.length > 0 && (
+        <Button variant="secondary" className="w-full" onClick={onPrintTicket}>
+          <Printer className="size-4" aria-hidden="true" />
+          {t('ticket.print')}
+        </Button>
+      )}
       <Button variant="secondary" className="w-full" onClick={onNextReader}>
         {t('desk.nextReader')}
       </Button>

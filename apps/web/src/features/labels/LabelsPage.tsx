@@ -95,6 +95,7 @@ export function LabelsPage() {
 
 function BookLabels({ initialCodes }: { initialCodes: string }) {
   const { t } = useTranslation();
+  const { libraryName, logoKey } = useConfig();
   const api = useAuthorizedApi();
   const errorMessage = useErrorMessage();
   const pending = usePendingLabels();
@@ -172,7 +173,12 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
   async function makePdf(labels: CopyLabel[], unknown: string[], start: number) {
     if (!sheet) return;
     if (labels.length > 0) {
-      const doc = await bookLabelsPdf(labels, sheet, { startAt: start, offset });
+      const doc = await bookLabelsPdf(labels, sheet, {
+        startAt: start,
+        offset,
+        libraryName,
+        logo: await loadLogo(logoKey),
+      });
       doc.save(`labels-${labels[0]?.barcode}.pdf`);
     }
     setResult({ codes: labels.map((label) => label.barcode), unknown, startAt: start });

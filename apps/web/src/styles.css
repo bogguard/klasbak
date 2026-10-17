@@ -78,3 +78,14 @@
     @apply outline-2 outline-offset-2 outline-accent;
   }
 }
+
+/* Printing a loan ticket at the desk: only the ticket, nothing of the app behind it. */
+@media print {
+  html.printing-ticket #root {
+    display: none;
+  }
+  html.printing-ticket,
+  html.printing-ticket body {
+    background: white;
+  }
+}

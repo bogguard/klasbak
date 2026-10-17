@@ -678,5 +678,14 @@
     "notLentHint": "Dit schooljaar nog niet uitgeleend, de oudste eerst. Misschien verdienen ze een plaatsje in de kijker, of mogen ze weg.",
     "andMore_one": "en nog {{count}}",
     "andMore_other": "en nog {{count}}"
+  },
+  "ticket": {
+    "print": "Ticket afdrukken",
+    "printedOn": "Afgedrukt op {{date}}",
+    "books_one": "Je hebt {{count}} boek van de bib:",
+    "books_other": "Je hebt {{count}} boeken van de bib:",
+    "dueOn": "Terugbrengen op {{date}}",
+    "footer": "Breng je boeken op tijd terug. Veel leesplezier!",
+    "late": "Te laat! Moest terug op {{date}}"
   }
 }
