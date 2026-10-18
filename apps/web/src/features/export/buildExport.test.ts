@@ -17,6 +17,26 @@ describe('toCsv', () => {
   });
 });
 
+describe('toCsv against formula injection', () => {
+  it('makes text that Excel would run as a formula plain text, but keeps numbers', () => {
+    const csv = toCsv(
+      [
+        { name: '=HYPERLINK("https://evil.example","klik")' },
+        { name: '+32 9 123' },
+        { name: '@SUM(A1)' },
+        { name: -3 },
+      ],
+      [['naam', (r) => r.name]],
+    );
+    expect(csv.split('\r\n').slice(1, 5)).toEqual([
+      `"'=HYPERLINK(""https://evil.example"",""klik"")"`,
+      "'+32 9 123",
+      "'@SUM(A1)",
+      '-3',
+    ]);
+  });
+});
+
 describe('buildExportZip', () => {
   it('puts every kind of record in its own CSV, plus everything as JSON', () => {
     const zip = buildExportZip(

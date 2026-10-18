@@ -59,14 +59,19 @@ export async function storeCover(titleId: string, url: string): Promise<string |
     const response = await fetchAllowed(url);
     if (!response) return undefined;
     const contentType = response.headers.get('content-type')?.split(';')[0] ?? '';
-    const extension = ALLOWED_TYPES[contentType];
-    if (!response.ok || !extension) return undefined;
+    if (!response.ok || !ALLOWED_TYPES[contentType]) return undefined;
 
+    // Refuse big files before reading them, when the size is announced.
+    if (Number(response.headers.get('content-length') ?? 0) > MAX_BYTES) return undefined;
     const body = new Uint8Array(await response.arrayBuffer());
     if (body.byteLength < MIN_BYTES || body.byteLength > MAX_BYTES) return undefined;
+    // Allowed hosts also serve files uploaded by anyone (archive.org): trust the bytes, not
+    // the declared type, exactly as for uploads, and store it as what it really is.
+    const type = detectImageType(body);
+    if (!type) return undefined;
 
-    const key = `covers/${titleId}.${extension}`;
-    await putPublicFile(key, body, contentType, 'public, max-age=604800');
+    const key = `covers/${titleId}.${IMAGE_EXTENSIONS[type]}`;
+    await putPublicFile(key, body, type, 'public, max-age=604800');
     return key;
   } catch (error) {
     logger.warn('cover copy failed', { error });

@@ -119,7 +119,8 @@ Resources:
       EnabledMfas: [SOFTWARE_TOKEN_MFA]
       Policies:
         PasswordPolicy:
-          MinimumLength: 8
+          # Length beats complexity rules (NIST); staff also need two-step verification.
+          MinimumLength: 12
           RequireLowercase: false
           RequireUppercase: false
           RequireNumbers: false
@@ -141,6 +142,10 @@ Resources:
       ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
       PreventUserExistenceErrors: ENABLED
       EnableTokenRevocation: true
+      # Users may not change their own attributes with their token (e.g. their email address,
+      # which a stolen session could use to take over password recovery). Admins do it via
+      # the app. Cognito needs at least one writable attribute; locale is harmless and unused.
+      WriteAttributes: [locale]
       AccessTokenValidity: 60
       IdTokenValidity: 60
       RefreshTokenValidity: 30
@@ -513,6 +518,15 @@ Resources:
           ContentTypeOptions: { Override: true }
           FrameOptions: { Override: true, FrameOption: DENY }
           ReferrerPolicy: { Override: true, ReferrerPolicy: strict-origin-when-cross-origin }
+        CustomHeadersConfig:
+          Items:
+            # Only the camera, and only for our own pages (barcode scanning at the desk).
+            - Header: Permissions-Policy
+              Override: true
+              Value: camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+            - Header: Cross-Origin-Opener-Policy
+              Override: true
+              Value: same-origin
 
   Distribution:
     Type: AWS::CloudFront::Distribution

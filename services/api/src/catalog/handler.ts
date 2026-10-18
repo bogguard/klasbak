@@ -1,5 +1,6 @@
 import {
   AddExchangeBooksRequestSchema,
+  CodeSchema,
   CopyInputSchema,
   CreateExchangeRequestSchema,
   CoverUploadRequestSchema,
@@ -85,13 +86,15 @@ app.post('/copies/labels', async (c) => {
 
 app.get('/copies/:barcode', async (c) => {
   requireRole(getActor(c), STAFF);
-  return c.json(await catalog.getCopyByBarcode(c.req.param('barcode')));
+  return c.json(await catalog.getCopyByBarcode(parse(CodeSchema, c.req.param('barcode'))));
 });
 
 app.patch('/copies/:barcode', async (c) => {
   const actor = requireRole(getActor(c), STAFF);
   const changes = parse(UpdateCopyRequestSchema, await readJson(c));
-  return c.json(await catalog.updateCopy(actor, c.req.param('barcode'), changes));
+  return c.json(
+    await catalog.updateCopy(actor, parse(CodeSchema, c.req.param('barcode')), changes),
+  );
 });
 
 // Exchange collections from the public library (decision 031); in the catalogue function

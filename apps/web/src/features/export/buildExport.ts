@@ -10,10 +10,16 @@ const BYTE_ORDER_MARK = String.fromCharCode(0xfeff);
 
 type Column<T> = [header: string, value: (row: T) => unknown];
 
-/** Belgian Excel expects ";"; the byte-order mark makes it read UTF-8 accents correctly. */
+/**
+ * Belgian Excel expects ";"; the byte-order mark makes it read UTF-8 accents correctly.
+ * Text starting with = + - @ (or a tab/return) would run as a formula in Excel ("CSV
+ * injection", e.g. a reader called =HYPERLINK(...)), so it gets a leading apostrophe,
+ * which Excel shows as plain text. Numbers are left alone.
+ */
 export function toCsv<T>(rows: T[], columns: Column<T>[]): string {
   const cell = (value: unknown) => {
-    const text = value === undefined || value === null ? '' : String(value);
+    let text = value === undefined || value === null ? '' : String(value);
+    if (typeof value === 'string' && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
     return /[;"\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   const lines = [
