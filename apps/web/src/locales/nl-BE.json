@@ -112,7 +112,8 @@
     "RENEWAL_NOT_LONGER": "Dit boek mag al tot {{dueDate}} blijven; verlengen maakt dat niet langer.",
     "NOT_A_READER_CARD": "Dit is een boek. Scan je bibliotheekpasje.",
     "EXCHANGE_RETURNED": "Deze wisselcollectie is al teruggebracht.",
-    "EXCHANGE_HAS_LOANS": "Er zijn nog {{count}} boeken uitgeleend. Laat ze eerst terugbrengen."
+    "EXCHANGE_HAS_LOANS": "Er zijn nog {{count}} boeken uitgeleend. Laat ze eerst terugbrengen.",
+    "reference": "(Referentie voor de helpdesk: {{reference}})"
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",

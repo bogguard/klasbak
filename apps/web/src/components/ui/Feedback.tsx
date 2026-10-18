@@ -40,12 +40,16 @@ export function useErrorMessage() {
     const status = typeof details.status === 'string' ? t(`copyStatus.${details.status}`) : '';
     const dueDate =
       typeof details.dueDate === 'string' ? formatDate(details.dueDate, i18n.language) : '';
-    return t(`errors.${error.code}`, {
+    const message = t(`errors.${error.code}`, {
       ...details,
       status: status.toLocaleLowerCase(),
       dueDate,
       defaultValue: t('errors.UNKNOWN'),
     });
+    // An unexpected error: the reference lets ITRW find exactly what happened.
+    return error.reference
+      ? `${message} ${t('errors.reference', { reference: error.reference })}`
+      : message;
   };
 }
 

@@ -591,7 +591,9 @@ Resources:
   ApiServerErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: The API returned server errors. Check the CatalogFunction logs.
+      AlarmDescription: >-
+        The API returned server errors. Open the dashboard and the "Errors and warnings" query in
+        CloudWatch Logs Insights (docs/runbook.md).
       Namespace: AWS/ApiGateway
       MetricName: 5xx
       Dimensions:
@@ -654,6 +656,144 @@ Resources:
       TreatMissingData: notBreaching
       AlarmActions: [!Ref AlarmTopic]
 
+  # A function was throttled (account concurrency limit): requests were refused or delayed.
+  LambdaThrottlesAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda functions were throttled; users may have seen errors (docs/runbook.md).
+      Namespace: AWS/Lambda
+      MetricName: Throttles
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+
+  # Failing runs are caught above; this catches the nightly job not running at all (privacy:
+  # reading history must be removed after the retention period).
+  RetentionNotRunningAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The nightly removal of old reading history did not run for two days (docs/runbook.md).
+      Namespace: AWS/Lambda
+      MetricName: Invocations
+      Dimensions:
+        - { Name: FunctionName, Value: !Ref RetentionFunction }
+      Statistic: Sum
+      Period: 86400
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+      AlarmActions: [!Ref AlarmTopic]
+      OKActions: [!Ref AlarmTopic]
+
+  # One page to see how the library is doing (free: up to three dashboards per account).
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub library-${Environment}
+      DashboardBody: !Sub
+        - |
+          {
+            "widgets": [
+              { "type": "text", "x": 0, "y": 0, "width": 24, "height": 2, "properties": { "markdown": "## Library (${Environment})  \nAlarms go to the address in Parameter Store (/library/alarm-email). What to do per alarm: docs/runbook.md in the repository." } },
+              { "type": "alarm", "x": 0, "y": 2, "width": 24, "height": 3, "properties": { "title": "Alarms", "alarms": [ "${ApiAlarm}", "${IndexerAlarm}", "${RetentionAlarm}", "${DlqAlarm}", "${ThrottlesAlarm}", "${RetentionRunAlarm}" ] } },
+              { "type": "metric", "x": 0, "y": 5, "width": 12, "height": 6, "properties": { "title": "API requests and errors", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ "AWS/ApiGateway", "Count", "ApiId", "${HttpApi}", "Stage", "$default", { "label": "requests" } ], [ ".", "4xx", ".", ".", ".", ".", { "label": "4xx (refused, e.g. validation)" } ], [ ".", "5xx", ".", ".", ".", ".", { "label": "5xx (server errors)", "color": "#d62728" } ] ] } },
+              { "type": "metric", "x": 12, "y": 5, "width": 12, "height": 6, "properties": { "title": "API response time (ms)", "region": "${AWS::Region}", "period": 300, "metrics": [ [ "AWS/ApiGateway", "Latency", "ApiId", "${HttpApi}", "Stage", "$default", { "stat": "p50", "label": "median" } ], [ "...", { "stat": "p95", "label": "95th percentile" } ] ] } },
+              { "type": "metric", "x": 0, "y": 11, "width": 12, "height": 6, "properties": { "title": "Function errors and throttles", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ { "expression": "SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" library-${Environment}', 'Sum', 300)", "label": "", "id": "errors" } ], [ "AWS/Lambda", "Throttles", { "label": "throttles" } ], [ "AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "${DlqName}", { "stat": "Maximum", "label": "search index dead-letter queue" } ] ] } },
+              { "type": "metric", "x": 12, "y": 11, "width": 12, "height": 6, "properties": { "title": "Library activity per day", "region": "${AWS::Region}", "stat": "Sum", "period": 86400, "view": "bar", "metrics": [ [ { "expression": "SEARCH('{Library,service} MetricName=\"LoanCreated\" OR MetricName=\"LoanReturned\" OR MetricName=\"LoanReturnedOverdue\" OR MetricName=\"TitleCreated\" OR MetricName=\"ReaderCreated\"', 'Sum', 86400)", "label": "", "id": "activity" } ] ] } },
+              { "type": "log", "x": 0, "y": 17, "width": 24, "height": 8, "properties": { "title": "Latest errors and warnings", "region": "${AWS::Region}", "view": "table", "query": "SOURCE '${CatalogLogs}' | SOURCE '${ReadersLogs}' | SOURCE '${CirculationLogs}' | SOURCE '${StaffLogs}' | SOURCE '${RetentionLogs}' | SOURCE '${IndexerLogs}' | fields @timestamp, level, message, function_name, error.message, function_request_id | filter level in ['ERROR', 'WARN'] | sort @timestamp desc | limit 50" } }
+            ]
+          }
+        - ApiAlarm: !GetAtt ApiServerErrorsAlarm.Arn
+          IndexerAlarm: !GetAtt SearchIndexerErrorsAlarm.Arn
+          RetentionAlarm: !GetAtt RetentionErrorsAlarm.Arn
+          DlqAlarm: !GetAtt SearchIndexerDlqAlarm.Arn
+          ThrottlesAlarm: !GetAtt LambdaThrottlesAlarm.Arn
+          RetentionRunAlarm: !GetAtt RetentionNotRunningAlarm.Arn
+          DlqName: !GetAtt SearchIndexerDlq.QueueName
+          CatalogLogs: !Ref CatalogLogGroup
+          ReadersLogs: !Ref ReadersLogGroup
+          CirculationLogs: !Ref CirculationLogGroup
+          StaffLogs: !Ref StaffLogGroup
+          RetentionLogs: !Ref RetentionLogGroup
+          IndexerLogs: !Ref SearchIndexerLogGroup
+
+  # Ready-made searches in CloudWatch Logs Insights (free to keep; a search costs fractions of a cent).
+  ErrorsQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub library-${Environment}/Errors and warnings
+      LogGroupNames:
+        [
+          !Ref CatalogLogGroup,
+          !Ref ReadersLogGroup,
+          !Ref CirculationLogGroup,
+          !Ref StaffLogGroup,
+          !Ref RetentionLogGroup,
+          !Ref SearchIndexerLogGroup,
+        ]
+      QueryString: |
+        fields @timestamp, level, message, function_name, error.name, error.message, function_request_id
+        | filter level in ['ERROR', 'WARN']
+        | sort @timestamp desc
+        | limit 100
+
+  ReferenceQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub library-${Environment}/Find an error by its reference
+      LogGroupNames:
+        [
+          !Ref CatalogLogGroup,
+          !Ref ReadersLogGroup,
+          !Ref CirculationLogGroup,
+          !Ref StaffLogGroup,
+          !Ref RetentionLogGroup,
+          !Ref SearchIndexerLogGroup,
+        ]
+      QueryString: |
+        # Replace REFERENCE by the code the user saw ("referentie: ..."), or the first characters of it.
+        fields @timestamp, level, message, function_name, error.name, error.message, error.stack
+        | filter function_request_id like 'REFERENCE'
+        | sort @timestamp asc
+
+  SlowRequestsQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub library-${Environment}/Slow requests
+      LogGroupNames:
+        [!Ref CatalogLogGroup, !Ref ReadersLogGroup, !Ref CirculationLogGroup, !Ref StaffLogGroup]
+      QueryString: |
+        fields @timestamp, method, route, status, durationMs, function_name
+        | filter message = 'request' and durationMs > 1000
+        | sort durationMs desc
+        | limit 50
+
+  TrafficQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub library-${Environment}/Requests per route and status
+      LogGroupNames:
+        [!Ref CatalogLogGroup, !Ref ReadersLogGroup, !Ref CirculationLogGroup, !Ref StaffLogGroup]
+      QueryString: |
+        filter message = 'request'
+        | stats count() as requests, avg(durationMs) as avgMs, max(durationMs) as maxMs by method, route, status
+        | sort requests desc
+
+  IsbnSourcesQuery:
+    Type: AWS::Logs::QueryDefinition
+    Properties:
+      Name: !Sub library-${Environment}/ISBN sources failing
+      LogGroupNames: [!Ref CatalogLogGroup]
+      QueryString: |
+        filter message = 'isbn source failed'
+        | stats count() as failures, latest(error.message) as lastError by source
+        | sort failures desc
+
   MonthlyBudget:
     Type: AWS::Budgets::Budget
     Condition: HasBudget
@@ -680,6 +820,9 @@ Resources:
             - { SubscriptionType: EMAIL, Address: !Ref AlarmEmail }
 
 Outputs:
+  DashboardUrl:
+    Description: How the library is doing (CloudWatch dashboard)
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards/dashboard/library-${Environment}
   AppUrl:
     Value: !If
       - HasCustomDomain

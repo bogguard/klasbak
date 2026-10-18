@@ -112,7 +112,8 @@
     "RENEWAL_NOT_LONGER": "This book may already stay until {{dueDate}}; renewing wouldn't make that longer.",
     "NOT_A_READER_CARD": "This is a book. Please scan your library card.",
     "EXCHANGE_RETURNED": "This exchange collection was already returned.",
-    "EXCHANGE_HAS_LOANS": "{{count}} books are still on loan. Have them returned first."
+    "EXCHANGE_HAS_LOANS": "{{count}} books are still on loan. Have them returned first.",
+    "reference": "(Reference for support: {{reference}})"
   },
   "notFound": {
     "title": "This page doesn't exist",

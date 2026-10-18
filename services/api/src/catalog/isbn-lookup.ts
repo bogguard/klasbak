@@ -23,13 +23,19 @@ const GOOGLE_KEY_PARAMETER = '/library/google-books-api-key';
  */
 export async function lookupIsbn(isbn13: string): Promise<IsbnLookupResult | undefined> {
   let failed = false;
-  for (const source of [openLibrary, googleBooks, dutchLibraries]) {
+  // Names written out: the bundler shortens function names, which made the logs unreadable.
+  const sources = [
+    ['Open Library', openLibrary],
+    ['Google Books', googleBooks],
+    ['Nederlandse bibliotheken', dutchLibraries],
+  ] as const;
+  for (const [name, lookup] of sources) {
     try {
-      const result = await source(isbn13);
+      const result = await lookup(isbn13);
       if (result) return result;
     } catch (error) {
       failed = true;
-      logger.warn('isbn source failed', { source: source.name, error });
+      logger.warn('isbn source failed', { source: name, error });
     }
   }
   if (failed) throw new AppError(502, 'LOOKUP_UNAVAILABLE', 'A book data source is unavailable');

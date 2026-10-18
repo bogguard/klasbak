@@ -42,8 +42,22 @@ export function createApp(): Hono<Env> {
         error.status,
       );
     }
-    logger.error('unhandled error', { error });
-    return c.json({ error: { code: 'INTERNAL', message: 'Something went wrong' } }, 500);
+    // The Lambda request id is in every log line (function_request_id): shown to the user as a
+    // reference, it leads straight to this error in the logs (docs/runbook.md).
+    // (No Lambda context when running locally: a random one then.)
+    const lambdaContext = c.env.lambdaContext as LambdaContext | undefined;
+    const reference = lambdaContext?.awsRequestId ?? crypto.randomUUID();
+    logger.error('unhandled error', { error, reference });
+    return c.json(
+      {
+        error: {
+          code: 'INTERNAL',
+          message: 'Something went wrong',
+          reference: reference.slice(0, 8),
+        },
+      },
+      500,
+    );
   });
 
   app.notFound((c) => c.json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404));

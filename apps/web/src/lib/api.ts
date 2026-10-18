@@ -5,6 +5,8 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly details?: unknown,
+    /** For unexpected server errors: a short code that finds the error in the logs. */
+    readonly reference?: string,
   ) {
     super(message);
   }
@@ -38,13 +40,14 @@ export function apiGet<T>(path: string): Promise<T> {
 async function toApiError(response: Response): Promise<ApiError> {
   try {
     const body = (await response.json()) as {
-      error?: { code?: string; message?: string; details?: unknown };
+      error?: { code?: string; message?: string; details?: unknown; reference?: string };
     };
     return new ApiError(
       response.status,
       body.error?.code ?? 'UNKNOWN',
       body.error?.message ?? '',
       body.error?.details,
+      body.error?.reference,
     );
   } catch {
     return new ApiError(response.status, response.status >= 500 ? 'INTERNAL' : 'UNKNOWN', '');

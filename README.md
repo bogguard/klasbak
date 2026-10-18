@@ -162,6 +162,22 @@ renew the certificate.
   npm run deploy:prod && scripts/deploy-web.sh prod
   ```
 
+## Following up: alarms, logs and the dashboard
+
+How to know the library is doing well, and what to do when it isn't, is in
+[docs/runbook.md](docs/runbook.md). In short:
+
+- **Alarms come by email** (the address from `setup-installation.sh`): server errors, a failing or
+  missing nightly clean-up, search index problems, throttling, and (prod) the budget. Each alarm
+  has a section in the runbook.
+- **Weekly check:** `scripts/status.sh prod` prints the alarms, the last 24 hours (requests,
+  errors, loans), whether the nightly job ran, the costs so far and the latest errors and warnings.
+  It needs `jq`.
+- **Dashboard:** CloudWatch → Dashboards → `library-prod` (link in the stack output
+  `DashboardUrl`), with ready-made searches under Logs Insights → Saved queries.
+- **A user reports an error:** the app shows a reference ("referentie: abc12345") on unexpected
+  errors; the saved query "Find an error by its reference" finds it.
+
 ## Book data (ISBN lookup)
 
 Scanning an ISBN fills in the title, authors and cover from three free sources, in this order:
