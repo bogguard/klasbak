@@ -22,6 +22,7 @@ When two principles conflict, resolve in this order:
 4. **Explain decisions.** Every non-obvious choice gets a short rationale: in a code comment (the _why_, never the _what_), in a PR description, or as an entry in `docs/decisions.md`.
 5. **Small, reversible steps.** Small PRs, feature-flag or hide unfinished work, prefer additive changes to data models.
 6. **Delete code.** Unused code, flags and config are liabilities. Remove them.
+7. **The README is part of the change.** It is the way in for the next developer and the operator: what the project is, how to run it locally (including demo or sample data), how to set up, deploy and follow up an installation. Update it in the same change that adds or alters a command, script, setup step, setting or visible feature, and make sure its commands work as written.
 
 ## 2. Default stack (use unless there is a written reason not to)
 
@@ -175,7 +176,7 @@ Before saying a task is done, verify (see `references/review-checklist.md`):
 - [ ] Loading/empty/error states designed; keyboard and screen-reader usable; checked visually
 - [ ] All UI text translated into the project's languages (see `CLAUDE.md`)
 - [ ] IaC updated; no new fixed-cost resource without a stated estimate
-- [ ] Docs/decision log updated if behaviour or architecture changed
+- [ ] README still true (commands, setup, local and demo data, features); decision log updated if behaviour or architecture changed
 
 ## 13. How to work
 

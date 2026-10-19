@@ -42,4 +42,5 @@ Use this when reviewing a change (your own or someone else's). Report only real 
 
 - Names in domain language? Comments explain why?
 - Tests cover the business rules and fail with meaningful messages?
-- Docs/decision log updated?
+- README still true: new or changed commands, scripts, setup steps, settings and features described, and its commands run as written?
+- Decision log updated?
