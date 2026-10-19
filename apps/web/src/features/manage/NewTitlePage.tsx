@@ -12,6 +12,7 @@ import { findByIsbn, useSearchIndex } from '../catalog/useSearchIndex';
 import { useAddCopyToTitle, useCreateTitle, useIsbnLookup } from './api';
 import { TitleForm } from './TitleForm';
 import { emptyTitleForm, toFormValues, type TitleFormValues } from './titleFormValues';
+import { useConfig } from '../../lib/config';
 
 type Draft = {
   values: TitleFormValues;
@@ -99,10 +100,11 @@ function AddedMessage({ added }: { added: Added }) {
 
 function LocationField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const { t } = useTranslation();
+  const { kind } = useConfig();
   return (
     <Field
       label={t('manage.new.location')}
-      hint={t('manage.new.locationHint')}
+      hint={t('manage.new.locationHint', { context: kind })}
       className="max-w-xs"
     >
       {(props) => (

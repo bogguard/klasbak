@@ -5,6 +5,7 @@ import {
   DEFAULT_SETTINGS,
   isClosed,
   isOverdue,
+  libraryYear,
   localDate,
   monthsBetween,
   schoolYear,
@@ -86,5 +87,12 @@ describe('StatisticsQuerySchema', () => {
     expect(StatisticsQuerySchema.safeParse({ from: '2025-09', to: '2027-08' }).success).toBe(true);
     expect(StatisticsQuerySchema.safeParse({ from: '2025-09', to: '2027-09' }).success).toBe(false);
     expect(StatisticsQuerySchema.safeParse({ from: '2026-13', to: '2027-01' }).success).toBe(false);
+  });
+});
+
+describe('libraryYear', () => {
+  it('is a school year for schools and a calendar year for other organisations', () => {
+    expect(libraryYear('2026-10-19', 'school')).toEqual({ from: '2026-09', to: '2027-08' });
+    expect(libraryYear('2026-10-19', 'organisation')).toEqual({ from: '2026-01', to: '2026-12' });
   });
 });

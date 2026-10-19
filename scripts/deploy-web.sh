@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the frontend and publishes it to the stack's web bucket.
 # Usage: scripts/deploy-web.sh dev|prod
-# The library's name and logo are set in the app (Instellingen → Huisstijl), not here.
+# The library's name and logo are set in the app (Instellingen → Bibliotheek), not here.
 set -euo pipefail
 # AWS CLI v2 shows some output in a pager (less), which waits for 'q'; scripts must not stop.
 export AWS_PAGER=""

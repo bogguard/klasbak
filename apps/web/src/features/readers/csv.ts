@@ -11,7 +11,20 @@ import { splitRecords } from '../../lib/spreadsheet';
 const COLUMN_ALIASES: Record<keyof ReaderRow, string[]> = {
   firstName: ['voornaam', 'roepnaam', 'firstname', 'first name', 'given name'],
   lastName: ['achternaam', 'familienaam', 'naam', 'lastname', 'last name', 'surname'],
-  group: ['klas', 'klasgroep', 'klasnaam', 'klascode', 'groep', 'class', 'group'],
+  group: [
+    'klas',
+    'klasgroep',
+    'klasnaam',
+    'klascode',
+    'groep',
+    'afdeling',
+    'dienst',
+    'departement',
+    'team',
+    'class',
+    'group',
+    'department',
+  ],
   schoolNumber: [
     'stamboeknummer',
     'stamboeknr',
@@ -19,6 +32,10 @@ const COLUMN_ALIASES: Record<keyof ReaderRow, string[]> = {
     'stamnr',
     'leerlingnummer',
     'leerlingnr',
+    'personeelsnummer',
+    'werknemersnummer',
+    'employee number',
+    'staff number',
     'student number',
     'student id',
   ],
@@ -42,12 +59,16 @@ export type CsvParseResult =
 /** Excel adds this invisible character at the start of UTF-8 files. */
 const BYTE_ORDER_MARK = new RegExp(`^${String.fromCharCode(0xfeff)}`);
 
-export function parseReadersCsv(text: string): CsvParseResult {
-  return parseReaderRecords(splitRecords(text.replace(BYTE_ORDER_MARK, '')));
+export function parseReadersCsv(text: string, teacherNames: string[] = []): CsvParseResult {
+  return parseReaderRecords(splitRecords(text.replace(BYTE_ORDER_MARK, '')), teacherNames);
 }
 
 /** Rows of cells (from CSV or Excel) → readers. The header is the first row naming both names. */
-export function parseReaderRecords(lines: string[][]): CsvParseResult {
+/**
+ * `teacherNames`: the library's own words for its second reader type (e.g. "partner"), so a
+ * "soort" column with those words is read as that type too.
+ */
+export function parseReaderRecords(lines: string[][], teacherNames: string[] = []): CsvParseResult {
   const headerIndex = lines.slice(0, 10).findIndex((cells) => {
     const columns = mapColumns(cells);
     return columns.firstName !== undefined && columns.lastName !== undefined;
@@ -73,7 +94,7 @@ export function parseReaderRecords(lines: string[][]): CsvParseResult {
       schoolNumber: value('schoolNumber'),
       memberNumber: value('memberNumber'),
       email: value('email'),
-      category: toCategory(value('category')),
+      category: toCategory(value('category'), teacherNames),
     };
     const parsed = ReaderInputSchema.safeParse(candidate);
     const line = headerIndex + i + 2; // 1-based, after the header: as people see it in Excel
@@ -110,8 +131,13 @@ function mapColumns(header: string[]): Partial<Record<keyof ReaderRow, number>> 
   return result;
 }
 
-function toCategory(value: string | undefined): ReaderInput['category'] | undefined {
+function toCategory(
+  value: string | undefined,
+  teacherNames: string[],
+): ReaderInput['category'] | undefined {
   if (!value) return undefined;
+  const word = value.trim().toLocaleLowerCase('nl');
+  if (teacherNames.some((name) => name.toLocaleLowerCase('nl') === word)) return 'teacher';
   return /^(leerkracht|leraar|juf|meester|teacher|staff|personeel)/i.test(value)
     ? 'teacher'
     : 'pupil';

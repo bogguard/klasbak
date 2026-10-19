@@ -9,6 +9,7 @@ School library software: a public online catalogue, a circulation desk for libra
 - **Code, comments, commits, docs, API fields and translation keys are in English.**
 - **The user interface is in Dutch (Flemish, `nl-BE`) by default**, with English (`en`) as second language. Every user-facing string goes through i18n (`apps/web/src/locales/`), including emails and printed labels.
 - Use Flemish library vocabulary in the UI (see glossary), e.g. "reservatie", not "reservering".
+- The library chooses its kind (school or organisation) and its own words for reader types and groups (decision 034). UI texts never write "leerling", "leerkracht" or "klas" literally: use `{{pupil}}`, `{{teachers}}`, `{{Group}}`, `{{org}}`, `{{period}}` and a `_school` context variant for school-only texts.
 
 ## Stack
 

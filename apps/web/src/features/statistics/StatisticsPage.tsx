@@ -1,4 +1,4 @@
-import { localDate, schoolYear } from '@library/shared';
+import { libraryYear, localDate, type LibraryKind } from '@library/shared';
 import MiniSearch from 'minisearch';
 import { BarChart3, Download, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -14,15 +14,15 @@ import { useExchanges } from '../exchange/api';
 import { statisticsCsv } from './reportCsv';
 import { summarize, type CatalogueTitle } from './summary';
 
-/** The current school year and the two before it. */
-function schoolYears(today: string) {
-  const current = schoolYear(today);
-  const start = Number(current.from.slice(0, 4));
-  return [0, 1, 2].map((back) => ({
-    from: `${start - back}-09`,
-    to: `${start - back + 1}-08`,
-    label: `${start - back}–${start - back + 1}`,
-  }));
+/** This year and the two before it: school years for a school, calendar years otherwise. */
+function libraryYears(today: string, kind: LibraryKind) {
+  const start = Number(libraryYear(today, kind).from.slice(0, 4));
+  return [0, 1, 2].map((back) => {
+    const year = start - back;
+    return kind === 'school'
+      ? { from: `${year}-09`, to: `${year + 1}-08`, label: `${year}–${year + 1}` }
+      : { from: `${year}-01`, to: `${year}-12`, label: String(year) };
+  });
 }
 
 /**
@@ -33,15 +33,15 @@ function schoolYears(today: string) {
  */
 export function StatisticsPage() {
   const { t, i18n } = useTranslation();
-  const years = useMemo(() => schoolYears(localDate()), []);
+  const { libraryName, kind } = useConfig();
+  const years = useMemo(() => libraryYears(localDate(), kind), [kind]);
   const [yearIndex, setYearIndex] = useState(0);
   const year = years[yearIndex] ?? years[0];
   const stats = useStatistics({ from: year?.from ?? '', to: year?.to ?? '' });
   const index = useSearchIndex();
   const errorMessage = useErrorMessage();
-  const { libraryName } = useConfig();
   const exchanges = useExchanges();
-  // Exchange collections that were at the school during this school year.
+  // Exchange collections that were at the library during the chosen year.
   const yearExchanges = (exchanges.data ?? []).filter(
     (e) =>
       year &&

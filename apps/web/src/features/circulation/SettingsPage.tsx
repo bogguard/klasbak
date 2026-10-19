@@ -11,13 +11,14 @@ import { Plus, Save, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Skeleton, StatusMessage, useErrorMessage } from '../../components/ui/Feedback';
-import { Alert, inputHeight } from '../../components/ui/Form';
+import { Alert, Field, inputHeight } from '../../components/ui/Form';
 import { AdminOnly } from '../../app/AdminOnly';
 import { useConfig } from '../../lib/config';
 import { formatDate } from '../../lib/format';
-import { useSettings, useUpdateSettings } from './api';
+import { useBranding, useSettings, useUpdateSettings } from './api';
 import { ExportSection } from '../export/ExportSection';
-import { BrandingSection } from './BrandingSection';
+import { LogoField } from './LogoField';
+import { termsToSave, vocabularyFromConfig, VocabularyFields } from './VocabularyFields';
 
 // Monday first, as on a Belgian calendar; values follow Date.getUTCDay().
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
@@ -39,11 +40,6 @@ function Settings() {
   return (
     <div className="max-w-3xl space-y-6">
       <h1 className="text-3xl font-semibold tracking-tight">{t('settings.heading')}</h1>
-      {/* Remount once the configuration is loaded, so the name field starts with the real name. */}
-      <BrandingSection key={String(loaded)} />
-      <hr className="border-line" />
-      <ExportSection />
-      <hr className="border-line" />
       {settings.isPending ? (
         <Skeleton className="h-96 w-full" />
       ) : settings.isError ? (
@@ -52,26 +48,36 @@ function Settings() {
           title={errorMessage(settings.error)}
         />
       ) : (
-        <SettingsForm settings={settings.data} />
+        // Remount once the configuration is loaded, so name and words start with the real ones.
+        <SettingsForm key={String(loaded)} settings={settings.data} />
       )}
+      {/* An action, not a setting: it stays out of the form and its save button. */}
+      <hr className="border-line" />
+      <ExportSection />
     </div>
   );
 }
 
 function SettingsForm({ settings }: { settings: LibrarySettings }) {
   const { t, i18n } = useTranslation();
+  const config = useConfig();
   const update = useUpdateSettings();
+  const { rename, saveVocabulary } = useBranding();
   const errorMessage = useErrorMessage();
   const { version: _version, ...initial } = settings;
   const [values, setValues] = useState<LibrarySettingsInput>(initial);
-  const [invalid, setInvalid] = useState(false);
+  // Name and words live in the branding file, but are edited and saved with the rest.
+  const [name, setName] = useState(config.libraryName);
+  const [vocabulary, setVocabulary] = useState(() => vocabularyFromConfig(config));
+  const [failure, setFailure] = useState<unknown>();
+  const [invalid, setInvalid] = useState<string>();
   const [saved, setSaved] = useState(false);
   // The version we last saw; the next save must be based on it (optimistic locking).
   const [version, setVersion] = useState(settings.version);
 
   function change(next: LibrarySettingsInput) {
     setValues(next);
-    setInvalid(false);
+    setInvalid(undefined);
     setSaved(false);
   }
 
@@ -109,24 +115,71 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
       })),
     };
     const parsed = LibrarySettingsInputSchema.safeParse(cleaned);
-    if (!parsed.success) {
-      setInvalid(true);
-      return;
-    }
+    const terms = termsToSave(t, vocabulary);
+    const problem = !name.trim()
+      ? 'settings.branding.nameRequired'
+      : !terms
+        ? 'settings.vocabulary.incomplete'
+        : !parsed.success
+          ? 'settings.invalid'
+          : undefined;
+    setInvalid(problem);
+    if (problem || !parsed.success || !terms) return;
+    setFailure(undefined);
     try {
       const result = await update.mutateAsync({ settings: parsed.data, version });
       setVersion(result.version);
+      // Only what changed, so the audit trail doesn't list a new name on every save.
+      if (name.trim() !== config.libraryName) await rename.mutateAsync(name.trim());
+      const wordsChanged = JSON.stringify(terms) !== JSON.stringify(config.terms ?? {});
+      if (vocabulary.kind !== config.kind || wordsChanged) {
+        await saveVocabulary.mutateAsync({ kind: vocabulary.kind, terms });
+      }
       setSaved(true);
-    } catch {
-      // Shown below.
+    } catch (error) {
+      setFailure(error);
     }
   }
+
+  const saving = update.isPending || rename.isPending || saveVocabulary.isPending;
 
   const preview = LibrarySettingsInputSchema.safeParse(values);
   const today = localDate();
 
   return (
     <form onSubmit={(e) => void submit(e)} noValidate className="space-y-8">
+      <fieldset className="space-y-5">
+        <legend className="mb-2 text-xl font-semibold">{t('settings.branding.heading')}</legend>
+        <Field
+          label={t('settings.branding.name')}
+          hint={t('settings.branding.nameHint')}
+          className="w-full max-w-md"
+        >
+          {(props) => (
+            <input
+              {...props}
+              className={`${props.className} ${inputHeight}`}
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setInvalid(undefined);
+                setSaved(false);
+              }}
+              maxLength={80}
+            />
+          )}
+        </Field>
+        <LogoField />
+        <VocabularyFields
+          value={vocabulary}
+          onChange={(next) => {
+            setVocabulary(next);
+            setInvalid(undefined);
+            setSaved(false);
+          }}
+        />
+      </fieldset>
+
       <fieldset className="space-y-3">
         <legend className="mb-2 text-xl font-semibold">{t('settings.rules.heading')}</legend>
         <div className="relative overflow-x-auto rounded-xl border border-line bg-surface">
@@ -308,14 +361,15 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
         </Button>
       </fieldset>
 
-      {invalid && <Alert tone="danger">{t('settings.invalid')}</Alert>}
-      {saved && <Alert tone="success">{t('manage.edit.saved')}</Alert>}
-      {update.isError && <Alert tone="danger">{errorMessage(update.error)}</Alert>}
-
-      <div className="border-t border-line pt-6">
-        <Button type="submit" disabled={update.isPending}>
+      {/* Stays in view on this long page, so it's clear one button saves everything above;
+          the outcome shows next to it, where the eye is after clicking. */}
+      <div className="sticky bottom-0 -mx-4 space-y-3 border-t border-line bg-surface-sunken/95 px-4 py-4 backdrop-blur">
+        {invalid && <Alert tone="danger">{t(invalid)}</Alert>}
+        {saved && <Alert tone="success">{t('manage.edit.saved')}</Alert>}
+        {failure !== undefined && <Alert tone="danger">{errorMessage(failure)}</Alert>}
+        <Button type="submit" disabled={saving}>
           <Save className="size-4" aria-hidden="true" />
-          {update.isPending ? t('manage.form.saving') : t('settings.save')}
+          {saving ? t('manage.form.saving') : t('settings.save')}
         </Button>
       </div>
     </form>

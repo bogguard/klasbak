@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Layout } from './app/Layout';
+import { LibraryWords } from './app/LibraryWords';
 import { NotFoundPage } from './app/NotFoundPage';
 import { PrivacyPage } from './app/PrivacyPage';
 import { RequireStaff } from './app/RequireStaff';
@@ -151,6 +152,7 @@ createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <LibraryWords />
         <RouterProvider router={router} />
       </AuthProvider>
     </QueryClientProvider>

@@ -128,7 +128,7 @@
   "auth": {
     "heading": "Sign in",
     "username": "Username",
-    "usernameHint": "Your member number or the username the school gave you.",
+    "usernameHint": "Your member number or the username you got from {{org}}.",
     "password": "Password",
     "submit": "Sign in",
     "busy": "One moment…",
@@ -191,7 +191,8 @@
       "addCopy": "Add a copy",
       "newTitleAnyway": "Create a new title anyway",
       "location": "Location of new copies",
-      "locationHint": "Optional, e.g. ‘Reading books’ or ‘Class library 3B’. Kept for the next books."
+      "locationHint": "Optional, e.g. ‘Reading books’ or ‘Shelf 2’. Kept for the next books.",
+      "locationHint_school": "Optional, e.g. ‘Reading books’ or ‘Class library 3B’. Kept for the next books."
     },
     "edit": {
       "viewPublic": "View in the catalogue",
@@ -280,12 +281,13 @@
     "import": "Import (CSV)",
     "new": "New reader",
     "search": "Search by name or card number",
-    "group": "Class",
-    "allGroups": "All classes",
+    "group": "{{Group}}",
+    "allGroups": "All {{groups}}",
     "showInactive": "Include inactive readers",
     "empty": {
       "title": "No readers yet",
-      "hint": "Add readers one by one or import a class list."
+      "hint": "Add readers one by one or import a list.",
+      "hint_school": "Add readers one by one or import a class list."
     },
     "count_one": "{{count}} reader",
     "count_other": "{{count}} readers",
@@ -293,8 +295,8 @@
     "memberNumber": "Card number",
     "onLoan": "On loan",
     "categories": {
-      "pupil": "Pupil",
-      "teacher": "Teacher"
+      "pupil": "{{Pupil}}",
+      "teacher": "{{Teacher}}"
     },
     "inactive": "Inactive",
     "back": "Back to readers",
@@ -302,7 +304,7 @@
     "form": {
       "firstName": "First name",
       "lastName": "Last name",
-      "groupHint": "For example 3B. Leave empty for teachers.",
+      "groupHint": "Optional, for example the reader's {{group}}.",
       "category": "Type",
       "email": "Email",
       "emailHint": "Optional. Only needed for reminders.",
@@ -317,8 +319,11 @@
         "group": "At most 30 characters.",
         "schoolNumber": "At most 40 characters."
       },
-      "schoolNumber": "School number",
-      "schoolNumberHint": "Optional. The number from the school administration, to recognise the pupil in a next import. Not printed on the card."
+      "schoolNumber": "Administration number",
+      "schoolNumberHint": "Optional. The number from your own administration (e.g. staff or member number), to recognise the reader in a next import. Not printed on the card.",
+      "groupHint_school": "For example 3B. Leave empty for {{teachers}}.",
+      "schoolNumber_school": "School number",
+      "schoolNumberHint_school": "Optional. The number from the school administration, to recognise the {{pupil}} in a next import. Not printed on the card."
     },
     "loans": {
       "active_one": "{{count}} book on loan",
@@ -331,8 +336,8 @@
     },
     "importPage": {
       "heading": "Import readers",
-      "explanation": "Choose an Excel (.xlsx) or CSV file, for example the pupil list from your school administration software. A title row above the column names is fine. For example:",
-      "columns": "Required: first name and last name. Optional: class, school number (stamboeknummer), card number, email, type (pupil or teacher). Existing readers (same school number, card number or, for readers entered by hand, exactly the same name) are updated, so you can simply import the new list every school year. Data that isn't in the file is kept.",
+      "explanation": "Choose an Excel (.xlsx) or CSV file, for example a staff or member list. A title row above the column names is fine. For example:",
+      "columns": "Required: first name and last name. Optional: {{group}}, administration number (e.g. staff number), card number, email, type ({{pupil}} or {{teacher}}). Existing readers (same number, card number or, for readers entered by hand, exactly the same name) are updated, so you can simply import a new list later. Data that isn't in the file is kept.",
       "chooseFile": "Choose a file",
       "errors": {
         "empty": "This file is empty or only has column names.",
@@ -356,22 +361,29 @@
       "planCount": "{{created}} new, {{updated}} to update.",
       "willCreate": "New",
       "willUpdate": "Update",
-      "missing_one": "{{count}} active pupil is not in this file.",
-      "missing_other": "{{count}} active pupils are not in this file.",
+      "missing_one": "{{count}} active {{pupil}} is not in this file.",
+      "missing_other": "{{count}} active {{pupils}} are not in this file.",
       "showMissing": "Show who",
-      "deactivateMissing_one": "Set this pupil inactive (new school year)",
-      "deactivateMissing_other": "Set these {{count}} pupils inactive (new school year)",
-      "deactivateHint": "Only tick this if the file contains all pupils of the school. Inactive readers can't borrow; their books stay on the overdue list and you can make them active again at any time.",
-      "deactivated_one": "{{count}} pupil set inactive.",
-      "deactivated_other": "{{count}} pupils set inactive."
+      "deactivateMissing_one": "Set this {{pupil}} inactive (left)",
+      "deactivateMissing_other": "Set these {{count}} {{pupils}} inactive (left)",
+      "deactivateHint": "Only tick this if the file contains all {{pupils}} of {{org}}. Inactive readers can't borrow; their books stay on the overdue list and you can make them active again at any time.",
+      "deactivated_one": "{{count}} {{pupil}} set inactive.",
+      "deactivated_other": "{{count}} {{pupils}} set inactive.",
+      "explanation_school": "Choose an Excel (.xlsx) or CSV file, for example the pupil list from your school administration software. A title row above the column names is fine. For example:",
+      "columns_school": "Required: first name and last name. Optional: {{group}}, school number (stamboeknummer), card number, email, type ({{pupil}} or {{teacher}}). Existing readers (same school number, card number or, for readers entered by hand, exactly the same name) are updated, so you can simply import the new list every school year. Data that isn't in the file is kept.",
+      "deactivateMissing_school_one": "Set this {{pupil}} inactive (new school year)",
+      "deactivateMissing_school_other": "Set these {{count}} {{pupils}} inactive (new school year)",
+      "example": "first name;last name;department;employee number\nLotte;Peeters;Tax;P0417\nAmir;Claes;Family law;P0422",
+      "example_school": "voornaam;naam;klas;stamboeknummer\nLotte;Peeters;3B;1234567\nAmir;Claes;1A;1234568"
     },
     "privacy": {
       "heading": "Privacy of this reader",
-      "explanation": "A reader (or their parents) may ask for a copy of their data, or ask for everything to be deleted.",
+      "explanation": "A reader may ask for a copy of their data, or ask for everything to be deleted.",
       "export": "Download data",
       "delete": "Delete reader",
       "hasBooks": "You can delete the reader once all books are returned.",
-      "confirmDelete": "Permanently delete {{name}} and their full reading history? This can't be undone."
+      "confirmDelete": "Permanently delete {{name}} and their full reading history? This can't be undone.",
+      "explanation_school": "A reader (or their parents) may ask for a copy of their data, or ask for everything to be deleted."
     }
   },
   "loans": {
@@ -383,7 +395,7 @@
     "show": "Show",
     "onlyOverdue": "Overdue",
     "allActive": "All loans",
-    "noGroup": "No class",
+    "noGroup": "No {{group}}",
     "noneOverdue": "Nothing overdue. Well done!",
     "none": "Nothing is on loan.",
     "reader": "Reader",
@@ -397,7 +409,7 @@
     "reminder": {
       "button_one": "Make reminder slip",
       "button_other": "Make {{count}} reminder slips",
-      "hint": "One slip per reader with all their late books, three per A4 page. Choose a class first to make slips for that class only.",
+      "hint": "One slip per reader with all their late books, three per A4 page. Choose a {{group}} first to make slips for that {{group}} only.",
       "heading": "Reminder: please return your books",
       "intro": "These library books should already have been returned. Please bring them back as soon as possible. If you have lost a book, let the librarian know.",
       "dueOn": "was due {{date}}",
@@ -452,7 +464,7 @@
       "heading": "Loan rules",
       "loanDays": "Days",
       "maxLoans": "Max. books",
-      "preview": "A book lent to a pupil today is due back on {{date}}."
+      "preview": "A book lent to a {{pupil}} today is due on {{date}}."
     },
     "closedDays": {
       "heading": "Regular closing days",
@@ -475,23 +487,46 @@
       "retentionHint": "Returned loans are deleted after this; only anonymous counts remain. Between 30 and 3650 days."
     },
     "branding": {
-      "heading": "Branding",
+      "heading": "Library",
       "name": "Name of the library",
       "nameHint": "Shown at the top of every page and on reader cards.",
-      "saveName": "Save name",
-      "logoAlt": "School logo",
+      "logoAlt": "Logo of {{org}}",
       "addLogo": "Add logo",
       "replaceLogo": "Choose another logo",
-      "logoHint": "A PNG with a transparent background looks best. Shown at the top of the website, on reader cards and as the browser tab icon."
+      "logoHint": "A PNG with a transparent background looks best. Shown at the top of the website, on reader cards and as the browser tab icon. A chosen logo is saved right away.",
+      "logo": "Logo",
+      "nameRequired": "Give the library a name."
     },
     "export": {
       "heading": "Export data",
-      "explanation": "Download all the library's data in one ZIP file: titles, copies, readers and loans as CSV (opens in Excel) and everything together as JSON. The file contains pupils' personal data: keep it safe and delete it when you no longer need it.",
+      "explanation": "Download all the library's data in one ZIP file: titles, copies, readers and loans as CSV (opens in Excel) and everything together as JSON. The file contains readers' personal data: keep it safe and delete it when you no longer need it.",
       "button": "Export all data",
       "busy_one": "Working… {{count}} record",
       "busy_other": "Working… {{count}} records",
       "done_one": "Done: {{count}} record exported.",
       "done_other": "Done: {{count}} records exported."
+    },
+    "vocabulary": {
+      "kind": "Kind of library",
+      "kinds": {
+        "school": "School",
+        "organisation": "Other organisation"
+      },
+      "kindHints": {
+        "school": "Words like pupil, teacher and class; statistics per school year; import from school administration software and exchange collections from the public library.",
+        "organisation": "For example a law firm, a company or an association: neutral words and statistics per calendar year."
+      },
+      "words": "Own words",
+      "wordsHint": "What are your two kinds of readers and their groups called? The first kind follows the first loan rule, the second kind the second. Leave empty to use the grey defaults.",
+      "what": "What",
+      "one": "Singular",
+      "other": "Plural",
+      "terms": {
+        "pupil": "First kind of reader",
+        "teacher": "Second kind of reader",
+        "group": "Group"
+      },
+      "incomplete": "For an own word, fill in both singular and plural, or leave both empty."
     }
   },
   "labels": {
@@ -553,11 +588,11 @@
       "done_one": "{{count}} label marked as printed. Next time you start at label {{next}}.",
       "done_other": "{{count}} labels marked as printed. Next time you start at label {{next}}."
     },
-    "cardsHowTo": "Ten cards per A4, the size of a bank card. Print on sturdy paper (200–250 g/m²) at actual size, cut along the marks in the margin and laminate with 65 × 95 mm pouches, preferably matte so the scanner sees no glare. Test one card with the scanner first. The class is left off on purpose, so a card lasts several school years."
+    "cardsHowTo": "Ten cards per A4, the size of a bank card. Print on sturdy paper (200–250 g/m²) at actual size, cut along the marks in the margin and laminate with 65 × 95 mm pouches, preferably matte so the scanner sees no glare. Test one card with the scanner first. The {{group}} is left off on purpose, so a card lasts several years."
   },
   "mfa": {
     "heading": "Protect your account with two-step verification",
-    "why": "You manage the library and can see pupils' data. So when you sign in we ask, besides your password, for a code from an app on your phone. You set this up once.",
+    "why": "You manage the library and can see readers' data. So when you sign in we ask, besides your password, for a code from an app on your phone. You set this up once.",
     "step1": "Install an authenticator app on your phone, if you don't have one yet.",
     "apps": "For example Microsoft Authenticator, Google Authenticator or your password manager's app.",
     "step2": "Scan this QR code with the app.",
@@ -572,11 +607,11 @@
     "intro": "How {{library}} handles your data, in plain language.",
     "who": {
       "heading": "Who is responsible?",
-      "body": "The school is responsible for the data in this library. Questions about your data? Please contact the school."
+      "body": "{{Org}} is responsible for the data in this library. Questions about your data? Please contact {{org}}."
     },
     "what": {
       "heading": "What data do we keep?",
-      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. We don't ask for a date of birth, address or photo."
+      "body": "Only what's needed to lend books: your first name, last name, {{group}}, card number and, if {{org}} wants, an email address. We also keep track of which books you borrow and when they're due. We don't ask for a date of birth, address or photo."
     },
     "why": {
       "heading": "What do we use it for?",
@@ -584,7 +619,8 @@
     },
     "retention": {
       "heading": "How long do we keep it?",
-      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. When you leave the school, the school can delete all your data."
+      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; {{org}} can change this). For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘this {{group}} borrowed 40 books’, never who read what. When you leave, {{org}} can delete all your data.",
+      "body_school": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; {{org}} can change this). For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘{{group}} 3B borrowed 40 books’, never who read what. When you leave {{org}}, {{org}} can delete all your data."
     },
     "where": {
       "heading": "Where is the data?",
@@ -596,7 +632,8 @@
     },
     "rights": {
       "heading": "Your rights",
-      "body": "You (or your parents) may ask which data we have about you, have it corrected or have it deleted. Ask the school. Not satisfied? You can file a complaint with the Belgian Data Protection Authority (dataprotectionauthority.be)."
+      "body": "You may ask which data we have about you, have it corrected or have it deleted. Ask {{org}}. Not satisfied? You can file a complaint with the Belgian Data Protection Authority (dataprotectionauthority.be).",
+      "body_school": "You (or your parents) may ask which data we have about you, have it corrected or have it deleted. Ask {{org}}. Not satisfied? You can file a complaint with the Belgian Data Protection Authority (dataprotectionauthority.be)."
     }
   },
   "cover": {
@@ -682,32 +719,32 @@
   },
   "statistics": {
     "heading": "Statistics",
-    "schoolYear": "School year",
-    "intro": "Anonymous: we count how many books are lent per month, per title and per class, not who read what.",
-    "empty": "No loans in this school year yet",
+    "schoolYear": "{{Period}}",
+    "intro": "Anonymous: we count how many books are lent per month, per title and per {{group}}, not who read what.",
+    "empty": "No loans in this {{period}} yet",
     "emptyHint": "As soon as books are lent at the desk, the figures appear here.",
     "total": "Loans",
-    "perPupil": "Per pupil",
+    "perPupil": "Per {{pupil}}",
     "busiestMonth": "Busiest month",
     "perMonth": "Per month",
     "topTitles": "Most borrowed",
     "loans_one": "{{count}}×",
     "loans_other": "{{count}}×",
-    "perClass": "Per class",
-    "pupils": "Pupils",
+    "perClass": "Per {{group}}",
+    "pupils": "{{Pupils}}",
     "notLent_one": "{{count}} title not borrowed",
     "notLent_other": "{{count}} titles not borrowed",
-    "notLentHint": "Not borrowed this school year yet, oldest first. Maybe they deserve a spot in the spotlight, or they can go.",
+    "notLentHint": "Not borrowed this {{period}} yet, oldest first. Maybe they deserve a spot in the spotlight, or they can go.",
     "andMore_one": "and {{count}} more",
     "andMore_other": "and {{count}} more",
     "activeReaders": "Active readers",
-    "activePupils": "Active pupils",
-    "activeTeachers": "Active teachers",
+    "activePupils": "Active {{pupils}}",
+    "activeTeachers": "Active {{teachers}}",
     "collection": "Collection",
     "collectionValue": "{{titles}} titles, {{copies}} copies",
     "titles": "Titles",
     "copies": "Copies",
-    "added": "New titles this school year",
+    "added": "New titles this {{period}}",
     "perAvi": "Loans per AVI level",
     "report": {
       "print": "Print report",
@@ -716,12 +753,12 @@
       "value": "Count",
       "totals": "Totals",
       "fileName": "library-report",
-      "printHeader": "{{library}} · report for school year {{year}} · printed on {{date}}. Anonymous figures: per month, title and class, not per pupil."
+      "printHeader": "{{library}} · report for {{period}} {{year}} · printed on {{date}}. Anonymous figures: per month, title and {{group}}, not per {{pupil}}."
     },
-    "pupilsCount_one": "{{count}} pupil",
-    "pupilsCount_other": "{{count}} pupils",
-    "teachersCount_one": "{{count}} teacher",
-    "teachersCount_other": "{{count}} teachers",
+    "pupilsCount_one": "{{count}} {{pupil}}",
+    "pupilsCount_other": "{{count}} {{pupils}}",
+    "teachersCount_one": "{{count}} {{teacher}}",
+    "teachersCount_other": "{{count}} {{teachers}}",
     "exchanges": "Exchange collections from the public library"
   },
   "ticket": {
@@ -736,10 +773,10 @@
   "exchange": {
     "heading": "Exchange collections",
     "new": "New exchange collection",
-    "intro": "Books the public library lends to the school for a while. They keep the library's label, you lend them at the desk as usual, and when the collection goes back they all leave the catalogue at once.",
+    "intro": "Books the public library lends to {{org}} for a while. They keep the library's label, you lend them at the desk as usual, and when the collection goes back they all leave the catalogue at once.",
     "none": "No exchange collections yet",
-    "noneHint": "Does the school get books from the public library? Create an exchange collection and read in the library's list, or scan the books one by one.",
-    "active": "At school",
+    "noneHint": "Does {{org}} get books from the public library? Create an exchange collection and read in the library's list, or scan the books one by one.",
+    "active": "At {{org}}",
     "returned": "Returned",
     "returnBy": "Back to the library on {{date}}",
     "returnedOn": "Returned on {{date}}",
@@ -758,7 +795,7 @@
       "name": "Name",
       "nameHint": "For example: Autumn 2026",
       "returnBy": "Back to the library on",
-      "returnByHint": "Pupils must return their books a week earlier.",
+      "returnByHint": "{{Pupils}} must return their books a week earlier.",
       "required": "Please fill this in.",
       "create": "Create and add books",
       "cancel": "Cancel"
@@ -838,9 +875,43 @@
       "label": "Exchange collection",
       "until": "back to the library on {{date}}",
       "titleNotice": "This book comes from the exchange collection {{name}} and goes back to the library on {{date}}. It then leaves the catalogue too.",
-      "copyNotice_one": "{{count}} copy comes from the exchange collection {{name}} and goes back to the library on {{date}}. The school's own copies stay.",
-      "copyNotice_other": "{{count}} copies come from the exchange collection {{name}} and go back to the library on {{date}}. The school's own copies stay.",
+      "copyNotice_one": "{{count}} copy comes from the exchange collection {{name}} and goes back to the library on {{date}}. {{Org}}'s own copies stay.",
+      "copyNotice_other": "{{count}} copies come from the exchange collection {{name}} and go back to the library on {{date}}. {{Org}}'s own copies stay.",
       "open": "Go to the exchange collection"
+    }
+  },
+  "terms": {
+    "school": {
+      "pupil": {
+        "one": "pupil",
+        "other": "pupils"
+      },
+      "teacher": {
+        "one": "teacher",
+        "other": "teachers"
+      },
+      "group": {
+        "one": "class",
+        "other": "classes"
+      },
+      "org": "the school",
+      "period": "school year"
+    },
+    "organisation": {
+      "pupil": {
+        "one": "reader",
+        "other": "readers"
+      },
+      "teacher": {
+        "one": "staff member",
+        "other": "staff members"
+      },
+      "group": {
+        "one": "department",
+        "other": "departments"
+      },
+      "org": "the organisation",
+      "period": "year"
     }
   }
 }

@@ -15,6 +15,7 @@ import { Alert } from '../../components/ui/Form';
 import { useDeactivateReaders, useImportReaders, useReaders } from './api';
 import { readSpreadsheet, SPREADSHEET_ACCEPT } from '../../lib/spreadsheet';
 import { parseReaderRecords, type CsvParseResult, type ParsedRow } from './csv';
+import { useConfig } from '../../lib/config';
 
 type FileResult = CsvParseResult | { ok: false; error: 'oldExcel' | 'unreadable' };
 
@@ -35,6 +36,7 @@ export function ImportReadersPage() {
 
 function ImportReaders() {
   const { t } = useTranslation();
+  const { kind, terms } = useConfig();
   const importReaders = useImportReaders();
   const deactivate = useDeactivateReaders();
   const existing = useReaders();
@@ -51,7 +53,11 @@ function ImportReaders() {
     setDeactivated(undefined);
     setDeactivateMissing(false);
     const sheet = await readSpreadsheet(file);
-    setParsed(sheet.ok ? parseReaderRecords(sheet.rows) : sheet);
+    // The library's own names for its second reader type count as that type in the file.
+    const teacherNames = [terms?.teacher?.one, terms?.teacher?.other].filter(
+      (name): name is string => Boolean(name),
+    );
+    setParsed(sheet.ok ? parseReaderRecords(sheet.rows, teacherNames) : sheet);
   }
 
   const valid = useMemo(
@@ -123,12 +129,12 @@ function ImportReaders() {
       <h1 className="text-3xl font-semibold tracking-tight">{t('readers.importPage.heading')}</h1>
 
       <section className="space-y-3 rounded-xl border border-line bg-surface p-4">
-        <p>{t('readers.importPage.explanation')}</p>
+        <p>{t('readers.importPage.explanation', { context: kind })}</p>
         <pre className="relative overflow-x-auto rounded-lg bg-surface-sunken p-3 text-sm">
-          voornaam;naam;klas;stamboeknummer{'\n'}Lotte;Peeters;3B;1234567{'\n'}
-          Amir;Claes;1A;1234568
+          {/* School administrations export Dutch column names, also for English users. */}
+          {t('readers.importPage.example', { context: kind })}
         </pre>
-        <p className="text-sm text-muted">{t('readers.importPage.columns')}</p>
+        <p className="text-sm text-muted">{t('readers.importPage.columns', { context: kind })}</p>
         <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-line px-4 font-medium hover:bg-surface-sunken focus-within:outline-2 focus-within:outline-accent">
           <FileUp className="size-4" aria-hidden="true" />
           {t('readers.importPage.chooseFile')}
@@ -172,7 +178,7 @@ function ImportReaders() {
                     {t('readers.group')}
                   </th>
                   <th scope="col" className="px-3 py-2 font-medium">
-                    {t('readers.form.schoolNumber')}
+                    {t('readers.form.schoolNumber', { context: kind })}
                   </th>
                   <th scope="col" className="px-3 py-2 font-medium">
                     {t('readers.importPage.check')}
@@ -231,7 +237,10 @@ function ImportReaders() {
                   className="mt-1 size-5 accent-accent"
                 />
                 <span>
-                  {t('readers.importPage.deactivateMissing', { count: plan.missing.length })}
+                  {t('readers.importPage.deactivateMissing', {
+                    count: plan.missing.length,
+                    context: kind,
+                  })}
                   <span className="block text-sm text-muted">
                     {t('readers.importPage.deactivateHint')}
                   </span>

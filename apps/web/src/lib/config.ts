@@ -1,15 +1,18 @@
-import { BRANDING_PATH, type Branding } from '@library/shared';
+import { BRANDING_PATH, type Branding, type LibraryKind, type LibraryTerms } from '@library/shared';
 import { useQuery } from '@tanstack/react-query';
 
 /**
  * Runtime settings: /config.json is written at deploy time (scripts/deploy-web.sh), so the
  * same build runs in every environment; the library's own name and logo come from the
- * branding file an administrator maintains in the app (Instellingen → Huisstijl).
+ * branding file an administrator maintains in the app (Instellingen → Bibliotheek).
  */
 export type AppConfig = {
   libraryName: string;
-  /** Path of the school's logo, if one was uploaded. */
+  /** Path of the library's logo, if one was uploaded. */
   logoKey?: string;
+  /** School or another organisation, and its own words (Instellingen → Bibliotheek). */
+  kind: LibraryKind;
+  terms?: LibraryTerms;
   region?: string;
   userPoolId?: string;
   userPoolClientId?: string;
@@ -21,11 +24,13 @@ export type AppConfig = {
 
 export const configKey = ['config'];
 
-const fallback: AppConfig = { libraryName: 'Bibliotheek', loaded: false };
+const fallback: AppConfig = { libraryName: 'Bibliotheek', kind: 'school', loaded: false };
 
 async function readJson<T>(path: string): Promise<Partial<T>> {
   try {
-    const response = await fetch(path);
+    // Always ask the server (a 304 if unchanged): the local dev server sends no Cache-Control,
+    // and browsers would otherwise show the old name or words right after saving.
+    const response = await fetch(path, { cache: 'no-cache' });
     return response.ok ? ((await response.json()) as Partial<T>) : {};
   } catch {
     // Offline or not set up yet: defaults (public catalogue, no sign-in).
@@ -46,6 +51,8 @@ export function useConfig(): AppConfig {
         ...config,
         libraryName: branding.libraryName ?? fallback.libraryName,
         logoKey: branding.logoKey,
+        kind: branding.kind ?? 'school',
+        terms: branding.terms,
         loaded: true,
       };
     },

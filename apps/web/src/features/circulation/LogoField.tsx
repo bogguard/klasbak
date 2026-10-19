@@ -1,33 +1,24 @@
-import { ImageUp, Library, Save, Trash2 } from 'lucide-react';
-import { useId, useState, type FormEvent } from 'react';
+import { ImageUp, Library, Trash2 } from 'lucide-react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, useErrorMessage } from '../../components/ui/Feedback';
-import { Alert, Field, inputHeight } from '../../components/ui/Form';
+import { Alert } from '../../components/ui/Form';
 import { useConfig } from '../../lib/config';
 import { prepareImage, UnsupportedImageError } from '../../lib/image';
 import { useBranding } from './api';
 
-/** The library's own name and the school logo, shown in the header and on reader cards. */
-export function BrandingSection() {
+/**
+ * The library's logo, shown in the header and on reader cards. A chosen file is saved right
+ * away (like a cover), so it sits in the settings form without waiting for its save button.
+ */
+export function LogoField() {
   const { t } = useTranslation();
   const config = useConfig();
-  const { rename, uploadLogo, removeLogo } = useBranding();
+  const { uploadLogo, removeLogo } = useBranding();
   const errorMessage = useErrorMessage();
   const inputId = useId();
-  const [name, setName] = useState(config.libraryName);
-  const [saved, setSaved] = useState(false);
   const [problem, setProblem] = useState<string>();
-  const failed = [rename, uploadLogo, removeLogo].find((m) => m.isError);
-
-  async function saveName(event: FormEvent) {
-    event.preventDefault();
-    setSaved(false);
-    if (!name.trim()) return;
-    await rename.mutateAsync(name.trim()).then(
-      () => setSaved(true),
-      () => undefined,
-    );
-  }
+  const failed = [uploadLogo, removeLogo].find((m) => m.isError);
 
   async function chooseLogo(file: File | undefined) {
     if (!file) return;
@@ -41,35 +32,8 @@ export function BrandingSection() {
   }
 
   return (
-    <section aria-labelledby="branding-heading" className="space-y-4">
-      <h2 id="branding-heading" className="text-xl font-semibold">
-        {t('settings.branding.heading')}
-      </h2>
-      <form onSubmit={(e) => void saveName(e)} className="flex flex-wrap items-end gap-3">
-        <Field
-          label={t('settings.branding.name')}
-          hint={t('settings.branding.nameHint')}
-          className="w-full max-w-md"
-        >
-          {(props) => (
-            <input
-              {...props}
-              className={`${props.className} ${inputHeight}`}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setSaved(false);
-              }}
-              maxLength={80}
-            />
-          )}
-        </Field>
-        <Button type="submit" variant="secondary" disabled={rename.isPending} className="mb-6">
-          <Save className="size-4" aria-hidden="true" />
-          {t('settings.branding.saveName')}
-        </Button>
-      </form>
-
+    <div className="space-y-3">
+      <span className="block text-sm font-medium">{t('settings.branding.logo')}</span>
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex size-24 items-center justify-center rounded-xl border border-line bg-surface p-2">
           {config.logoKey ? (
@@ -107,6 +71,7 @@ export function BrandingSection() {
             />
             {config.logoKey && (
               <Button
+                type="button"
                 variant="secondary"
                 className="text-danger"
                 disabled={removeLogo.isPending}
@@ -117,12 +82,10 @@ export function BrandingSection() {
               </Button>
             )}
           </div>
-          <p className="text-sm text-muted">{t('settings.branding.logoHint')}</p>
+          <p className="max-w-md text-sm text-muted">{t('settings.branding.logoHint')}</p>
         </div>
       </div>
-
-      {saved && <Alert tone="success">{t('manage.edit.saved')}</Alert>}
       {(problem || failed) && <Alert tone="danger">{problem ?? errorMessage(failed?.error)}</Alert>}
-    </section>
+    </div>
   );
 }

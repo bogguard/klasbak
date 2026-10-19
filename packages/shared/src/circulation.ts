@@ -129,6 +129,16 @@ export function monthsBetween(from: string, to: string): string[] {
   return months;
 }
 
+/** The library's year a date falls in: a school year for schools, a calendar year otherwise. */
+export function libraryYear(
+  isoDate: string,
+  kind: 'school' | 'organisation' = 'school',
+): { from: string; to: string } {
+  if (kind === 'school') return schoolYear(isoDate);
+  const year = isoDate.slice(0, 4);
+  return { from: `${year}-01`, to: `${year}-12` };
+}
+
 /** The school year (1 September – 31 August) a date falls in, as months. */
 export function schoolYear(isoDate: string): { from: string; to: string } {
   const year = Number(isoDate.slice(0, 4));

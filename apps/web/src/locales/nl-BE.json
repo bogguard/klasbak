@@ -128,7 +128,7 @@
   "auth": {
     "heading": "Aanmelden",
     "username": "Gebruikersnaam",
-    "usernameHint": "Je lidnummer of de gebruikersnaam die je van school kreeg.",
+    "usernameHint": "Je lidnummer of de gebruikersnaam die je van {{org}} kreeg.",
     "password": "Wachtwoord",
     "submit": "Aanmelden",
     "busy": "Even geduld…",
@@ -191,7 +191,8 @@
       "addCopy": "Exemplaar toevoegen",
       "newTitleAnyway": "Toch een nieuwe titel maken",
       "location": "Plaats van nieuwe exemplaren",
-      "locationHint": "Niet verplicht, bv. ‘Leesboeken’ of ‘Klasbib 3B’. Blijft staan voor de volgende boeken."
+      "locationHint": "Niet verplicht, bv. ‘Leesboeken’ of ‘Kast 2’. Blijft staan voor de volgende boeken.",
+      "locationHint_school": "Niet verplicht, bv. ‘Leesboeken’ of ‘Klasbib 3B’. Blijft staan voor de volgende boeken."
     },
     "edit": {
       "viewPublic": "Bekijk in de catalogus",
@@ -280,12 +281,13 @@
     "import": "Importeren (CSV)",
     "new": "Nieuwe lezer",
     "search": "Zoek op naam of kaartnummer",
-    "group": "Klas",
-    "allGroups": "Alle klassen",
+    "group": "{{Group}}",
+    "allGroups": "Alle {{groups}}",
     "showInactive": "Ook niet-actieve lezers",
     "empty": {
       "title": "Nog geen lezers",
-      "hint": "Voeg lezers één voor één toe of importeer een klaslijst."
+      "hint": "Voeg lezers één voor één toe of importeer een lijst.",
+      "hint_school": "Voeg lezers één voor één toe of importeer een klaslijst."
     },
     "count_one": "{{count}} lezer",
     "count_other": "{{count}} lezers",
@@ -293,8 +295,8 @@
     "memberNumber": "Kaartnummer",
     "onLoan": "Uitgeleend",
     "categories": {
-      "pupil": "Leerling",
-      "teacher": "Leerkracht"
+      "pupil": "{{Pupil}}",
+      "teacher": "{{Teacher}}"
     },
     "inactive": "Niet actief",
     "back": "Terug naar de lezers",
@@ -302,7 +304,7 @@
     "form": {
       "firstName": "Voornaam",
       "lastName": "Achternaam",
-      "groupHint": "Bijvoorbeeld 3B. Leeg laten voor leerkrachten.",
+      "groupHint": "Niet verplicht, bijvoorbeeld de {{group}} van de lezer.",
       "category": "Soort",
       "email": "E-mail",
       "emailHint": "Niet verplicht. Alleen nodig voor herinneringen.",
@@ -317,8 +319,11 @@
         "group": "Maximaal 30 tekens.",
         "schoolNumber": "Maximaal 40 tekens."
       },
-      "schoolNumber": "Stamboeknummer",
-      "schoolNumberHint": "Niet verplicht. Het nummer uit de schooladministratie, om de leerling bij een volgende import te herkennen. Komt niet op de kaart."
+      "schoolNumber": "Nummer in de administratie",
+      "schoolNumberHint": "Niet verplicht. Het nummer uit de eigen administratie (bv. personeels- of lidnummer), om de lezer bij een volgende import te herkennen. Komt niet op de kaart.",
+      "groupHint_school": "Bijvoorbeeld 3B. Leeg laten voor {{teachers}}.",
+      "schoolNumber_school": "Stamboeknummer",
+      "schoolNumberHint_school": "Niet verplicht. Het nummer uit de schooladministratie, om de {{pupil}} bij een volgende import te herkennen. Komt niet op de kaart."
     },
     "loans": {
       "active_one": "{{count}} boek uitgeleend",
@@ -331,8 +336,8 @@
     },
     "importPage": {
       "heading": "Lezers importeren",
-      "explanation": "Kies een Excel- (.xlsx) of CSV-bestand, bijvoorbeeld de leerlingenlijst uit Informat, Wisa of Smartschool. Een titelregel boven de kolomnamen mag. Bijvoorbeeld:",
-      "columns": "Verplicht: voornaam en naam. Niet verplicht: klas, stamboeknummer (of stamnummer), kaartnummer, e-mail, soort (leerling of leerkracht). Wie al bestaat (zelfde stamboeknummer, kaartnummer of, voor met de hand ingevoerde lezers, exact dezelfde naam) wordt bijgewerkt; zo kan je elk schooljaar gewoon de nieuwe lijst importeren. Gegevens die niet in het bestand staan, blijven behouden.",
+      "explanation": "Kies een Excel- (.xlsx) of CSV-bestand, bijvoorbeeld een personeels- of ledenlijst. Een titelregel boven de kolomnamen mag. Bijvoorbeeld:",
+      "columns": "Verplicht: voornaam en naam. Niet verplicht: {{group}}, nummer in de administratie (bv. personeelsnummer), kaartnummer, e-mail, soort ({{pupil}} of {{teacher}}). Wie al bestaat (zelfde nummer, kaartnummer of, voor met de hand ingevoerde lezers, exact dezelfde naam) wordt bijgewerkt; zo kan je later gewoon een nieuwe lijst importeren. Gegevens die niet in het bestand staan, blijven behouden.",
       "chooseFile": "Kies een bestand",
       "errors": {
         "empty": "Dit bestand is leeg of bevat alleen kolomnamen.",
@@ -356,22 +361,29 @@
       "planCount": "{{created}} nieuw, {{updated}} bijwerken.",
       "willCreate": "Nieuw",
       "willUpdate": "Bijwerken",
-      "missing_one": "{{count}} actieve leerling staat niet in dit bestand.",
-      "missing_other": "{{count}} actieve leerlingen staan niet in dit bestand.",
+      "missing_one": "{{count}} actieve {{pupil}} staat niet in dit bestand.",
+      "missing_other": "{{count}} actieve {{pupils}} staan niet in dit bestand.",
       "showMissing": "Toon wie",
-      "deactivateMissing_one": "Zet deze leerling op inactief (nieuw schooljaar)",
-      "deactivateMissing_other": "Zet deze {{count}} leerlingen op inactief (nieuw schooljaar)",
-      "deactivateHint": "Alleen aanvinken als dit bestand alle leerlingen van de school bevat. Inactieve lezers kunnen niet lenen; hun boeken blijven op de lijst ‘Te laat’ staan en je kan ze later altijd weer actief zetten.",
-      "deactivated_one": "{{count}} leerling op inactief gezet.",
-      "deactivated_other": "{{count}} leerlingen op inactief gezet."
+      "deactivateMissing_one": "Zet deze {{pupil}} op inactief (vertrokken)",
+      "deactivateMissing_other": "Zet deze {{count}} {{pupils}} op inactief (vertrokken)",
+      "deactivateHint": "Alleen aanvinken als dit bestand alle {{pupils}} van {{org}} bevat. Inactieve lezers kunnen niet lenen; hun boeken blijven op de lijst ‘Te laat’ staan en je kan ze later altijd weer actief zetten.",
+      "deactivated_one": "{{count}} {{pupil}} op inactief gezet.",
+      "deactivated_other": "{{count}} {{pupils}} op inactief gezet.",
+      "explanation_school": "Kies een Excel- (.xlsx) of CSV-bestand, bijvoorbeeld de leerlingenlijst uit Informat, Wisa of Smartschool. Een titelregel boven de kolomnamen mag. Bijvoorbeeld:",
+      "columns_school": "Verplicht: voornaam en naam. Niet verplicht: {{group}}, stamboeknummer (of stamnummer), kaartnummer, e-mail, soort ({{pupil}} of {{teacher}}). Wie al bestaat (zelfde stamboeknummer, kaartnummer of, voor met de hand ingevoerde lezers, exact dezelfde naam) wordt bijgewerkt; zo kan je elk schooljaar gewoon de nieuwe lijst importeren. Gegevens die niet in het bestand staan, blijven behouden.",
+      "deactivateMissing_school_one": "Zet deze {{pupil}} op inactief (nieuw schooljaar)",
+      "deactivateMissing_school_other": "Zet deze {{count}} {{pupils}} op inactief (nieuw schooljaar)",
+      "example": "voornaam;naam;afdeling;personeelsnummer\nLotte;Peeters;Fiscaal;P0417\nAmir;Claes;Familierecht;P0422",
+      "example_school": "voornaam;naam;klas;stamboeknummer\nLotte;Peeters;3B;1234567\nAmir;Claes;1A;1234568"
     },
     "privacy": {
       "heading": "Privacy van deze lezer",
-      "explanation": "Een lezer (of de ouders) mag een kopie van zijn gegevens vragen, of vragen om alles te wissen.",
+      "explanation": "Een lezer mag een kopie van zijn gegevens vragen, of vragen om alles te wissen.",
       "export": "Gegevens downloaden",
       "delete": "Lezer verwijderen",
       "hasBooks": "Verwijderen kan pas als alle boeken terug zijn.",
-      "confirmDelete": "{{name}} en de volledige leesgeschiedenis definitief verwijderen? Dit kan niet ongedaan gemaakt worden."
+      "confirmDelete": "{{name}} en de volledige leesgeschiedenis definitief verwijderen? Dit kan niet ongedaan gemaakt worden.",
+      "explanation_school": "Een lezer (of de ouders) mag een kopie van zijn gegevens vragen, of vragen om alles te wissen."
     }
   },
   "loans": {
@@ -383,7 +395,7 @@
     "show": "Toon",
     "onlyOverdue": "Te laat",
     "allActive": "Alle uitleningen",
-    "noGroup": "Zonder klas",
+    "noGroup": "Zonder {{group}}",
     "noneOverdue": "Niets te laat. Goed zo!",
     "none": "Er is niets uitgeleend.",
     "reader": "Lezer",
@@ -397,7 +409,7 @@
     "reminder": {
       "button_one": "Herinneringsbriefje maken",
       "button_other": "{{count}} herinneringsbriefjes maken",
-      "hint": "Eén briefje per lezer met al zijn of haar boeken die te laat zijn, drie per A4. Kies eerst een klas om alleen de briefjes voor die klas te maken.",
+      "hint": "Eén briefje per lezer met al zijn of haar boeken die te laat zijn, drie per A4. Kies eerst een {{group}} om alleen de briefjes voor die {{group}} te maken.",
       "heading": "Herinnering: boeken terugbrengen",
       "intro": "Deze boeken van de bibliotheek hadden al terug moeten zijn. Breng je ze zo snel mogelijk terug? Ben je een boek kwijt, laat het dan weten aan de bibliothecaris.",
       "dueOn": "moest terug op {{date}}",
@@ -452,7 +464,7 @@
       "heading": "Uitleenregels",
       "loanDays": "Dagen",
       "maxLoans": "Max. boeken",
-      "preview": "Een boek dat vandaag aan een leerling wordt uitgeleend, moet terug op {{date}}."
+      "preview": "Een boek dat vandaag aan een {{pupil}} wordt uitgeleend, moet terug op {{date}}."
     },
     "closedDays": {
       "heading": "Vaste sluitingsdagen",
@@ -475,23 +487,46 @@
       "retentionHint": "Teruggebrachte uitleningen worden daarna gewist; alleen anonieme aantallen blijven over. Tussen 30 en 3650 dagen."
     },
     "branding": {
-      "heading": "Huisstijl",
+      "heading": "Bibliotheek",
       "name": "Naam van de bibliotheek",
       "nameHint": "Staat bovenaan elke pagina en op de lezerskaarten.",
-      "saveName": "Naam opslaan",
-      "logoAlt": "Logo van de school",
+      "logoAlt": "Logo van {{org}}",
       "addLogo": "Logo toevoegen",
       "replaceLogo": "Ander logo kiezen",
-      "logoHint": "PNG met doorzichtige achtergrond werkt het mooist. Verschijnt bovenaan de website, op lezerskaarten en als icoontje in de browser."
+      "logoHint": "PNG met doorzichtige achtergrond werkt het mooist. Verschijnt bovenaan de website, op lezerskaarten en als icoontje in de browser. Een gekozen logo wordt meteen bewaard.",
+      "logo": "Logo",
+      "nameRequired": "Geef de bibliotheek een naam."
     },
     "export": {
       "heading": "Gegevens exporteren",
-      "explanation": "Download alle gegevens van de bibliotheek in één ZIP-bestand: titels, exemplaren, lezers en uitleningen als CSV (opent in Excel) en alles samen als JSON. Het bestand bevat persoonsgegevens van leerlingen: bewaar het veilig en verwijder het als je het niet meer nodig hebt.",
+      "explanation": "Download alle gegevens van de bibliotheek in één ZIP-bestand: titels, exemplaren, lezers en uitleningen als CSV (opent in Excel) en alles samen als JSON. Het bestand bevat persoonsgegevens van lezers: bewaar het veilig en verwijder het als je het niet meer nodig hebt.",
       "button": "Alle gegevens exporteren",
       "busy_one": "Bezig… {{count}} record",
       "busy_other": "Bezig… {{count}} records",
       "done_one": "Klaar: {{count}} record geëxporteerd.",
       "done_other": "Klaar: {{count}} records geëxporteerd."
+    },
+    "vocabulary": {
+      "kind": "Soort bibliotheek",
+      "kinds": {
+        "school": "School",
+        "organisation": "Andere organisatie"
+      },
+      "kindHints": {
+        "school": "Woorden zoals leerling, leerkracht en klas; statistieken per schooljaar; import uit Informat, Wisa of Smartschool en wisselcollecties van de openbare bib.",
+        "organisation": "Bijvoorbeeld een advocatenkantoor, een bedrijf of een vereniging: neutrale woorden en statistieken per kalenderjaar."
+      },
+      "words": "Eigen woorden",
+      "wordsHint": "Hoe heten jullie twee soorten lezers en hun groepen? De eerste soort volgt de eerste uitleenregel, de tweede soort de tweede. Laat leeg om de grijze standaardwoorden te gebruiken.",
+      "what": "Wat",
+      "one": "Enkelvoud",
+      "other": "Meervoud",
+      "terms": {
+        "pupil": "Eerste soort lezers",
+        "teacher": "Tweede soort lezers",
+        "group": "Groep"
+      },
+      "incomplete": "Vul bij een eigen woord zowel het enkelvoud als het meervoud in, of laat beide leeg."
     }
   },
   "labels": {
@@ -553,11 +588,11 @@
       "done_one": "{{count}} label gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}.",
       "done_other": "{{count}} labels gemarkeerd als afgedrukt. Volgende keer begin je bij label {{next}}."
     },
-    "cardsHowTo": "Tien kaarten per A4, zo groot als een bankkaart. Druk af op stevig papier (200–250 g/m²) op ware grootte, snijd langs de streepjes in de marge en lamineer met hoesjes van 65 × 95 mm, liefst mat zodat de scanner geen reflectie ziet. Test eerst één kaart met de scanner. De klas staat er bewust niet op, zodat een kaart meerdere schooljaren meegaat."
+    "cardsHowTo": "Tien kaarten per A4, zo groot als een bankkaart. Druk af op stevig papier (200–250 g/m²) op ware grootte, snijd langs de streepjes in de marge en lamineer met hoesjes van 65 × 95 mm, liefst mat zodat de scanner geen reflectie ziet. Test eerst één kaart met de scanner. De {{group}} staat er bewust niet op, zodat een kaart meerdere jaren meegaat."
   },
   "mfa": {
     "heading": "Beveilig je account met tweestapsverificatie",
-    "why": "Je beheert de bibliotheek en kan gegevens van leerlingen zien. Daarom vragen we bij het aanmelden, naast je wachtwoord, ook een code uit een app op je smartphone. Dit stel je één keer in.",
+    "why": "Je beheert de bibliotheek en kan gegevens van lezers zien. Daarom vragen we bij het aanmelden, naast je wachtwoord, ook een code uit een app op je smartphone. Dit stel je één keer in.",
     "step1": "Installeer een authenticator-app op je smartphone, als je er nog geen hebt.",
     "apps": "Bijvoorbeeld Microsoft Authenticator, Google Authenticator of de app van je wachtwoordbeheerder.",
     "step2": "Scan deze QR-code met de app.",
@@ -572,11 +607,11 @@
     "intro": "Hoe {{library}} omgaat met je gegevens, in gewone taal.",
     "who": {
       "heading": "Wie is verantwoordelijk?",
-      "body": "De school is verantwoordelijk voor de gegevens in deze bibliotheek. Heb je een vraag over je gegevens? Neem dan contact op met de school."
+      "body": "{{Org}} is verantwoordelijk voor de gegevens in deze bibliotheek. Heb je een vraag over je gegevens? Neem dan contact op met {{org}}."
     },
     "what": {
       "heading": "Welke gegevens bewaren we?",
-      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. We vragen geen geboortedatum, adres of foto."
+      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, {{group}}, kaartnummer en, als {{org}} dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. We vragen geen geboortedatum, adres of foto."
     },
     "why": {
       "heading": "Waarvoor gebruiken we ze?",
@@ -584,7 +619,8 @@
     },
     "retention": {
       "heading": "Hoe lang bewaren we ze?",
-      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Verlaat je de school, dan kan de school al je gegevens wissen."
+      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; {{org}} kan dat aanpassen). Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘deze {{group}} leende 40 boeken’, nooit wie wat las. Vertrek je, dan kan {{org}} al je gegevens wissen.",
+      "body_school": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; {{org}} kan dat aanpassen). Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘{{group}} 3B leende 40 boeken’, nooit wie wat las. Verlaat je {{org}}, dan kan {{org}} al je gegevens wissen."
     },
     "where": {
       "heading": "Waar staan de gegevens?",
@@ -596,7 +632,8 @@
     },
     "rights": {
       "heading": "Jouw rechten",
-      "body": "Je mag (of je ouders mogen) vragen welke gegevens we over je hebben, ze laten verbeteren of laten wissen. Vraag het aan de school. Ben je niet tevreden, dan kan je een klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be)."
+      "body": "Je mag vragen welke gegevens we over je hebben, ze laten verbeteren of laten wissen. Vraag het aan {{org}}. Ben je niet tevreden, dan kan je een klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be).",
+      "body_school": "Je mag (of je ouders mogen) vragen welke gegevens we over je hebben, ze laten verbeteren of laten wissen. Vraag het aan {{org}}. Ben je niet tevreden, dan kan je een klacht indienen bij de Gegevensbeschermingsautoriteit (gegevensbeschermingsautoriteit.be)."
     }
   },
   "cover": {
@@ -682,32 +719,32 @@
   },
   "statistics": {
     "heading": "Statistieken",
-    "schoolYear": "Schooljaar",
-    "intro": "Anoniem: we tellen hoeveel boeken er per maand, per titel en per klas uitgeleend worden, niet wie wat las.",
-    "empty": "Nog geen uitleningen in dit schooljaar",
+    "schoolYear": "{{Period}}",
+    "intro": "Anoniem: we tellen hoeveel boeken er per maand, per titel en per {{group}} uitgeleend worden, niet wie wat las.",
+    "empty": "Nog geen uitleningen in dit {{period}}",
     "emptyHint": "Zodra er boeken uitgeleend worden aan de uitleenbalie, verschijnen hier de cijfers.",
     "total": "Uitleningen",
-    "perPupil": "Per leerling",
+    "perPupil": "Per {{pupil}}",
     "busiestMonth": "Drukste maand",
     "perMonth": "Per maand",
     "topTitles": "Meest uitgeleend",
     "loans_one": "{{count}}×",
     "loans_other": "{{count}}×",
-    "perClass": "Per klas",
-    "pupils": "Leerlingen",
+    "perClass": "Per {{group}}",
+    "pupils": "{{Pupils}}",
     "notLent_one": "{{count}} titel niet uitgeleend",
     "notLent_other": "{{count}} titels niet uitgeleend",
-    "notLentHint": "Dit schooljaar nog niet uitgeleend, de oudste eerst. Misschien verdienen ze een plaatsje in de kijker, of mogen ze weg.",
+    "notLentHint": "Dit {{period}} nog niet uitgeleend, de oudste eerst. Misschien verdienen ze een plaatsje in de kijker, of mogen ze weg.",
     "andMore_one": "en nog {{count}}",
     "andMore_other": "en nog {{count}}",
     "activeReaders": "Actieve lezers",
-    "activePupils": "Actieve leerlingen",
-    "activeTeachers": "Actieve leerkrachten",
+    "activePupils": "Actieve {{pupils}}",
+    "activeTeachers": "Actieve {{teachers}}",
     "collection": "Collectie",
     "collectionValue": "{{titles}} titels, {{copies}} exemplaren",
     "titles": "Titels",
     "copies": "Exemplaren",
-    "added": "Nieuwe titels dit schooljaar",
+    "added": "Nieuwe titels dit {{period}}",
     "perAvi": "Uitleningen per AVI-niveau",
     "report": {
       "print": "Rapport afdrukken",
@@ -716,12 +753,12 @@
       "value": "Aantal",
       "totals": "Totaal",
       "fileName": "rapport-bib",
-      "printHeader": "{{library}} · rapport schooljaar {{year}} · afgedrukt op {{date}}. Anonieme cijfers: per maand, per titel en per klas, niet per leerling."
+      "printHeader": "{{library}} · rapport {{period}} {{year}} · afgedrukt op {{date}}. Anonieme cijfers: per maand, per titel en per {{group}}, niet per {{pupil}}."
     },
-    "pupilsCount_one": "{{count}} leerling",
-    "pupilsCount_other": "{{count}} leerlingen",
-    "teachersCount_one": "{{count}} leerkracht",
-    "teachersCount_other": "{{count}} leerkrachten",
+    "pupilsCount_one": "{{count}} {{pupil}}",
+    "pupilsCount_other": "{{count}} {{pupils}}",
+    "teachersCount_one": "{{count}} {{teacher}}",
+    "teachersCount_other": "{{count}} {{teachers}}",
     "exchanges": "Wisselcollecties van de openbare bib"
   },
   "ticket": {
@@ -736,10 +773,10 @@
   "exchange": {
     "heading": "Wisselcollecties",
     "new": "Nieuwe wisselcollectie",
-    "intro": "Boeken die de openbare bib tijdelijk uitleent aan de school. Ze houden het etiket van de bib, je leent ze gewoon uit aan de balie, en als de collectie teruggaat verdwijnen ze in één keer uit de catalogus.",
+    "intro": "Boeken die de openbare bib tijdelijk uitleent aan {{org}}. Ze houden het etiket van de bib, je leent ze gewoon uit aan de balie, en als de collectie teruggaat verdwijnen ze in één keer uit de catalogus.",
     "none": "Nog geen wisselcollecties",
-    "noneHint": "Krijgt de school boeken van de openbare bib? Maak een wisselcollectie en lees de lijst van de bib in, of scan de boeken één voor één.",
-    "active": "Bij de school",
+    "noneHint": "Krijgt {{org}} boeken van de openbare bib? Maak een wisselcollectie en lees de lijst van de bib in, of scan de boeken één voor één.",
+    "active": "Bij {{org}}",
     "returned": "Teruggebracht",
     "returnBy": "Terug naar de bib op {{date}}",
     "returnedOn": "Teruggebracht op {{date}}",
@@ -758,7 +795,7 @@
       "name": "Naam",
       "nameHint": "Bijvoorbeeld: Najaar 2026",
       "returnBy": "Terug naar de bib op",
-      "returnByHint": "Leerlingen moeten hun boeken een week eerder terugbrengen.",
+      "returnByHint": "{{Pupils}} moeten hun boeken een week eerder terugbrengen.",
       "required": "Vul dit in.",
       "create": "Aanmaken en boeken toevoegen",
       "cancel": "Annuleren"
@@ -838,9 +875,43 @@
       "label": "Wisselcollectie",
       "until": "terug naar de bib op {{date}}",
       "titleNotice": "Dit boek komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. Dan verdwijnt het ook uit de catalogus.",
-      "copyNotice_one": "{{count}} exemplaar komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
-      "copyNotice_other": "{{count}} exemplaren komen uit de wisselcollectie {{name}} en gaan op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
+      "copyNotice_one": "{{count}} exemplaar komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. De eigen exemplaren van {{org}} blijven.",
+      "copyNotice_other": "{{count}} exemplaren komen uit de wisselcollectie {{name}} en gaan op {{date}} terug naar de bib. De eigen exemplaren van {{org}} blijven.",
       "open": "Naar de wisselcollectie"
+    }
+  },
+  "terms": {
+    "school": {
+      "pupil": {
+        "one": "leerling",
+        "other": "leerlingen"
+      },
+      "teacher": {
+        "one": "leerkracht",
+        "other": "leerkrachten"
+      },
+      "group": {
+        "one": "klas",
+        "other": "klassen"
+      },
+      "org": "de school",
+      "period": "schooljaar"
+    },
+    "organisation": {
+      "pupil": {
+        "one": "lezer",
+        "other": "lezers"
+      },
+      "teacher": {
+        "one": "medewerker",
+        "other": "medewerkers"
+      },
+      "group": {
+        "one": "afdeling",
+        "other": "afdelingen"
+      },
+      "org": "de organisatie",
+      "period": "jaar"
     }
   }
 }

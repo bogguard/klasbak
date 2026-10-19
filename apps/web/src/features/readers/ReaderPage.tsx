@@ -24,6 +24,7 @@ import { formatDate, formatTimestampDate } from '../../lib/format';
 import { useIsAdmin } from '../../lib/auth';
 import { useRenew } from '../circulation/api';
 import { useCreateReader, useDeleteReader, useReader, useReaders, useUpdateReader } from './api';
+import { useConfig } from '../../lib/config';
 
 type Values = {
   firstName: string;
@@ -163,6 +164,7 @@ export function ReaderPage() {
 /** The reader's rights: a copy of their data, and erasure. */
 function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
   const { t } = useTranslation();
+  const { kind } = useConfig();
   const navigate = useNavigate();
   const remove = useDeleteReader(reader.id);
   const errorMessage = useErrorMessage();
@@ -193,7 +195,7 @@ function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
       <h2 id="reader-privacy" className="text-xl font-semibold">
         {t('readers.privacy.heading')}
       </h2>
-      <p className="text-sm text-muted">{t('readers.privacy.explanation')}</p>
+      <p className="text-sm text-muted">{t('readers.privacy.explanation', { context: kind })}</p>
       <div className="flex flex-wrap gap-3">
         <Button variant="secondary" onClick={download}>
           <Download className="size-4" aria-hidden="true" />
@@ -217,6 +219,7 @@ function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
 
 function ReaderForm({ reader }: { reader?: Reader }) {
   const { t } = useTranslation();
+  const { kind } = useConfig();
   const navigate = useNavigate();
   const create = useCreateReader();
   const update = useUpdateReader(reader?.id ?? '');
@@ -289,7 +292,11 @@ function ReaderForm({ reader }: { reader?: Reader }) {
             />
           )}
         </Field>
-        <Field label={t('readers.group')} error={error('group')} hint={t('readers.form.groupHint')}>
+        <Field
+          label={t('readers.group')}
+          error={error('group')}
+          hint={t('readers.form.groupHint', { context: kind })}
+        >
           {(props) => (
             <>
               <input
@@ -341,9 +348,9 @@ function ReaderForm({ reader }: { reader?: Reader }) {
           )}
         </Field>
         <Field
-          label={t('readers.form.schoolNumber')}
+          label={t('readers.form.schoolNumber', { context: kind })}
           error={error('schoolNumber')}
-          hint={t('readers.form.schoolNumberHint')}
+          hint={t('readers.form.schoolNumberHint', { context: kind })}
         >
           {(props) => (
             <input

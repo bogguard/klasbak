@@ -6,13 +6,18 @@ Library software for any organisation with its own collection: a school, a law f
 documentation centre, an association. A public or internal catalogue, a lending desk with barcodes,
 readers, labels and cards, statistics. Serverless on AWS, one installation per organisation.
 
-It was built first for school libraries, so some parts speak that language: classes, reading levels
-(AVI), imports from school administrations (Informat, Wisa, Smartschool), exchange collections from
-the public library. Other organisations simply leave those out: readers don't need a class, titles
-don't need a reading level, and readers can be imported from any spreadsheet (e.g. a staff list).
-Some wording is still school-oriented, though: the two reader types (each with their own loan rules)
-are called pupil and teacher (leerling and leerkracht), and the statistics speak of pupils and
-classes. Making those names configurable is the next step for other kinds of libraries.
+It was built first for school libraries, but works for any organisation with a small library, such
+as a law firm, a company or an association. Under Beheer → Instellingen an administrator chooses the
+kind of library:
+
+- **School**: pupils, teachers and classes; statistics per school year; imports from school
+  administrations (Informat, Wisa, Smartschool) and exchange collections from the public library.
+- **Other organisation**: readers, staff members and departments; statistics per calendar year; no
+  exchange collections. Readers can be imported from any spreadsheet (e.g. a staff list).
+
+The library can also choose its own words for its two kinds of readers (each with their own loan
+rules) and their groups, e.g. "advocaat" and "stagiair" with "team". Groups and reading levels (AVI)
+stay optional.
 
 ## Setting up an organisation (production)
 
@@ -92,7 +97,7 @@ two-step verification with an authenticator app.
 
 The administrator then, in the app:
 
-- sets the library's name and logo (Instellingen → **Huisstijl**), the loan rules and the days the
+- sets the library's name and logo (Instellingen → **Bibliotheek**), the loan rules and the days the
   library is closed (Instellingen);
 - adds colleagues who run the library (Beheer → **Medewerkers**);
 - adds the readers, one by one or imported from a spreadsheet (Lezers → **Importeren**): a list of

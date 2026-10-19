@@ -27,7 +27,7 @@ import { ensureLocalTable } from './table';
  * `npm run demo`: empties the LOCAL database and fills it with a school library that is a few
  * weeks into the school year, for demos and screenshots. Everything happens through the
  * services, dated in the past, so statistics, overdue lists, label queue and exchange
- * collections look like real use. The school's name and logo (Huisstijl) are kept.
+ * collections look like real use. The school's name and logo (Instellingen → Bibliotheek) are kept.
  * All names are made up. Never run against AWS: it refuses unless DynamoDB Local is used.
  */
 

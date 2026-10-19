@@ -1,5 +1,11 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { BRANDING_PATH, LOGO_MAX_BYTES, type Branding } from '@library/shared';
+import {
+  BRANDING_PATH,
+  LOGO_MAX_BYTES,
+  type Branding,
+  type LibraryKind,
+  type LibraryTerms,
+} from '@library/shared';
 import { ulid } from 'ulid';
 import { writeAudit } from '../lib/audit';
 import type { Actor } from '../lib/auth';
@@ -24,7 +30,13 @@ async function save(branding: Branding): Promise<Branding> {
   await db.send(
     new PutCommand({ TableName: env.tableName, Item: { ...brandingKey, ...branding } }),
   );
-  const published: Branding = { libraryName: branding.libraryName, logoKey: branding.logoKey };
+  // Public: the words are also used on public pages (e.g. the privacy page).
+  const published: Branding = {
+    libraryName: branding.libraryName,
+    logoKey: branding.logoKey,
+    kind: branding.kind,
+    terms: branding.terms,
+  };
   // no-cache: a new name or logo shows up on the next page load.
   await putPublicFile(BRANDING_PATH, JSON.stringify(published), 'application/json', 'no-cache');
   return published;
@@ -33,6 +45,17 @@ async function save(branding: Branding): Promise<Branding> {
 export async function updateLibraryName(actor: Actor, libraryName: string): Promise<Branding> {
   const branding = await save({ ...(await getBranding()), libraryName });
   await writeAudit({ entity: 'SETTINGS#BRANDING', action: 'branding.nameChanged', actor });
+  return branding;
+}
+
+/** The kind of library and its own words for readers and groups. */
+export async function updateVocabulary(
+  actor: Actor,
+  kind: LibraryKind,
+  terms: LibraryTerms,
+): Promise<Branding> {
+  const branding = await save({ ...(await getBranding()), kind, terms });
+  await writeAudit({ entity: 'SETTINGS#BRANDING', action: 'branding.vocabularyChanged', actor });
   return branding;
 }
 
