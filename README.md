@@ -2,24 +2,33 @@
 
 [MIT licence](LICENSE)
 
-School library software: public catalogue, circulation desk, reader portal. Serverless on AWS.
-Start with [CLAUDE.md](CLAUDE.md) (overview, commands, glossary), [docs/features.md](docs/features.md)
-(roadmap and status) and [docs/decisions.md](docs/decisions.md) (why things are the way they are).
+Library software for any organisation with its own collection: a school, a law firm, a company's
+documentation centre, an association. A public or internal catalogue, a lending desk with barcodes,
+readers, labels and cards, statistics. Serverless on AWS, one installation per organisation.
 
-## Setting up a school (production)
+It was built first for school libraries, so some parts speak that language: classes, reading levels
+(AVI), imports from school administrations (Informat, Wisa, Smartschool), exchange collections from
+the public library. Other organisations simply leave those out: readers don't need a class, titles
+don't need a reading level, and readers can be imported from any spreadsheet (e.g. a staff list).
+Some wording is still school-oriented, though: the two reader types (each with their own loan rules)
+are called pupil and teacher (leerling and leerkracht), and the statistics speak of pupils and
+classes. Making those names configurable is the next step for other kinds of libraries.
 
-Each school gets **its own AWS account**: its data, costs and access stay fully separate, and
-one school's settings can never touch another's. Use a second account for testing (the `dev`
-environment). Setting up a school takes about half an hour, most of it waiting for AWS.
+## Setting up an organisation (production)
 
-An own web address (e.g. `bib.schoolnaam.be`) is optional. Without one, the library runs on
-an address like `d1234abcd.cloudfront.net`; you can [add the school's address
-later](#adding-the-schools-own-web-address) without losing anything.
+Each organisation gets **its own AWS account**: its data, costs and access stay fully separate,
+and one organisation's settings can never touch another's. Use a second account for testing (the
+`dev` environment). Setting up an organisation takes about half an hour, most of it waiting for
+AWS.
 
-### 1. A new AWS account (once per school)
+An own web address (e.g. `bib.example.org`) is optional. Without one, the library runs on an
+address like `d1234abcd.cloudfront.net`; you can [add the organisation's address
+later](#adding-the-organisations-own-web-address) without losing anything.
+
+### 1. A new AWS account (once per organisation)
 
 1. Create the account, ideally under an AWS Organization (one invoice, central access). Use an
-   address you control, e.g. `aws-<school>@your-domain.example`.
+   address you control, e.g. `aws-<organisation>@your-domain.example`.
 2. Secure the **root user**: turn on two-step verification (MFA), then stop using it.
 3. Give yourself day-to-day access with two-step verification: IAM Identity Center (with
    Organizations) or an IAM user with MFA. Deploying needs broad rights
@@ -27,8 +36,8 @@ later](#adding-the-schools-own-web-address) without losing anything.
 4. Configure a CLI profile on your computer and switch off the pager for it:
 
    ```bash
-   aws configure sso --profile library-<school>     # or: aws configure --profile library-<school>
-   aws configure set cli_pager "" --profile library-<school>
+   aws configure sso --profile library-<organisation>     # or: aws configure --profile library-<organisation>
+   aws configure set cli_pager "" --profile library-<organisation>
    ```
 
 ### 2. Prerequisites on your computer
@@ -41,7 +50,7 @@ later](#adding-the-schools-own-web-address) without losing anything.
 Run everything from the project folder, in one terminal:
 
 ```bash
-export AWS_PROFILE=library-<school>
+export AWS_PROFILE=library-<organisation>
 scripts/setup-installation.sh replace-with-your-address@example.com
 ```
 
@@ -79,14 +88,15 @@ It creates the account with a random temporary password, shown once. Pass it on 
 phone. At the first sign-in the app asks for a new password (at least 12 characters) and sets up
 two-step verification with an authenticator app.
 
-### 7. Hand over to the school
+### 7. Hand over to the organisation
 
 The administrator then, in the app:
 
-- sets the library's name and logo (Instellingen → **Huisstijl**), the loan rules and the
-  school holidays (Instellingen);
-- adds colleagues (Beheer → **Medewerkers**);
-- imports the pupils from Informat, Wisa or Smartschool (Lezers → **Importeren**);
+- sets the library's name and logo (Instellingen → **Huisstijl**), the loan rules and the days the
+  library is closed (Instellingen);
+- adds colleagues who run the library (Beheer → **Medewerkers**);
+- adds the readers, one by one or imported from a spreadsheet (Lezers → **Importeren**): a list of
+  employees, members or, in a school, the pupils from Informat, Wisa or Smartschool;
 - prints reader cards and labels (**Labels**).
 
 ### A test environment
@@ -101,33 +111,33 @@ before deploying.
 After pulling a new version:
 
 ```bash
-export AWS_PROFILE=library-<school>
+export AWS_PROFILE=library-<organisation>
 npm run deploy:prod
 scripts/deploy-web.sh prod
 ```
 
 Always deploy the backend first: the new website may use new API routes.
 
-## Adding the school's own web address
+## Adding the organisation's own web address
 
 Can be done at installation or any time later on a running library; data and accounts stay as
-they are. Use a subdomain such as `bib.schoolnaam.be`: the bare `schoolnaam.be` can't point to
-CloudFront with an ordinary DNS record. You need whoever manages the school's domain for two DNS
-records.
+they are. Use a subdomain such as `bib.example.org`: the bare `example.org` can't point to
+CloudFront with an ordinary DNS record. You need whoever manages the organisation's domain for two
+DNS records.
 
 1. **Request a certificate** (free, renews itself):
 
    ```bash
-   export AWS_PROFILE=library-<school>
-   scripts/request-certificate.sh bib.schoolnaam.be
+   export AWS_PROFILE=library-<organisation>
+   scripts/request-certificate.sh bib.example.org
    ```
 
-   It shows the first DNS record (a CNAME that proves the address belongs to the school) and waits
+   It shows the first DNS record (a CNAME that proves the address belongs to the organisation) and waits
    until AWS sees it: minutes, sometimes a few hours. If the window closes, run it again; it picks
    up where it left off. When it's done, it stores the address and certificate in the account.
 
    - The address must not point anywhere yet: the script stops if it already has a CNAME.
-   - If the school's domain limits who may issue certificates (a CAA record), the script explains
+   - If the organisation's domain limits who may issue certificates (a CAA record), the script explains
      which record to add (`amazon.com`).
 
 2. **Deploy**, so CloudFront answers on the new address:
@@ -245,6 +255,7 @@ npm run typecheck && npm run lint && npm test && npm run validate:infra
 
 ## Costs
 
-At school scale the stack stays mostly within the AWS free tier. Expect a few euros per month,
-mainly CloudWatch and S3/CloudFront. There are no always-on resources (no NAT, no databases with
-minimum capacity, no OpenSearch). A budget alarm (`MonthlyBudgetUsd`) warns you before surprises.
+At the scale of a school or office library the stack stays mostly within the AWS free tier.
+Expect a few euros per month, mainly CloudWatch and S3/CloudFront. There are no always-on resources
+(no NAT, no databases with minimum capacity, no OpenSearch). A budget alarm (`MonthlyBudgetUsd`)
+warns you before surprises.

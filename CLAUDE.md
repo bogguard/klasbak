@@ -49,7 +49,7 @@ npm run deploy:dev               # build:api + sam deploy of the dev stack (no `
 scripts/deploy-web.sh dev       # publish the frontend to the dev stack (name and logo: in the app)
 scripts/setup-installation.sh <alarm email>      # once per AWS account, before the first deploy
 scripts/create-admin.sh dev|prod <user> <email>  # first administrator (random temporary password)
-scripts/request-certificate.sh bib.school.be     # own web address (see README)
+scripts/request-certificate.sh bib.example.org   # own web address (see README)
 scripts/status.sh dev|prod                       # how the installation is doing (docs/runbook.md)
 ```
 

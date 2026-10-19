@@ -1,7 +1,7 @@
 # Runbook: following up an installation
 
 What to watch, what each alarm means, and what to do. One installation is one AWS account and
-stack (`library-prod` for a school, `library-dev` for testing); run commands with that account's
+stack (`library-prod` for an organisation, `library-dev` for testing); run commands with that account's
 profile (`export AWS_PROFILE=...`).
 
 ## How you hear about problems
@@ -14,19 +14,19 @@ profile (`export AWS_PROFILE=...`).
 | Security updates for dependencies      | Dependabot pull requests and alerts on GitHub | GitHub notifications                                         |
 | Runtime end-of-life, AWS incidents     | AWS Health Dashboard                          | the account's email                                          |
 
-Nothing is logged that identifies a pupil: no names, IP addresses or search terms. Logs are kept 30
+Nothing is logged that identifies a reader: no names, IP addresses or search terms. Logs are kept 30
 days in prod, 7 in dev.
 
 ## Routine
 
-- **Weekly, 5 minutes per school:** `scripts/status.sh prod` (or the dashboard, see the stack's
+- **Weekly, 5 minutes per installation:** `scripts/status.sh prod` (or the dashboard, see the stack's
   `DashboardUrl` output). It shows the alarms, traffic, errors, the nightly job, costs and the latest
   warnings, and exits with an error when an alarm is on. Merge or close Dependabot pull requests.
 - **Monthly:** costs (the budget emails warn, `status.sh` shows the month so far); the "ISBN sources
   failing" query (a book source that keeps failing makes adding books harder); AWS Health notices.
 - **Once a year (summer):** check the Lambda runtime is still supported and plan the upgrade to the
   next Node.js LTS (`Runtime` in `infra/template.yaml`); try a backup restore in the test account
-  (below); check with the school that the retention period (Instellingen) is still right.
+  (below); check with the organisation that the retention period (Instellingen) is still right.
 
 ## Alarms
 
@@ -59,7 +59,7 @@ The public catalogue (search, availability) may be out of date; lending itself w
 
 ### Removing old reading history failed / did not run for two days
 
-Returned loans older than the retention period are kept longer than promised to the school (privacy;
+Returned loans older than the retention period are kept longer than promised to the organisation (privacy;
 see the data processing agreement).
 
 1. Query **"Errors and warnings"**, function `RetentionFunction`.
