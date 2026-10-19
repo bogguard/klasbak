@@ -25,10 +25,13 @@ import { ensureLocalTable } from './table';
 
 /*
  * `npm run demo`: empties the LOCAL database and fills it with a school library that is a few
- * weeks into the school year, for demos and screenshots. Everything happens through the
+ * weeks into the current school year, for demos and screenshots. Everything happens through the
  * services, dated in the past, so statistics, overdue lists, label queue and exchange
  * collections look like real use. The school's name and logo (Instellingen → Bibliotheek) are kept.
  * All names are made up. Never run against AWS: it refuses unless DynamoDB Local is used.
+ *
+ * The dates below are written for the school year 2026–2027 and moved to the current one (see
+ * `on`), so the demo never looks old.
  */
 
 if (!process.env.DYNAMODB_ENDPOINT?.includes('localhost')) {
@@ -36,9 +39,21 @@ if (!process.env.DYNAMODB_ENDPOINT?.includes('localhost')) {
 }
 
 const actor: Actor = { userId: 'demo', roles: ['admin'] };
-const today = new Date();
-const at = (date: string, hour = 10) =>
-  new Date(`${date}T${String(hour - 2).padStart(2, '0')}:00:00Z`);
+// DEMO_TODAY=2027-05-20 shows the demo as on another day (to check it in every season).
+const today = process.env.DEMO_TODAY ? new Date(`${process.env.DEMO_TODAY}T16:00:00Z`) : new Date();
+
+// Whole school years between the one the dates are written for and the current one.
+const [thisYear = 2026, thisMonth = 9] = localDate(today).split('-').map(Number);
+const yearsLater = (thisMonth >= 9 ? thisYear : thisYear - 1) - 2026;
+
+/** A date written for 2026–2027, moved to the same day of the current school year. */
+const on = (date: string) => `${Number(date.slice(0, 4)) + yearsLater}${date.slice(4)}`;
+
+/** A moment on a (real) day; moments still to come this school year happen today instead. */
+const at = (day: string, hour = 10) => {
+  const moment = new Date(`${day}T${String(hour - 2).padStart(2, '0')}:00:00Z`);
+  return moment > today ? today : moment;
+};
 
 // A small, repeatable random generator: the same demo every time.
 let seed = 20260901;
@@ -354,14 +369,14 @@ async function main() {
     {
       ...DEFAULT_SETTINGS,
       closedPeriods: [
-        { from: '2026-10-26', to: '2026-11-01', label: 'Herfstvakantie' },
-        { from: '2026-12-21', to: '2027-01-03', label: 'Kerstvakantie' },
-        { from: '2027-02-15', to: '2027-02-21', label: 'Krokusvakantie' },
-        { from: '2027-04-05', to: '2027-04-18', label: 'Paasvakantie' },
+        { from: on('2026-10-26'), to: on('2026-11-01'), label: 'Herfstvakantie' },
+        { from: on('2026-12-21'), to: on('2027-01-03'), label: 'Kerstvakantie' },
+        { from: on('2027-02-15'), to: on('2027-02-21'), label: 'Krokusvakantie' },
+        { from: on('2027-04-05'), to: on('2027-04-18'), label: 'Paasvakantie' },
       ],
     },
     0,
-    at('2026-08-25'),
+    at(on('2026-08-25')),
   );
 
   // Catalogue, with titles added over the last year (so "new titles" means something).
@@ -372,11 +387,11 @@ async function main() {
     const { copies: copyInputs, added = '2026-09-01', ...title } = book;
     const { input, coverUrl } = await withLookup(title);
     const parsed = TitleInputSchema.parse({ type: 'book', ...input });
-    const created = await createTitle(actor, parsed, coverUrl, at(added));
+    const created = await createTitle(actor, parsed, coverUrl, at(on(added)));
     titleIds.set(parsed.title, created.id);
     if (created.coverImageKey) covers++;
     for (const copyInput of copyInputs) {
-      const copy = await addCopy(actor, created.id, copyInput, at(added));
+      const copy = await addCopy(actor, created.id, copyInput, at(on(added)));
       copies.push({ barcode: copy.barcode, titleId: created.id });
     }
   }
@@ -397,7 +412,7 @@ async function main() {
         group,
         schoolNumber: String(++number),
       };
-      pupils.push(await createReader(actor, ReaderInputSchema.parse(input), at('2026-09-01')));
+      pupils.push(await createReader(actor, ReaderInputSchema.parse(input), at(on('2026-09-01'))));
     }
   }
   const teachers = [];
@@ -410,7 +425,7 @@ async function main() {
       await createReader(
         actor,
         ReaderInputSchema.parse({ firstName, lastName, category: 'teacher' }),
-        at('2026-09-01'),
+        at(on('2026-09-01')),
       ),
     );
   }
@@ -422,17 +437,22 @@ async function main() {
       group: '6A',
       active: false,
     }),
-    at('2026-09-01'),
+    at(on('2026-09-01')),
   );
   console.log(
     `Readers: ${pupils.length} pupils in ${Object.keys(classes).length} classes, ${teachers.length} teachers, 1 inactive.`,
   );
 
-  // An exchange collection that went back in June (with its list), and one at school now.
+  // An exchange collection that went back in June (with its list), and one from the autumn
+  // (at school now, or back already after December).
   const spring = await createExchange(
     actor,
-    { name: 'Voorjaar 2026', lender: 'Bibliotheek Zele', returnBy: '2026-06-19' },
-    at('2026-03-02'),
+    {
+      name: `Voorjaar ${on('2026-03-02').slice(0, 4)}`,
+      lender: 'Bibliotheek Zele',
+      returnBy: on('2026-06-19'),
+    },
+    at(on('2026-03-02')),
   );
   // Spring: plain titles without authors (the saved list after returning is what matters).
   const springBooks = [
@@ -449,12 +469,16 @@ async function main() {
       barcode: `30700040${10 + i}`,
       title: { type: 'book', title, authors: [] },
     })),
-    at('2026-03-02'),
+    at(on('2026-03-02')),
   );
   const autumn = await createExchange(
     actor,
-    { name: 'Najaar 2026', lender: 'Bibliotheek Zele', returnBy: '2026-12-18' },
-    at('2026-09-15'),
+    {
+      name: `Najaar ${on('2026-09-15').slice(0, 4)}`,
+      lender: 'Bibliotheek Zele',
+      returnBy: on('2026-12-18'),
+    },
+    at(on('2026-09-15')),
   );
   // Autumn: real books, two of which the school also owns (to show "Herkomst").
   const autumnRows = [];
@@ -489,7 +513,7 @@ async function main() {
     actor,
     autumn.id,
     autumnBooks.map((book, i) => ({ barcode: `307000512${30 + i}`, ...book })),
-    at('2026-09-15'),
+    at(on('2026-09-15')),
   );
   const shelf = [
     ...copies,
@@ -498,30 +522,60 @@ async function main() {
   ];
 
   // A history of lending: school days from March to today, returns after one to three weeks,
-  // a few books forgotten (overdue now). Everything through the desk, dated in the past.
+  // a few books forgotten lately (overdue now). Everything through the desk, dated in the past.
   const onLoan = new Map<string, { readerId: string; returnOn: string | null }>();
   const loansOf = new Map<string, number>();
   const settings = {
     closedWeekdays: DEFAULT_SETTINGS.closedWeekdays,
     closedPeriods: [
-      { from: '2026-04-06', to: '2026-04-19' },
-      { from: '2026-07-01', to: '2026-08-31' },
-      { from: '2026-10-26', to: '2026-11-01' },
+      { from: on('2026-04-06'), to: on('2026-04-19') },
+      { from: on('2026-07-01'), to: on('2026-08-31') },
+      { from: on('2026-10-26'), to: on('2026-11-01') },
+      { from: on('2026-12-21'), to: on('2027-01-03') },
+      { from: on('2027-02-15'), to: on('2027-02-21') },
+      { from: on('2027-04-05'), to: on('2027-04-18') },
     ],
   };
   const days: string[] = [];
   for (
-    let d = new Date('2026-03-02T12:00:00Z');
+    let d = new Date(`${on('2026-03-02')}T12:00:00Z`);
     localDate(d) < localDate(today);
     d.setUTCDate(d.getUTCDate() + 1)
   ) {
     const day = localDate(d);
     if (!isClosed(day, settings)) days.push(day);
   }
+  // Exchange books are lent while the collection is at school, all come back a few days before
+  // it goes, and it goes on the first school day from its date (weekends move in other years).
+  const exchanges = [
+    {
+      id: spring.id,
+      tag: 'spring',
+      from: on('2026-03-02'),
+      lastLoan: on('2026-06-05'),
+      allBack: on('2026-06-12'),
+      goesBack: on('2026-06-15'),
+    },
+    {
+      id: autumn.id,
+      tag: 'autumn',
+      from: on('2026-09-15'),
+      lastLoan: on('2026-12-04'),
+      allBack: on('2026-12-11'),
+      goesBack: on('2026-12-14'),
+    },
+  ];
+  const returned = new Set<string>();
+  const exchangeOf = (titleId: string) => exchanges.find((e) => e.tag === titleId);
+  const weeksAgo = (weeks: number) => {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - 7 * weeks);
+    return localDate(d);
+  };
+  // Lent four to eight weeks ago and never returned: overdue now, whatever today is.
+  const forgetWindow = { from: weeksAgo(8), to: weeksAgo(4) };
   let lent = 0;
   for (const day of days) {
-    // Spring books go back before the collection does.
-    const springOver = day >= '2026-06-10';
     for (const [barcode, loan] of onLoan) {
       if (loan.returnOn && loan.returnOn <= day) {
         await scan(actor, barcode, undefined, at(day, 9));
@@ -536,33 +590,38 @@ async function main() {
       const reader = random() < 0.1 ? pick(teachers) : pick(pupils);
       const max = reader.category === 'teacher' ? 10 : 3;
       if ((loansOf.get(reader.id) ?? 0) >= max) continue;
-      const free = shelf.filter(
-        (c) =>
+      const free = shelf.filter((c) => {
+        const exchange = exchangeOf(c.titleId);
+        return (
           !onLoan.has(c.barcode) &&
-          (c.titleId !== 'spring' || (day >= '2026-03-02' && !springOver)) &&
-          (c.titleId !== 'autumn' || day >= '2026-09-15'),
-      );
+          (!exchange || (day >= exchange.from && day <= exchange.lastLoan))
+        );
+      });
       if (free.length === 0) continue;
       const book = pick(free);
       const result = await scan(actor, book.barcode, reader.id, at(day, 10));
       if (result.outcome !== 'checkedOut') continue;
       lent++;
       loansOf.set(reader.id, (loansOf.get(reader.id) ?? 0) + 1);
-      // Most come back in time; some are kept long (overdue now), recent ones are still out.
-      const forgotten = random() < 0.07 && day >= '2026-09-01';
-      const keep = 7 + Math.floor(random() * 14);
+      const exchange = exchangeOf(book.titleId);
+      // Most come back in time; some of the school's own books lent a month or two ago are
+      // kept (overdue now). Not earlier, or the shelves would be full of forgotten books.
+      const forgotten =
+        !exchange && day >= forgetWindow.from && day <= forgetWindow.to && random() < 0.2;
       const back = new Date(`${day}T12:00:00Z`);
-      back.setUTCDate(back.getUTCDate() + keep);
-      // Spring's books all come back before that collection goes back on 15 June.
+      back.setUTCDate(back.getUTCDate() + 7 + Math.floor(random() * 14));
       const returnOn = forgotten
         ? null
-        : book.titleId === 'spring' && localDate(back) > '2026-06-12'
-          ? '2026-06-12'
+        : exchange && localDate(back) > exchange.allBack
+          ? exchange.allBack
           : localDate(back);
       onLoan.set(book.barcode, { readerId: reader.id, returnOn });
     }
-    if (day === '2026-06-15') {
-      await returnExchange(actor, spring.id, at(day, 15));
+    for (const exchange of exchanges) {
+      if (!returned.has(exchange.id) && day >= exchange.goesBack) {
+        await returnExchange(actor, exchange.id, at(day, 15));
+        returned.add(exchange.id);
+      }
     }
   }
   console.log(`Loans: ${lent} since March, ${onLoan.size} out now.`);
@@ -577,15 +636,15 @@ async function main() {
       actor,
       damaged.barcode,
       { status: 'damaged', note: 'Kaft gescheurd' },
-      at('2026-10-07'),
+      at(on('2026-10-07')),
     );
-  if (lost) await updateCopy(actor, lost.barcode, { status: 'lost' }, at('2026-10-09'));
+  if (lost) await updateCopy(actor, lost.barcode, { status: 'lost' }, at(on('2026-10-09')));
   if (withdrawn)
     await updateCopy(
       actor,
       withdrawn.barcode,
       { status: 'withdrawn', note: 'Versleten' },
-      at('2026-10-12'),
+      at(on('2026-10-12')),
     );
 
   console.log(`Search index: ${await rebuildSearchIndex()} titles.`);

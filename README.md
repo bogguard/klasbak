@@ -252,8 +252,9 @@ To work on the frontend against a deployed dev stack instead, put its `AppUrl` i
 
 ### A demo library
 
-For a demo or screenshots, fill the local app with a school library a few weeks into the school
-year. Keep `npm run dev:local` running and, in a second terminal:
+For a demo or screenshots, fill the local app with a school library in use since last spring. The
+dates follow the current school year, so the demo never looks old. Keep `npm run dev:local` running
+and, in a second terminal:
 
 ```bash
 npm run demo
@@ -265,15 +266,17 @@ Bibliotheek) are kept. It refuses to run against AWS. Then it loads:
 - a catalogue of real children's books with their covers (looked up by ISBN, so an internet
   connection helps; offline the covers are generated), added over the last year;
 - classes of pupils and a few teachers, all with made-up names, and one inactive reader;
-- loans since March, some of them overdue now, so the statistics, the overdue list and the reminder
-  slips have something to show;
-- a few damaged, missing and withdrawn copies, books waiting for a label, exchange collections from
-  the public library (one returned, one in use) and the school holidays as closed days.
+- loans since last March up to today, a few of them overdue now, so the statistics, the overdue
+  list and the reminder slips have something to show;
+- a few damaged, missing and withdrawn copies, books waiting for a label, two exchange collections
+  from the public library (in use until their return date, then returned with their book list) and
+  the school holidays as closed days.
 
 Open http://localhost:5173, choose **Aanmelden** and sign in as a role (no password locally):
 **beheerder** (admin) sees everything, including Instellingen; **bibliothecaris** (librarian) the
 desk, catalogue, readers and statistics. Run `npm run demo` again to start from a clean demo; after
-`docker compose down -v` the database is empty.
+`docker compose down -v` the database is empty. To see the demo as on another day (e.g. to check a
+change in another season), run `DEMO_TODAY=2027-05-20 npm run demo`.
 
 ## Quality checks (also run in CI)
 
