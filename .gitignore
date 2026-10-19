@@ -10,3 +10,6 @@ coverage/
 playwright-report/
 test-results/
 .local/
+
+# Video recordings for the webinar and teaser (local for now)
+video/
