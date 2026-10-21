@@ -449,7 +449,7 @@ async function main() {
     actor,
     {
       name: `Voorjaar ${on('2026-03-02').slice(0, 4)}`,
-      lender: 'Bibliotheek Zele',
+      lender: 'Bibliotheek Boekenstad',
       returnBy: on('2026-06-19'),
     },
     at(on('2026-03-02')),
@@ -475,7 +475,7 @@ async function main() {
     actor,
     {
       name: `Najaar ${on('2026-09-15').slice(0, 4)}`,
-      lender: 'Bibliotheek Zele',
+      lender: 'Bibliotheek Boekenstad',
       returnBy: on('2026-12-18'),
     },
     at(on('2026-09-15')),

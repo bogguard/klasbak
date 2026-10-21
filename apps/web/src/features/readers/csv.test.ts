@@ -28,7 +28,7 @@ describe('parseReadersCsv', () => {
   it('handles commas, quotes, any column order and optional columns', () => {
     const csv = [
       'email,last name,first name,card,role',
-      'an@school.be,"Wouters, sr.",An,K-100,Leerkracht',
+      'an@example.org,"Wouters, sr.",An,K-100,Leerkracht',
     ].join('\n');
     const result = parseReadersCsv(csv);
     expect(result.ok && result.rows[0]).toEqual({
@@ -37,7 +37,7 @@ describe('parseReadersCsv', () => {
       reader: expect.objectContaining({
         lastName: 'Wouters, sr.',
         memberNumber: 'K-100',
-        email: 'an@school.be',
+        email: 'an@example.org',
         category: 'teacher',
       }),
     });

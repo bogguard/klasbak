@@ -20,7 +20,7 @@ const exchange = {
   sk: 'X1',
   id: 'X1',
   name: 'Najaar 2026',
-  lender: 'Bibliotheek Zele',
+  lender: 'Bibliotheek Boekenstad',
   returnBy: '2027-01-29',
   status: 'active',
 };

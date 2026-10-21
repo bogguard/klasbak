@@ -791,7 +791,7 @@
     "closedHint_other": "Deze collectie is teruggebracht; haar boeken staan niet meer in de catalogus. Ze werden samen {{count}} keer uitgeleend.",
     "form": {
       "lender": "Van welke bib",
-      "lenderHint": "Bijvoorbeeld: Bibliotheek Zele",
+      "lenderHint": "Bijvoorbeeld: Bibliotheek Boekenstad",
       "name": "Naam",
       "nameHint": "Bijvoorbeeld: Najaar 2026",
       "returnBy": "Terug naar de bib op",

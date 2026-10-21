@@ -791,7 +791,7 @@
     "closedHint_other": "This collection was returned; its books are no longer in the catalogue. Together they were lent {{count}} times.",
     "form": {
       "lender": "From which library",
-      "lenderHint": "For example: Bibliotheek Zele",
+      "lenderHint": "For example: Bibliotheek Boekenstad",
       "name": "Name",
       "nameHint": "For example: Autumn 2026",
       "returnBy": "Back to the library on",

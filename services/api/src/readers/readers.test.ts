@@ -85,7 +85,7 @@ describe('importing a class list', () => {
     firstName: 'An',
     lastName: 'Wouters',
     category: 'teacher',
-    email: 'an@school.be',
+    email: 'an@example.org',
     group: '3B',
     active: true,
   };
@@ -106,7 +106,7 @@ describe('importing a class list', () => {
     const values = update?.Update?.ExpressionAttributeValues;
     expect(values).toMatchObject({ ':group': '4A', ':schoolNumber': '12345' });
     // Not in the file, so kept: still a teacher, email untouched.
-    expect(values).toMatchObject({ ':category': 'teacher', ':email': 'an@school.be' });
+    expect(values).toMatchObject({ ':category': 'teacher', ':email': 'an@example.org' });
   });
 
   it('creates readers it does not know', async () => {

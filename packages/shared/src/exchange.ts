@@ -12,7 +12,7 @@ export const CreateExchangeRequestSchema = z
   .object({
     /** E.g. "Najaar 2026". */
     name: text(80),
-    /** The lending library, e.g. "Bibliotheek Zele". */
+    /** The lending library, e.g. "Bibliotheek Boekenstad". */
     lender: text(120),
     /** The day the books must be back at the library. */
     returnBy: z.iso.date(),

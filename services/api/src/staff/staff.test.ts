@@ -124,7 +124,7 @@ describe('cognitoDirectory', () => {
     cognito.on(AdminAddUserToGroupCommand).resolves({});
 
     const member = await cognitoDirectory.create(
-      { username: 'juf.an', name: 'An', email: 'an@school.be', role: 'librarian' },
+      { username: 'juf.an', name: 'An', email: 'an@example.org', role: 'librarian' },
       'Abcd-Efgh-Jkmn',
     );
 

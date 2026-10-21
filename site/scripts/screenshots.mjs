@@ -196,9 +196,10 @@ await shot(await open(`/manage/titles/${damaged}`, { height: 700 }), 'copies');
 // An exchange collection, with where each book is.
 {
   const page = await open(`/manage/exchanges/${exchange.id}`, { height: 600 });
+  // The last table is the collection's books (the first is the example list for the library).
   await page
     .locator('table')
-    .first()
+    .last()
     .evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 120));
   await shot(page, 'exchange');
 }

@@ -1,23 +1,32 @@
-# Library App
+# Schoolbibliotheek
 
-[MIT licence](LICENSE)
+[![CI](https://github.com/bogguard/library-app/actions/workflows/ci.yml/badge.svg)](https://github.com/bogguard/library-app/actions/workflows/ci.yml)
+[![MIT licence](https://img.shields.io/badge/licence-MIT-0f6e66)](LICENSE)
 
-Library software for any organisation with its own collection: a school, a law firm, a company's
-documentation centre, an association. A public or internal catalogue, a lending desk with barcodes,
-readers, labels and cards, statistics. Serverless on AWS, one installation per organisation.
+Open-source library software for schools, and for any organisation with its own collection: a
+public catalogue with real covers, a lending desk with barcodes, readers, labels and reader cards,
+reminder slips and anonymous statistics. Dutch (Flemish) and English. Serverless on AWS, one
+installation per organisation, data in the EU.
 
-It was built first for school libraries, but works for any organisation with a small library, such
-as a law firm, a company or an association. Under Beheer → Instellingen an administrator chooses the
-kind of library:
+- **What it is and how to get started:** https://bib.itrw.be
+- **See it work:** [a ten-minute tour](https://youtu.be/C4mgS-DkCsQ) (in Dutch)
+- **Run it locally in a few minutes:** [Local development](#local-development) and
+  [a demo library](#a-demo-library)
+
+Under Beheer → Instellingen an administrator chooses the kind of library:
 
 - **School**: pupils, teachers and classes; statistics per school year; imports from school
   administrations (Informat, Wisa, Smartschool) and exchange collections from the public library.
-- **Other organisation**: readers, staff members and departments; statistics per calendar year; no
-  exchange collections. Readers can be imported from any spreadsheet (e.g. a staff list).
+- **Other organisation** (a law firm, a company, an association): readers, staff members and
+  departments; statistics per calendar year; no exchange collections. Readers can be imported from
+  any spreadsheet (e.g. a staff list).
 
 The library can also choose its own words for its two kinds of readers (each with their own loan
 rules) and their groups, e.g. "advocaat" and "stagiair" with "team". Groups and reading levels (AVI)
 stay optional.
+
+Found a security problem? See [SECURITY.md](SECURITY.md). Questions and ideas are welcome as
+[issues](https://github.com/bogguard/library-app/issues).
 
 ## Setting up an organisation (production)
 
