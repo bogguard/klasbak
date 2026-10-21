@@ -13,3 +13,7 @@ test-results/
 
 # Video recordings for the webinar and teaser (local for now)
 video/
+
+# Product site build output and working files
+site/dist/
+site/.tmp/

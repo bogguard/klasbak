@@ -26,7 +26,9 @@
     "deploy:dev": "npm run build:api && cd infra && sam deploy --config-env dev --template-file template.yaml",
     "deploy:prod": "npm run build:api && cd infra && sam deploy --config-env prod --template-file template.yaml",
     "build:api": "node scripts/build-api.mjs",
-    "demo": "tsx services/api/src/local/demo.ts"
+    "demo": "tsx services/api/src/local/demo.ts",
+    "build:site": "node site/build.mjs",
+    "deploy:site": "site/deploy.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

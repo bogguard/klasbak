@@ -2,11 +2,14 @@
 # Gets a free certificate for the organisation's own web address (e.g. bib.example.org) and stores
 # the settings for the next deploy. Safe to run again: it picks up where it left off.
 # Usage: scripts/request-certificate.sh bib.example.org
+#        scripts/request-certificate.sh bib.itrw.be /library-site   (the product site, see site/README.md)
 set -euo pipefail
 # AWS CLI v2 shows some output in a pager (less), which waits for 'q'; scripts must not stop.
 export AWS_PAGER=""
 
-domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. bib.example.org>}"
+domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. bib.example.org> [settings prefix]}"
+# Where the settings go: /library for the library stack, /library-site for the product site.
+prefix="${2:-/library}"
 region="eu-west-1"       # where the library stack and its settings live
 cert_region="us-east-1"  # CloudFront only accepts certificates from this region
 
@@ -89,6 +92,9 @@ ${zone} (keep any existing CAA records, e.g. for Let's Encrypt), then run this s
 Already there? Then check that ${domain} itself has no CNAME record (e.g. to CloudFront):
 Amazon would check the CAA rules of that target instead. Remove it until the certificate is issued.
 CAA
+    elif [[ "$reason" == "None" ]]; then
+      # The waiter gives up after about 40 minutes; the request itself stays open for 72 hours.
+      echo "AWS doesn't see the DNS record yet. Check it (name and value, no dot at the end), then run this script again: it continues with the same certificate."
     else
       echo "Validation stopped (${reason}). Check the DNS record above and run this script again."
     fi
@@ -96,19 +102,26 @@ CAA
   fi
 fi
 
-aws ssm put-parameter --region "$region" --name /library/domain-name --type String \
+aws ssm put-parameter --region "$region" --name "${prefix}/domain-name" --type String \
   --value "$domain" --overwrite >/dev/null
-aws ssm put-parameter --region "$region" --name /library/certificate-arn --type String \
+aws ssm put-parameter --region "$region" --name "${prefix}/certificate-arn" --type String \
   --value "$arn" --overwrite >/dev/null
 
+if [[ "$prefix" == "/library" ]]; then
+  deploy="npm run deploy:dev   (or deploy:prod)"
+  publish="  3. Publish the website again:  scripts/deploy-web.sh <env>"
+else
+  deploy="site/deploy.sh"
+  publish=""
+fi
 cat <<NEXT
 
 Certificate ready and stored. Next:
-  1. Deploy:  npm run deploy:dev   (or deploy:prod)
+  1. Deploy:  ${deploy}
   2. Step 2 of 2: add a second DNS record at the organisation's domain:
        Type:   CNAME
        Name:   ${domain%%.*}   (or the full name ${domain}, depending on the DNS panel)
        Value:  the CloudFrontDomain output of the deploy (e.g. d1234abcd.cloudfront.net),
                without a dot at the end
-  3. Publish the website again:  scripts/deploy-web.sh <env>
+${publish}
 NEXT

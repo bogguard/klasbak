@@ -278,6 +278,12 @@ desk, catalogue, readers and statistics. Run `npm run demo` again to start from 
 `docker compose down -v` the database is empty. To see the demo as on another day (e.g. to check a
 change in another season), run `DEMO_TODAY=2027-05-20 npm run demo`.
 
+## Product site
+
+The public page about the project, https://bib.itrw.be (what it is, the webinar, the price, how
+to start), lives in [`site/`](site/README.md): a static site in Dutch and English with its own
+small stack. `npm run build:site` builds it, `npm run deploy:site` publishes it.
+
 ## Quality checks (also run in CI)
 
 ```bash

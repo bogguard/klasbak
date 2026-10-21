@@ -30,6 +30,7 @@ packages/shared/src/     one file per domain: auth, branding, catalog, circulati
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
 docs/                    features.md, decisions.md
+site/                    the product site at bib.itrw.be (static, own stack; site/README.md)
 ```
 
 npm workspaces monorepo. Shared code goes in `packages/shared` only when used by both web and api.
