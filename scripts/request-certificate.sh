@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gets a free certificate for the organisation's own web address (e.g. klasbak.example.org) and stores
+# Gets a free certificate for the school's own web address (e.g. klasbak.example.org) and stores
 # the settings for the next deploy. Safe to run again: it picks up where it left off.
 # Usage: scripts/request-certificate.sh klasbak.example.org
 #        scripts/request-certificate.sh klasbak.itrw.be /klasbak-site   (the product site, see site/README.md)
@@ -8,9 +8,9 @@ set -euo pipefail
 export AWS_PAGER=""
 
 domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. klasbak.example.org> [settings prefix]}"
-# Where the settings go: /klasbak for the app's stack, /klasbak-site for the product site.
+# Where the settings go: /klasbak for a school's stack, /klasbak-site for the product site.
 prefix="${2:-/klasbak}"
-region="eu-west-1"       # where the app's stack and its settings live
+region="eu-west-1"       # where the school's stack and its settings live
 cert_region="us-east-1"  # CloudFront only accepts certificates from this region
 
 # Fail early and clearly when the terminal isn't signed in to AWS (e.g. AWS_PROFILE not set).
@@ -21,7 +21,7 @@ fi
 echo "AWS account ${account} (profile: ${AWS_PROFILE:-default}), certificate for ${domain}"
 
 # A CNAME on the address itself (e.g. already pointing to CloudFront) makes Amazon check the
-# CAA rules of the CNAME's target instead of the organisation's domain, and issuance fails (CAA_ERROR).
+# CAA rules of the CNAME's target instead of the school's domain, and issuance fails (CAA_ERROR).
 # It's only needed after the deploy, so remove it until the certificate is issued.
 existing_cname="$(dig +short CNAME "$domain" 2>/dev/null || true)"
 if [[ -n "$existing_cname" ]]; then
@@ -64,7 +64,7 @@ if [[ "$status" != "ISSUED" ]]; then
   short_name="${name%."$zone"}"
   cat <<INSTRUCTIONS
 
-Step 1 of 2: ask whoever manages the organisation's domain (${zone}) to add this DNS record:
+Step 1 of 2: ask whoever manages the school's domain (${zone}) to add this DNS record:
 
   Type:   CNAME
   Name:   ${short_name}
@@ -73,7 +73,7 @@ Step 1 of 2: ask whoever manages the organisation's domain (${zone}) to add this
 
 Enter both without a dot at the end.
 
-It only proves the address belongs to the organisation; nothing changes for visitors yet.
+It only proves the address belongs to the school; nothing changes for visitors yet.
 Waiting until AWS sees the record (usually minutes, sometimes a few hours)…
 If this window closes, just run this script again.
 
@@ -118,7 +118,7 @@ cat <<NEXT
 
 Certificate ready and stored. Next:
   1. Deploy:  ${deploy}
-  2. Step 2 of 2: add a second DNS record at the organisation's domain:
+  2. Step 2 of 2: add a second DNS record at the school's domain:
        Type:   CNAME
        Name:   ${domain%%.*}   (or the full name ${domain}, depending on the DNS panel)
        Value:  the CloudFrontDomain output of the deploy (e.g. d1234abcd.cloudfront.net),

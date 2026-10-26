@@ -9,7 +9,6 @@ const SECTIONS = ['who', 'what', 'why', 'retention', 'where', 'cookies', 'rights
  */
 export function PrivacyPage() {
   const { t } = useTranslation();
-  const { kind } = useConfig();
   const { libraryName } = useConfig();
   return (
     <article className="max-w-prose space-y-6">
@@ -20,7 +19,7 @@ export function PrivacyPage() {
           <h2 id={`privacy-${section}`} className="text-xl font-semibold">
             {t(`privacy.${section}.heading`)}
           </h2>
-          <p className="leading-relaxed">{t(`privacy.${section}.body`, { context: kind })}</p>
+          <p className="leading-relaxed">{t(`privacy.${section}.body`)}</p>
         </section>
       ))}
     </article>

@@ -12,13 +12,11 @@ import {
 } from '../../components/ui/Feedback';
 import { useIsAdmin } from '../../lib/auth';
 import { useReaders } from './api';
-import { useConfig } from '../../lib/config';
 
 const linkButton = 'inline-flex min-h-11 items-center gap-2 rounded-lg px-4 font-medium transition';
 
 export function ReadersPage() {
   const { t } = useTranslation();
-  const { kind } = useConfig();
   const readers = useReaders();
   const isAdmin = useIsAdmin();
   const errorMessage = useErrorMessage();
@@ -119,7 +117,7 @@ export function ReadersPage() {
         />
       ) : readers.data.length === 0 ? (
         <StatusMessage icon={<Users className="size-6" />} title={t('readers.empty.title')}>
-          {t('readers.empty.hint', { context: kind })}
+          {t('readers.empty.hint')}
         </StatusMessage>
       ) : (
         <>

@@ -1,7 +1,7 @@
 # Runbook: following up an installation
 
 What to watch, what each alarm means, and what to do. One installation is one AWS account and
-stack (`klasbak-prod` for an organisation, `klasbak-dev` for testing); run commands with that account's
+stack (`klasbak-prod` for a school, `klasbak-dev` for testing); run commands with that account's
 profile (`export AWS_PROFILE=...`).
 
 ## How you hear about problems
@@ -26,7 +26,7 @@ days in prod, 7 in dev.
   failing" query (a book source that keeps failing makes adding books harder); AWS Health notices.
 - **Once a year (summer):** check the Lambda runtime is still supported and plan the upgrade to the
   next Node.js LTS (`Runtime` in `infra/template.yaml`); try a backup restore in the test account
-  (below); check with the organisation that the retention period (Instellingen) is still right.
+  (below); check with the school that the retention period (Instellingen) is still right.
 
 ## Alarms
 
@@ -59,7 +59,7 @@ The public catalogue (search, availability) may be out of date; lending itself w
 
 ### Removing old reading history failed / did not run for two days
 
-Returned loans older than the retention period are kept longer than promised to the organisation (privacy;
+Returned loans older than the retention period are kept longer than promised to the school (privacy;
 see the data processing agreement).
 
 1. Query **"Errors and warnings"**, function `RetentionFunction`.

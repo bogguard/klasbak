@@ -103,23 +103,3 @@ describe('readXlsx', () => {
     ]);
   });
 });
-
-describe('other organisations', () => {
-  it("reads a department and staff number, and the library's own name for its second reader type", () => {
-    const result = parseReaderRecords(
-      [
-        ['Voornaam', 'Naam', 'Afdeling', 'Personeelsnummer', 'Soort'],
-        ['An', 'Peeters', 'Fiscaal', 'P-001', 'Partner'],
-        ['Bram', 'Maes', 'Fiscaal', 'P-002', 'medewerker'],
-      ],
-      ['partner', 'partners'],
-    );
-    expect(
-      result.ok &&
-        result.rows.map((r) => r.ok && [r.reader.group, r.reader.schoolNumber, r.reader.category]),
-    ).toEqual([
-      ['Fiscaal', 'P-001', 'teacher'],
-      ['Fiscaal', 'P-002', 'pupil'],
-    ]);
-  });
-});

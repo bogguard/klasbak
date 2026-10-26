@@ -1,7 +1,5 @@
 import type {
   Branding,
-  LibraryKind,
-  LibraryTerms,
   LibrarySettings,
   LibrarySettingsInput,
   Loan,
@@ -111,11 +109,6 @@ export function useBranding() {
     }),
     removeLogo: useMutation({
       mutationFn: () => api<Branding>('/api/circulation/branding/logo', { method: 'DELETE' }),
-      onSuccess: refresh,
-    }),
-    saveVocabulary: useMutation({
-      mutationFn: (input: { kind: LibraryKind; terms: LibraryTerms }) =>
-        api<Branding>('/api/circulation/branding/vocabulary', { method: 'PUT', body: input }),
       onSuccess: refresh,
     }),
   };

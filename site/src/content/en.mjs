@@ -136,10 +136,6 @@ export default {
       },
     ],
   },
-  orgs: {
-    title: 'Not a school? That works too.',
-    text: 'A law firm, a company or an association with its own library chooses “other organisation”. The app then speaks of readers, staff and departments, or of the words you choose yourself.',
-  },
   video: {
     kicker: 'See it in action',
     title: 'A ten-minute tour',
@@ -251,10 +247,6 @@ export default {
       {
         q: 'Where is our data stored?',
         a: 'In a separate installation per school, at Amazon Web Services in Ireland (European Union), encrypted.',
-      },
-      {
-        q: 'Does it work for an organisation that isn’t a school?',
-        a: 'Yes. Choose “other organisation” and the app uses neutral words, or the words you choose. Figures are then counted per calendar year.',
       },
     ],
   },

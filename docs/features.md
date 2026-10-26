@@ -4,21 +4,20 @@ Features a school library needs, from cataloguing to lending to reading promotio
 
 ## Status
 
-| Area                                                                        | State                         |
-| --------------------------------------------------------------------------- | ----------------------------- |
-| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit         | Built and tested; runs on AWS |
-| Public catalogue: search (in browser) and title page                        | Built; runs on AWS            |
-| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens          | Built; tested on AWS (dev)    |
-| Readers: list, add/edit, CSV import                                         | Built; runs on AWS            |
-| Lending desk, overdue/loan lists (printable), loan rules and closed days    | Built and tested; runs on AWS |
-| Barcode labels and reader cards (PDF)                                       | Built; runs on AWS            |
-| Staff two-step verification, privacy page, history retention, erasure       | Built; runs on AWS            |
-| Reminder slips, "Mijn boeken" screen, anonymous statistics                  | Built; runs on AWS            |
-| Loan ticket at the desk (browser print, receipt or A4)                      | Built; runs on AWS            |
-| Import from Informat/Wisa/Smartschool (xlsx, CSV), new school year, report  | Built; runs on AWS            |
-| Exchange collections from the public library (decision 031)                 | Built; runs on AWS            |
-| Kind of library (school or other organisation) and own words (decision 034) | Built; runs on AWS            |
-| Demo library for local development (`npm run demo`)                         | Built                         |
+| Area                                                                       | State                         |
+| -------------------------------------------------------------------------- | ----------------------------- |
+| Catalogue API: titles, copies, barcodes, ISBN lookup, covers, audit        | Built and tested; runs on AWS |
+| Public catalogue: search (in browser) and title page                       | Built; runs on AWS            |
+| Sign-in (Cognito, or dev roles locally) and staff "Beheer" screens         | Built; tested on AWS (dev)    |
+| Readers: list, add/edit, CSV import                                        | Built; runs on AWS            |
+| Lending desk, overdue/loan lists (printable), loan rules and closed days   | Built and tested; runs on AWS |
+| Barcode labels and reader cards (PDF)                                      | Built; runs on AWS            |
+| Staff two-step verification, privacy page, history retention, erasure      | Built; runs on AWS            |
+| Reminder slips, "Mijn boeken" screen, anonymous statistics                 | Built; runs on AWS            |
+| Loan ticket at the desk (browser print, receipt or A4)                     | Built; runs on AWS            |
+| Import from Informat/Wisa/Smartschool (xlsx, CSV), new school year, report | Built; runs on AWS            |
+| Exchange collections from the public library (decision 031)                | Built; runs on AWS            |
+| Demo library for local development (`npm run demo`)                        | Built                         |
 
 ## Phase 1 — MVP: run a school library
 

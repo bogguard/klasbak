@@ -1,4 +1,4 @@
-import { libraryYear, localDate, type LibraryKind } from '@klasbak/shared';
+import { localDate, schoolYear } from '@klasbak/shared';
 import MiniSearch from 'minisearch';
 import { BarChart3, Download, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -14,15 +14,14 @@ import { useExchanges } from '../exchange/api';
 import { statisticsCsv } from './reportCsv';
 import { summarize, type CatalogueTitle } from './summary';
 
-/** This year and the two before it: school years for a school, calendar years otherwise. */
-function libraryYears(today: string, kind: LibraryKind) {
-  const start = Number(libraryYear(today, kind).from.slice(0, 4));
-  return [0, 1, 2].map((back) => {
-    const year = start - back;
-    return kind === 'school'
-      ? { from: `${year}-09`, to: `${year + 1}-08`, label: `${year}–${year + 1}` }
-      : { from: `${year}-01`, to: `${year}-12`, label: String(year) };
-  });
+/** The current school year and the two before it. */
+function schoolYears(today: string) {
+  const start = Number(schoolYear(today).from.slice(0, 4));
+  return [0, 1, 2].map((back) => ({
+    from: `${start - back}-09`,
+    to: `${start - back + 1}-08`,
+    label: `${start - back}–${start - back + 1}`,
+  }));
 }
 
 /**
@@ -33,15 +32,15 @@ function libraryYears(today: string, kind: LibraryKind) {
  */
 export function StatisticsPage() {
   const { t, i18n } = useTranslation();
-  const { libraryName, kind } = useConfig();
-  const years = useMemo(() => libraryYears(localDate(), kind), [kind]);
+  const { libraryName } = useConfig();
+  const years = useMemo(() => schoolYears(localDate()), []);
   const [yearIndex, setYearIndex] = useState(0);
   const year = years[yearIndex] ?? years[0];
   const stats = useStatistics({ from: year?.from ?? '', to: year?.to ?? '' });
   const index = useSearchIndex();
   const errorMessage = useErrorMessage();
   const exchanges = useExchanges();
-  // Exchange collections that were at the library during the chosen year.
+  // Exchange collections that were at the school during this school year.
   const yearExchanges = (exchanges.data ?? []).filter(
     (e) =>
       year &&
