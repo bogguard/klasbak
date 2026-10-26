@@ -209,10 +209,6 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
           )
           .join('')}
       </div>
-      <aside class="orgs">
-        <h3>${esc(t.orgs.title)}</h3>
-        <p>${esc(t.orgs.text)}</p>
-      </aside>
     </div>
   </section>
 

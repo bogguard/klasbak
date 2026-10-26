@@ -20,7 +20,7 @@ distribution="$(output DistributionId)"
 
 npm run build -w apps/web
 
-# Runtime config: one build works for every environment and organisation.
+# Runtime config: one build works for every environment and school.
 cat > apps/web/dist/config.json <<EOF
 {
   "region": "${region}",

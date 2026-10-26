@@ -1,4 +1,4 @@
-import { BRANDING_PATH, type Branding, type LibraryKind, type LibraryTerms } from '@klasbak/shared';
+import { BRANDING_PATH, type Branding } from '@klasbak/shared';
 import { useQuery } from '@tanstack/react-query';
 
 /**
@@ -10,9 +10,6 @@ export type AppConfig = {
   libraryName: string;
   /** Path of the library's logo, if one was uploaded. */
   logoKey?: string;
-  /** School or another organisation, and its own words (Instellingen → Bibliotheek). */
-  kind: LibraryKind;
-  terms?: LibraryTerms;
   region?: string;
   userPoolId?: string;
   userPoolClientId?: string;
@@ -24,12 +21,12 @@ export type AppConfig = {
 
 export const configKey = ['config'];
 
-const fallback: AppConfig = { libraryName: 'Bibliotheek', kind: 'school', loaded: false };
+const fallback: AppConfig = { libraryName: 'Bibliotheek', loaded: false };
 
 async function readJson<T>(path: string): Promise<Partial<T>> {
   try {
     // Always ask the server (a 304 if unchanged): the local dev server sends no Cache-Control,
-    // and browsers would otherwise show the old name or words right after saving.
+    // and browsers would otherwise show the old name right after saving.
     const response = await fetch(path, { cache: 'no-cache' });
     return response.ok ? ((await response.json()) as Partial<T>) : {};
   } catch {
@@ -51,8 +48,6 @@ export function useConfig(): AppConfig {
         ...config,
         libraryName: branding.libraryName ?? fallback.libraryName,
         logoKey: branding.logoKey,
-        kind: branding.kind ?? 'school',
-        terms: branding.terms,
         loaded: true,
       };
     },

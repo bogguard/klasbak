@@ -12,14 +12,12 @@ import {
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { useIsAdmin } from '../lib/auth';
-import { useConfig } from '../lib/config';
 
 const items = [
   { to: '/manage/desk', key: 'desk', icon: ScanBarcode },
   { to: '/manage/loans', key: 'loans', icon: ClipboardList },
   { to: '/manage', key: 'collection', icon: BookCopy, end: true },
-  // Exchange collections come from the public library to schools ("Bib op school").
-  { to: '/manage/exchanges', key: 'exchanges', icon: ArrowLeftRight, schoolOnly: true },
+  { to: '/manage/exchanges', key: 'exchanges', icon: ArrowLeftRight },
   { to: '/manage/readers', key: 'readers', icon: Users },
   { to: '/manage/labels', key: 'labels', icon: Tags },
   { to: '/manage/statistics', key: 'statistics', icon: BarChart3 },
@@ -31,7 +29,6 @@ const items = [
 export function ManageNav() {
   const { t } = useTranslation();
   const isAdmin = useIsAdmin();
-  const { kind } = useConfig();
   return (
     <nav
       aria-label={t('manageNav.label')}
@@ -40,7 +37,6 @@ export function ManageNav() {
       <ul className="flex min-w-max gap-1 border-b border-line">
         {items
           .filter((item) => isAdmin || !('adminOnly' in item))
-          .filter((item) => kind === 'school' || !('schoolOnly' in item))
           .map(({ to, key, icon: Icon, ...rest }) => (
             <li key={key}>
               <NavLink

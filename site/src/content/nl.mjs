@@ -137,10 +137,6 @@ export default {
       },
     ],
   },
-  orgs: {
-    title: 'Geen school? Ook goed.',
-    text: 'Een advocatenkantoor, een bedrijf of een vereniging met een eigen bib kiest ‘andere organisatie’. Dan spreekt de app van lezers, medewerkers en afdelingen, of van de woorden die je zelf kiest.',
-  },
   video: {
     kicker: 'Zie het in actie',
     title: 'Een rondleiding van tien minuten',
@@ -252,10 +248,6 @@ export default {
       {
         q: 'Waar staan onze gegevens?',
         a: 'In een eigen installatie per school, bij Amazon Web Services in Ierland (Europese Unie), versleuteld.',
-      },
-      {
-        q: 'Werkt het ook voor een organisatie die geen school is?',
-        a: 'Ja. Kies ‘andere organisatie’ en de app gebruikt neutrale woorden, of de woorden die je zelf kiest. De cijfers tellen dan per kalenderjaar.',
       },
     ],
   },

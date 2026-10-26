@@ -4,7 +4,6 @@ import {
   StatisticsQuerySchema,
   RenewRequestSchema,
   UpdateBrandingRequestSchema,
-  UpdateVocabularyRequestSchema,
   ScanRequestSchema,
   UpdateSettingsRequestSchema,
 } from '@klasbak/shared';
@@ -65,12 +64,6 @@ app.put('/branding', async (c) => {
   const actor = requireRole(getActor(c), ADMIN);
   const { libraryName } = parse(UpdateBrandingRequestSchema, await readJson(c));
   return c.json(await branding.updateLibraryName(actor, libraryName));
-});
-
-app.put('/branding/vocabulary', async (c) => {
-  const actor = requireRole(getActor(c), ADMIN);
-  const { kind, terms } = parse(UpdateVocabularyRequestSchema, await readJson(c));
-  return c.json(await branding.updateVocabulary(actor, kind, terms));
 });
 
 app.put('/branding/logo', async (c) => {

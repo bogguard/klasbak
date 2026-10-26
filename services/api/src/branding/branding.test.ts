@@ -2,7 +2,7 @@ import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { removeLogo, updateLibraryName, updateVocabulary, uploadLogo } from './service';
+import { removeLogo, updateLibraryName, uploadLogo } from './service';
 
 const ddb = mockClient(DynamoDBDocumentClient);
 const s3 = mockClient(S3Client);
@@ -58,27 +58,5 @@ describe('branding', () => {
     ddb.on(GetCommand).resolves({ Item: { libraryName: 'Bib', logoKey: 'branding/logo-old.png' } });
     const branding = await removeLogo(admin);
     expect(branding).toEqual({ libraryName: 'Bib', logoKey: undefined });
-  });
-});
-
-describe("the library's own words", () => {
-  it('publishes the kind of library and its words, keeping name and logo', async () => {
-    ddb
-      .on(GetCommand)
-      .resolves({ Item: { libraryName: 'Kantoorbib', logoKey: 'branding/logo-1.png' } });
-    const terms = {
-      pupil: { one: 'medewerker', other: 'medewerkers' },
-      teacher: { one: 'partner', other: 'partners' },
-      group: { one: 'afdeling', other: 'afdelingen' },
-    };
-
-    await updateVocabulary(admin, 'organisation', terms);
-
-    expect(JSON.parse(String(published()?.Body))).toEqual({
-      libraryName: 'Kantoorbib',
-      logoKey: 'branding/logo-1.png',
-      kind: 'organisation',
-      terms,
-    });
   });
 });

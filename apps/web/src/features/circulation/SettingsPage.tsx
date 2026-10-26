@@ -18,7 +18,6 @@ import { formatDate } from '../../lib/format';
 import { useBranding, useSettings, useUpdateSettings } from './api';
 import { ExportSection } from '../export/ExportSection';
 import { LogoField } from './LogoField';
-import { termsToSave, vocabularyFromConfig, VocabularyFields } from './VocabularyFields';
 
 // Monday first, as on a Belgian calendar; values follow Date.getUTCDay().
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
@@ -48,7 +47,7 @@ function Settings() {
           title={errorMessage(settings.error)}
         />
       ) : (
-        // Remount once the configuration is loaded, so name and words start with the real ones.
+        // Remount once the configuration is loaded, so the name starts with the real one.
         <SettingsForm key={String(loaded)} settings={settings.data} />
       )}
       {/* An action, not a setting: it stays out of the form and its save button. */}
@@ -62,13 +61,12 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
   const { t, i18n } = useTranslation();
   const config = useConfig();
   const update = useUpdateSettings();
-  const { rename, saveVocabulary } = useBranding();
+  const { rename } = useBranding();
   const errorMessage = useErrorMessage();
   const { version: _version, ...initial } = settings;
   const [values, setValues] = useState<LibrarySettingsInput>(initial);
-  // Name and words live in the branding file, but are edited and saved with the rest.
+  // The name lives in the branding file, but is edited and saved with the rest.
   const [name, setName] = useState(config.libraryName);
-  const [vocabulary, setVocabulary] = useState(() => vocabularyFromConfig(config));
   const [failure, setFailure] = useState<unknown>();
   const [invalid, setInvalid] = useState<string>();
   const [saved, setSaved] = useState(false);
@@ -115,33 +113,26 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
       })),
     };
     const parsed = LibrarySettingsInputSchema.safeParse(cleaned);
-    const terms = termsToSave(t, vocabulary);
     const problem = !name.trim()
       ? 'settings.branding.nameRequired'
-      : !terms
-        ? 'settings.vocabulary.incomplete'
-        : !parsed.success
-          ? 'settings.invalid'
-          : undefined;
+      : !parsed.success
+        ? 'settings.invalid'
+        : undefined;
     setInvalid(problem);
-    if (problem || !parsed.success || !terms) return;
+    if (problem || !parsed.success) return;
     setFailure(undefined);
     try {
       const result = await update.mutateAsync({ settings: parsed.data, version });
       setVersion(result.version);
       // Only what changed, so the audit trail doesn't list a new name on every save.
       if (name.trim() !== config.libraryName) await rename.mutateAsync(name.trim());
-      const wordsChanged = JSON.stringify(terms) !== JSON.stringify(config.terms ?? {});
-      if (vocabulary.kind !== config.kind || wordsChanged) {
-        await saveVocabulary.mutateAsync({ kind: vocabulary.kind, terms });
-      }
       setSaved(true);
     } catch (error) {
       setFailure(error);
     }
   }
 
-  const saving = update.isPending || rename.isPending || saveVocabulary.isPending;
+  const saving = update.isPending || rename.isPending;
 
   const preview = LibrarySettingsInputSchema.safeParse(values);
   const today = localDate();
@@ -170,14 +161,6 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
           )}
         </Field>
         <LogoField />
-        <VocabularyFields
-          value={vocabulary}
-          onChange={(next) => {
-            setVocabulary(next);
-            setInvalid(undefined);
-            setSaved(false);
-          }}
-        />
       </fieldset>
 
       <fieldset className="space-y-3">
