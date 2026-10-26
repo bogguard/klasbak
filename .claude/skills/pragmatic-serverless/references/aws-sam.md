@@ -106,6 +106,7 @@ Resources:
 - **Async and batch**: SQS with a DLQ, `ReportBatchItemFailures` so one bad message doesn't retry the whole batch, alarms on DLQ depth; DLQ or on-failure destination for async invocations.
 - **No recursion**: a function must not trigger itself (e.g. writing to the bucket that invokes it) without a guard.
 - **Reserved concurrency** only to protect a downstream system or cap cost, with a reason.
+- **Gradual deployments in prod**: `AutoPublishAlias: live` with `DeploymentPreference` (`Linear10PercentEvery1Minute` in prod, `AllAtOnce` in dev) and the function's error alarm under `Alarms`, so a bad release rolls back by itself.
 
 **Configuration and security**
 

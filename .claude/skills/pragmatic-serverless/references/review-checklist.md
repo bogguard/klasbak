@@ -38,6 +38,13 @@ Use this when reviewing a change (your own or someone else's). Report only real 
 - Any new fixed monthly cost? Estimate stated?
 - Log retention, TTLs and lifecycle rules set?
 
+## Delivery
+
+- One concern, small enough to review in one go? Refactor and behaviour change in separate PRs?
+- Short-lived branch, up to date with `main`? Unfinished work behind a flag or hidden?
+- Can it be rolled back by redeploying the previous version? Data changes backwards-compatible (expand → migrate → contract)?
+- PR description says why, how it was tested, with screenshots for UI changes?
+
 ## Maintainability
 
 - Names in domain language? Comments explain why?

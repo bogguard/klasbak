@@ -14,7 +14,7 @@ The project's `CLAUDE.md` names its roles, users, region and privacy audience; t
 
 - Encryption at rest (DynamoDB, S3 default SSE) and in transit (TLS only, HSTS).
 - S3 buckets: Block Public Access on, access only via CloudFront OAC, bucket policy enforcing TLS.
-- Backups: DynamoDB PITR on; test a restore once.
+- Backups: DynamoDB PITR on; test a restore once and document the steps in `docs/runbook.md`.
 - Secrets in SSM SecureString / Secrets Manager; never in env files committed to git.
 
 ## Privacy (GDPR; extra care with minors)
