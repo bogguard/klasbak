@@ -1,23 +1,23 @@
-import type {
-  Copy,
-  CopyInput,
-  IsbnLookupResult,
-  PublicTitle,
-  Title,
-  TitleInput,
-  TitleWithCopies,
+import {
+  bookBarcode,
+  type Copy,
+  type CopyInput,
+  type IsbnLookupResult,
+  type PublicTitle,
+  type Title,
+  type TitleInput,
+  type TitleWithCopies,
 } from '@klasbak/shared';
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import { ulid } from 'ulid';
 import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
+import { env } from '../lib/aws';
 import { ConflictError, NotFoundError } from '../lib/errors';
 import { metrics } from '../lib/observability';
 import { deleteCover, storeCover, storeUploadedCover } from './covers';
 import { lookupIsbn } from './isbn-lookup';
 import * as repository from './repository';
-
-const BARCODE_DIGITS = 8;
 
 export async function getPublicTitle(titleId: string): Promise<PublicTitle> {
   const title = await getTitle(titleId);
@@ -99,7 +99,8 @@ export async function addCopy(
   now = new Date(),
   options: { exchangeId?: string } = {},
 ): Promise<Copy> {
-  const barcode = input.barcode ?? formatBarcode(await repository.nextBarcodeNumber());
+  const barcode =
+    input.barcode ?? bookBarcode(env.institutionNumber, await repository.nextBarcodeNumber());
   const copy: Copy = {
     id: ulid(),
     titleId,
@@ -168,11 +169,6 @@ export async function findByIsbn(isbn13: string): Promise<IsbnLookupResult> {
   const result = await lookupIsbn(isbn13);
   if (!result) throw new NotFoundError('ISBN');
   return result;
-}
-
-/** System barcodes are zero-padded numbers, e.g. 00000042, so they sort and scan reliably. */
-export function formatBarcode(n: number): string {
-  return String(n).padStart(BARCODE_DIGITS, '0');
 }
 
 function changedFields<T extends object>(before: T, after: T): string[] {

@@ -70,7 +70,7 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 
 - **Context**: At the lending desk one scan field accepts both reader cards and books. A code that could mean either would be ambiguous.
 - **Decision**: Every scannable code has one pointer item (`CODE#<code>`) with a `kind` (`copy` or `reader`), claimed with a conditional write. Generated card numbers start with `L` (L000123) so they look different from book barcodes (00000123).
-- **Consequences**: One lookup tells the desk what was scanned, and a duplicate code is impossible. Imported card numbers that clash with a book barcode are refused with a clear message.
+- **Consequences**: One lookup tells the desk what was scanned, and a duplicate code is impossible. Imported card numbers that clash with a book barcode are refused with a clear message. Generated codes start with the school's number since 038.
 
 ## 012 — Lending rules enforced in the database
 
@@ -226,3 +226,9 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 - **Context**: Decision 034 opened the library to other organisations (a kind of library and its own words). Klasbak (036) is a set of tools for schools; no organisation uses it, and the placeholders made every text harder to write and to read.
 - **Decision**: Remove the kind of library and the own words: no `kind` or `terms` in branding, no `PUT /api/circulation/branding/vocabulary`, no word placeholders or `_school` variants in the texts, statistics per school year only, exchange collections always shown, and the reader import reads school lists only. Supersedes 034.
 - **Consequences**: Texts say leerling, leerkracht and klas directly again. Branding items saved with a `kind` or `terms` keep those fields, but nothing reads them.
+
+## 038 — Codes start with the school's instellingsnummer
+
+- **Context**: Generated codes were unique within a school (011) but every school started at `00000001` and `L000001`. A book or card from another school (same scholengemeenschap, a pupil who changed schools) was taken for one of ours: lent or returned as the wrong book, or shown as the wrong pupil. The school's name and logo on the label help people, not the scanner.
+- **Decision**: Every code the app makes starts with the school's instellingsnummer (six digits, Departement Onderwijs): books `123456000042` (12 digits), cards `L123456000123`. It is unique across Flanders without a register kept by ITRW, and self-hosted installations get it for free. `scripts/setup-installation.sh` stores it once in Parameter Store (`/klasbak/institution-number`) and refuses to change it; the Lambdas get it as `INSTITUTION_NUMBER`, the frontend through `config.json`. A scanned code that isn't ours but carries another school's number gets `OTHER_SCHOOL_CODE` ("take it back to that school") instead of "unknown". A label range can be typed as short numbers ("1" to "65"). Codes typed or imported by the school (old labels) keep their form.
+- **Consequences**: Called `institutionNumber` in code, apart from a reader's `schoolNumber` (stamboeknummer, 030). Digits only, because Code 128 prints digit pairs compactly: on the smallest sheet (38 mm) the bars stay about 0.28 mm wide, which scanners and the camera read well; a letter prefix would make the code clearly wider. Room for 999,999 copies and cards per school. Changing the number after labels are printed would mean relabelling the library, hence the refusal. The local server uses `000000`.

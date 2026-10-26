@@ -2,6 +2,7 @@ export * from './auth';
 export * from './branding';
 export * from './catalog';
 export * from './circulation';
+export * from './codes';
 export * from './exchange';
 export * from './export';
 export * from './isbn';

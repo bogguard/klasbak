@@ -47,7 +47,13 @@ await rebuildSearchIndex();
 
 const server = new Hono();
 
-server.get('/config.json', (c) => c.json({ libraryName: 'Bibliotheek (lokaal)', devAuth: true }));
+server.get('/config.json', (c) =>
+  c.json({
+    libraryName: 'Bibliotheek (lokaal)',
+    devAuth: true,
+    institutionNumber: process.env.INSTITUTION_NUMBER,
+  }),
+);
 // Like the S3 file in the cloud: always revalidated, so a reload shows the latest index.
 server.use('/search/*', async (c, next) => {
   await next();

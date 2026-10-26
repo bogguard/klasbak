@@ -8,6 +8,7 @@ import {
   type LoanStatistics,
   type MyBooks,
   readerName,
+  institutionNumberOf,
   type Copy,
   type ExchangeCollection,
   type LibrarySettings,
@@ -21,12 +22,26 @@ import {
 import { ulid } from 'ulid';
 import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
+import { env } from '../lib/aws';
 import { getCodePointer, getItem } from '../lib/dynamo';
 import { AppError, ConflictError, NotFoundError } from '../lib/errors';
 import { copyKey, exchangeKey, titleKey } from '../lib/keys';
 import { metrics } from '../lib/observability';
 import { getReader, listReaders } from '../readers/repository';
 import * as repository from './repository';
+
+/**
+ * A code nobody here has. Codes Klasbak made at another school say so (decision 038), so a
+ * stray book or an old card from a previous school isn't taken for "not entered yet".
+ */
+function unknownCode(code: string): AppError {
+  const institutionNumber = institutionNumberOf(code);
+  return institutionNumber && institutionNumber !== env.institutionNumber
+    ? new AppError(404, 'OTHER_SCHOOL_CODE', 'This code belongs to another school', {
+        institutionNumber,
+      })
+    : new AppError(404, 'UNKNOWN_CODE', 'No copy or reader has this code');
+}
 
 /** A second scan of the same book for the same reader within this time is a double scan. */
 const DOUBLE_SCAN_WINDOW_MS = 60_000;
@@ -45,14 +60,14 @@ export async function scan(
   now = new Date(),
 ): Promise<ScanResult> {
   const pointer = await getCodePointer(code);
-  if (!pointer) throw new AppError(404, 'UNKNOWN_CODE', 'No copy or reader has this code');
+  if (!pointer) throw unknownCode(code);
 
   if (pointer.kind === 'reader') {
     return { outcome: 'reader', ...(await readerAtDesk(pointer.readerId)) };
   }
 
   const copy = await getItem<Copy>(copyKey(pointer.titleId, pointer.copyId));
-  if (!copy) throw new AppError(404, 'UNKNOWN_CODE', 'No copy or reader has this code');
+  if (!copy) throw unknownCode(code);
 
   if (copy.status === 'onLoan' && copy.currentLoan) {
     const { readerId, loanedAt, loanId } = copy.currentLoan;
@@ -228,7 +243,7 @@ export async function renewLoan(
  */
 export async function myBooks(code: string): Promise<MyBooks> {
   const pointer = await getCodePointer(code);
-  if (!pointer) throw new AppError(404, 'UNKNOWN_CODE', 'No copy or reader has this code');
+  if (!pointer) throw unknownCode(code);
   if (pointer.kind !== 'reader') {
     throw new AppError(409, 'NOT_A_READER_CARD', 'This is a book, not a reader card');
   }

@@ -1,4 +1,9 @@
-import { LABEL_LOOKUP_MAX, type CopyLabel, type LabelLookupResult } from '@klasbak/shared';
+import {
+  bookBarcodeFromInput,
+  LABEL_LOOKUP_MAX,
+  type CopyLabel,
+  type LabelLookupResult,
+} from '@klasbak/shared';
 import { Check, Download, IdCard, Tags } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -95,7 +100,7 @@ export function LabelsPage() {
 
 function BookLabels({ initialCodes }: { initialCodes: string }) {
   const { t } = useTranslation();
-  const { libraryName, logoKey } = useConfig();
+  const { libraryName, logoKey, institutionNumber } = useConfig();
   const api = useAuthorizedApi();
   const errorMessage = useErrorMessage();
   const pending = usePendingLabels();
@@ -139,7 +144,10 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
 
     const list =
       source === 'range'
-        ? expandRange(from.trim(), to.trim())
+        ? expandRange(
+            bookBarcodeFromInput(from, institutionNumber),
+            bookBarcodeFromInput(to, institutionNumber),
+          )
         : [
             ...new Set(
               codes
@@ -232,31 +240,34 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
         {source === 'pending' ? (
           <PendingSummary labels={pending.data} />
         ) : source === 'range' ? (
-          <div className="flex flex-wrap gap-3">
-            <Field label={t('labels.from')} className="w-44">
-              {(props) => (
-                <input
-                  {...props}
-                  className={`${props.className} ${inputHeight} font-mono`}
-                  value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  inputMode="numeric"
-                  placeholder="00000001"
-                />
-              )}
-            </Field>
-            <Field label={t('labels.to')} className="w-44">
-              {(props) => (
-                <input
-                  {...props}
-                  className={`${props.className} ${inputHeight} font-mono`}
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  inputMode="numeric"
-                  placeholder="00000065"
-                />
-              )}
-            </Field>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-3">
+              <Field label={t('labels.from')} className="w-44">
+                {(props) => (
+                  <input
+                    {...props}
+                    className={`${props.className} ${inputHeight} font-mono`}
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="1"
+                  />
+                )}
+              </Field>
+              <Field label={t('labels.to')} className="w-44">
+                {(props) => (
+                  <input
+                    {...props}
+                    className={`${props.className} ${inputHeight} font-mono`}
+                    value={to}
+                    onChange={(e) => setTo(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="65"
+                  />
+                )}
+              </Field>
+            </div>
+            <p className="text-sm text-muted">{t('labels.rangeHint')}</p>
           </div>
         ) : (
           <Field label={t('labels.codes')} hint={t('labels.codesHint')}>

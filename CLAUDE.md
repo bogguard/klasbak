@@ -25,8 +25,8 @@ apps/web/src/features/   catalog, manage (titles and copies), exchange, circulat
 services/api/src/        catalog, circulation, readers, staff (API functions); search-indexer, retention (jobs);
                          branding, export (used by the circulation function), exchange (used by the
                          catalog function); local/ (local dev server)
-packages/shared/src/     one file per domain: auth, branding, catalog, circulation, exchange, export, isbn,
-                         readers, search, staff
+packages/shared/src/     one file per domain: auth, branding, catalog, circulation, codes, exchange, export,
+                         isbn, readers, search, staff
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
 docs/                    features.md, decisions.md
@@ -49,7 +49,7 @@ npm run validate:infra           # sam validate --lint
 npm run build:api                # bundle the Lambdas into services/api/dist (used by deploy)
 npm run deploy:dev               # build:api + sam deploy of the dev stack (no `sam build`, see decision 014)
 scripts/deploy-web.sh dev       # publish the frontend to the dev stack (name and logo: in the app)
-scripts/setup-installation.sh <alarm email>      # once per AWS account, before the first deploy
+scripts/setup-installation.sh <alarm email> <instellingsnummer>  # once per AWS account, before the first deploy
 scripts/create-admin.sh dev|prod <user> <email>  # first administrator (random temporary password)
 scripts/request-certificate.sh klasbak.example.org   # own web address (see README)
 scripts/status.sh dev|prod                       # how the installation is doing (docs/runbook.md)

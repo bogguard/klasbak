@@ -15,7 +15,6 @@ import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client
 import { mockClient } from 'aws-sdk-client-mock';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { app } from './handler';
-import { formatBarcode } from './service';
 
 const ddb = mockClient(DynamoDBDocumentClient);
 const s3 = mockClient(S3Client);
@@ -159,14 +158,14 @@ describe('updating titles', () => {
 });
 
 describe('copies', () => {
-  it('generates a zero-padded barcode when none is given', async () => {
+  it("generates a barcode with the school's number when none is given", async () => {
     ddb.on(UpdateCommand).resolves({ Attributes: { value: 42 } });
     ddb.on(TransactWriteCommand).resolves({});
 
     const res = await request('POST', `/api/catalog/titles/${TITLE_ID}/copies`, '[librarian]', {});
 
     expect(res.status).toBe(201);
-    expect(await res.json()).toMatchObject({ barcode: '00000042', status: 'available' });
+    expect(await res.json()).toMatchObject({ barcode: '012345000042', status: 'available' });
   });
 
   it('refuses a barcode that is already in use', async () => {
@@ -192,12 +191,6 @@ describe('copies', () => {
 
     expect(res.status).toBe(409);
     expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
-  });
-});
-
-describe('formatBarcode', () => {
-  it('pads to eight digits', () => {
-    expect(formatBarcode(7)).toBe('00000007');
   });
 });
 
@@ -302,7 +295,7 @@ describe('label print queue', () => {
     expect(putCopyItem()).toMatchObject({
       labelPending: true,
       gsi1pk: 'LABELS#PENDING',
-      gsi1sk: '00000043',
+      gsi1sk: '012345000043',
     });
 
     ddb.resetHistory();

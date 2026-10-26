@@ -1,5 +1,5 @@
 import { BatchWriteCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import type { Loan, Reader } from '@klasbak/shared';
+import { memberNumber, type Loan, type Reader } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import {
   failedConditionAt,
@@ -56,8 +56,7 @@ export async function listReaders(): Promise<Reader[]> {
 }
 
 export async function nextMemberNumber(): Promise<string> {
-  // The "L" keeps generated card numbers visually and technically apart from book barcodes.
-  return `L${String(await nextCounterValue('MEMBER')).padStart(6, '0')}`;
+  return memberNumber(env.institutionNumber, await nextCounterValue('MEMBER'));
 }
 
 /** Stores a new reader and claims the card number, which must not be used by any copy or reader. */

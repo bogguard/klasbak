@@ -25,7 +25,8 @@ cat > apps/web/dist/config.json <<EOF
 {
   "region": "${region}",
   "userPoolId": "$(output UserPoolId)",
-  "userPoolClientId": "$(output UserPoolClientId)"
+  "userPoolClientId": "$(output UserPoolClientId)",
+  "institutionNumber": "$(output InstitutionNumber)"
 }
 EOF
 
