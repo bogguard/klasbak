@@ -154,6 +154,7 @@ See `references/aws-sam.md` for conventions, Lambda best practices and a snippet
 - Everything is in templates. No click-ops; if you had to click, document it and automate it next.
 - Parameters for environment differences; no copy-pasted templates per environment.
 - `DeletionPolicy: Retain` + `UpdateReplacePolicy: Retain` on stateful resources (tables, buckets, user pools).
+- **A backup you never restored is a hope**: restore a table from PITR once per project and write the steps in `docs/runbook.md`.
 - `sam validate --lint` and `cfn-lint` pass before commit.
 - Outputs for everything other stacks or the frontend need.
 
@@ -165,7 +166,17 @@ See `references/aws-sam.md` for conventions, Lambda best practices and a snippet
 - Test behaviour, not implementation. A failing test should tell you what broke in domain terms.
 - CI runs: typecheck, lint, test, `sam validate --lint`, build. Main branch is always deployable.
 
-## 12. Definition of done
+## 12. Branches, pull requests and releases
+
+- **Trunk-based**: `main` is the only long-lived branch. Feature branches live hours to a day or two, never weeks; rebase on `main` daily.
+- **One concern per PR**, small enough to review in 15 minutes. Split refactors from behaviour changes. Unfinished work is merged behind a flag or hidden, not kept on a branch.
+- **The PR description says why**, what changed for the user, how it was tested, and has screenshots for UI changes. Link the decision log entry if there is one.
+- **Branch protection on `main`**: CI green and one review required (once there is more than one maintainer), no direct pushes, squash merge so every commit on `main` is one working change.
+- **Every merge deploys to dev automatically**; prod deploys from `main` with a manual approval in GitHub Actions (environment protection), never from a laptop.
+- **Safe rollouts**: `AutoPublishAlias` + `DeploymentPreference` (e.g. `Linear10PercentEvery1Minute` in prod) with the error alarms as rollback triggers.
+- **Data changes are expand → migrate → contract** over separate deploys: add the new attribute or index, backfill with an idempotent script, switch reads, only then remove the old one.
+
+## 13. Definition of done
 
 Before saying a task is done, verify (see `references/review-checklist.md`):
 
@@ -178,7 +189,7 @@ Before saying a task is done, verify (see `references/review-checklist.md`):
 - [ ] IaC updated; no new fixed-cost resource without a stated estimate
 - [ ] README still true (commands, setup, local and demo data, features); decision log updated if behaviour or architecture changed
 
-## 13. How to work
+## 14. How to work
 
 - Start by restating the goal and the simplest design that meets it. Mention trade-offs briefly; recommend one option.
 - Suggest missing pieces (a forgotten edge case, privacy concern, missing alarm) proactively but concisely.

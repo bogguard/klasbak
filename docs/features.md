@@ -75,3 +75,32 @@ Features a school library needs, from cataloguing to lending to reading promotio
 - REST API with API keys for integrations; Smartschool SSO.
 - Import from existing systems (CSV/MARC) — not needed for the first school (decision 007).
 - Inventory mode (scan the shelves, report missing copies).
+
+## Beyond the library — modules (decision 036)
+
+Other school tools on the same installation, each switched on per school. Order: equipment lending, lost and found, maintenance requests, duty planning.
+
+### Module 1 — Equipment lending (`equipment`, UI "Materiaal")
+
+Laptops, tablets, cameras, calculators, sports gear: lent to a pupil or teacher, often for a day or a lesson.
+
+**Version 1: lend and return at a desk**
+
+- Equipment items (`Asset`): name, kind (laptop, tablet…), barcode, optional serial number, location, status (available, on loan, in repair, withdrawn), notes on condition. Not in the public catalogue or search index.
+- Barcodes in the existing code namespace (011, a new pointer kind `asset`), so the same scanner and label printing work and a scanned code still means one thing.
+- Lending reuses the reader, the loan and the "one active loan" condition (012): a loan points to a copy or an asset. A teacher's reminder slip then shows late books and late equipment together.
+- Loan periods per kind of equipment, in days, with "back today" (due at the end of the school day) as the common case; due dates skip closed days as for books.
+- Return asks for a condition note when something is wrong, and can set the item to "in repair" in one step.
+- Lend to a group: one loan per item to the teacher, for a class set (e.g. 25 tablets for one lesson).
+- Overdue list and reminder slips as in the library, filtered by module.
+- Who manages equipment: a role per module (`equipment`), so the ICT coordinator doesn't need library rights.
+
+**Version 2: booking**
+
+- Teachers book a set or item for a date and lesson period ("laptop cart, Tuesday 2nd period"); conflicts are refused in the database. Needs teacher logins (013) and the school's lesson periods as a setting.
+
+**Open questions**
+
+- Where loans live: in the same `LOAN#` items with an `assetId` (one overdue list and history) or in their own items (no change to the library's queries). Leaning towards the first; to be settled in the design step with the access patterns.
+- Statistics for equipment (use per kind and month) or none.
+- Liability for damage: stays outside the app (no fines, decision 007).
