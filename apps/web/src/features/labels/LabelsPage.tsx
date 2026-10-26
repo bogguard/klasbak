@@ -1,4 +1,4 @@
-import { LABEL_LOOKUP_MAX, type CopyLabel, type LabelLookupResult } from '@library/shared';
+import { LABEL_LOOKUP_MAX, type CopyLabel, type LabelLookupResult } from '@klasbak/shared';
 import { Check, Download, IdCard, Tags } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

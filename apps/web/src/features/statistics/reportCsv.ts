@@ -1,4 +1,4 @@
-import type { ExchangeSummary, LoanStatistics } from '@library/shared';
+import type { ExchangeSummary, LoanStatistics } from '@klasbak/shared';
 import { toCsv } from '../export/buildExport';
 import type { StatisticsSummary } from './summary';
 

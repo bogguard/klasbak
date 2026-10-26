@@ -1,4 +1,4 @@
-import { localDate, type MyBooks } from '@library/shared';
+import { localDate, type MyBooks } from '@klasbak/shared';
 import { Barcode, BookOpen, Camera, Library, LogOut } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

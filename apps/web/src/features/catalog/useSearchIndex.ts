@@ -4,7 +4,7 @@ import {
   toSearchDocument,
   type SearchDocument,
   type TitleWithCopies,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import MiniSearch from 'minisearch';
 

@@ -16,7 +16,7 @@ import {
   type AttributeType,
   type UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { STAFF_MEMBER_ROLES, type StaffMember, type StaffRole } from '@library/shared';
+import { STAFF_MEMBER_ROLES, type StaffMember, type StaffRole } from '@klasbak/shared';
 import { ConflictError } from '../lib/errors';
 import { tracer } from '../lib/observability';
 import type { StaffDirectory } from './directory';

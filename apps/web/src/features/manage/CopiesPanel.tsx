@@ -1,4 +1,4 @@
-import { COPY_STATUSES, CopyInputSchema, type Copy, type CopyStatus } from '@library/shared';
+import { COPY_STATUSES, CopyInputSchema, type Copy, type CopyStatus } from '@klasbak/shared';
 import { ArrowLeftRight, Pencil, Plus, Tags } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,10 +1,10 @@
 // Everything about the offer that may change, in one place.
 export const config = {
-  siteUrl: 'https://bib.itrw.be',
+  siteUrl: 'https://klasbak.itrw.be',
   email: 'tim@itrw.be',
   price: '€10',
   // The source code; shown as soon as the repository is public.
-  github: 'https://github.com/bogguard/library-app',
+  github: 'https://github.com/bogguard/klasbak',
   // The webinar on YouTube (the part after watch?v=). Empty: "coming soon".
   youtubeId: 'C4mgS-DkCsQ',
   company: {

@@ -1,4 +1,4 @@
-import { localDate, type ExportPage, type ExportRecord } from '@library/shared';
+import { localDate, type ExportPage, type ExportRecord } from '@klasbak/shared';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

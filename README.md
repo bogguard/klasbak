@@ -1,6 +1,6 @@
-# Schoolbibliotheek
+# Klasbak
 
-[![CI](https://github.com/bogguard/library-app/actions/workflows/ci.yml/badge.svg)](https://github.com/bogguard/library-app/actions/workflows/ci.yml)
+[![CI](https://github.com/bogguard/klasbak/actions/workflows/ci.yml/badge.svg)](https://github.com/bogguard/klasbak/actions/workflows/ci.yml)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-0f6e66)](LICENSE)
 
 Open-source library software for schools, and for any organisation with its own collection: a
@@ -8,7 +8,7 @@ public catalogue with real covers, a lending desk with barcodes, readers, labels
 reminder slips and anonymous statistics. Dutch (Flemish) and English. Serverless on AWS, one
 installation per organisation, data in the EU.
 
-- **What it is and how to get started:** https://bib.itrw.be
+- **What it is and how to get started:** https://klasbak.itrw.be
 - **See it work:** [a ten-minute tour](https://youtu.be/C4mgS-DkCsQ) (in Dutch)
 - **Run it locally in a few minutes:** [Local development](#local-development) and
   [a demo library](#a-demo-library)
@@ -26,7 +26,7 @@ rules) and their groups, e.g. "advocaat" and "stagiair" with "team". Groups and 
 stay optional.
 
 Found a security problem? See [SECURITY.md](SECURITY.md). Questions and ideas are welcome as
-[issues](https://github.com/bogguard/library-app/issues).
+[issues](https://github.com/bogguard/klasbak/issues).
 
 ## Setting up an organisation (production)
 
@@ -35,7 +35,7 @@ and one organisation's settings can never touch another's. Use a second account 
 `dev` environment). Setting up an organisation takes about half an hour, most of it waiting for
 AWS.
 
-An own web address (e.g. `bib.example.org`) is optional. Without one, the library runs on an
+An own web address (e.g. `klasbak.example.org`) is optional. Without one, the library runs on an
 address like `d1234abcd.cloudfront.net`; you can [add the organisation's address
 later](#adding-the-organisations-own-web-address) without losing anything.
 
@@ -50,8 +50,8 @@ later](#adding-the-organisations-own-web-address) without losing anything.
 4. Configure a CLI profile on your computer and switch off the pager for it:
 
    ```bash
-   aws configure sso --profile library-<organisation>     # or: aws configure --profile library-<organisation>
-   aws configure set cli_pager "" --profile library-<organisation>
+   aws configure sso --profile klasbak-<organisation>     # or: aws configure --profile klasbak-<organisation>
+   aws configure set cli_pager "" --profile klasbak-<organisation>
    ```
 
 ### 2. Prerequisites on your computer
@@ -64,7 +64,7 @@ later](#adding-the-organisations-own-web-address) without losing anything.
 Run everything from the project folder, in one terminal:
 
 ```bash
-export AWS_PROFILE=library-<organisation>
+export AWS_PROFILE=klasbak-<organisation>
 scripts/setup-installation.sh replace-with-your-address@example.com
 ```
 
@@ -125,7 +125,7 @@ before deploying.
 After pulling a new version:
 
 ```bash
-export AWS_PROFILE=library-<organisation>
+export AWS_PROFILE=klasbak-<organisation>
 npm run deploy:prod
 scripts/deploy-web.sh prod
 ```
@@ -135,15 +135,15 @@ Always deploy the backend first: the new website may use new API routes.
 ## Adding the organisation's own web address
 
 Can be done at installation or any time later on a running library; data and accounts stay as
-they are. Use a subdomain such as `bib.example.org`: the bare `example.org` can't point to
+they are. Use a subdomain such as `klasbak.example.org`: the bare `example.org` can't point to
 CloudFront with an ordinary DNS record. You need whoever manages the organisation's domain for two
 DNS records.
 
 1. **Request a certificate** (free, renews itself):
 
    ```bash
-   export AWS_PROFILE=library-<organisation>
-   scripts/request-certificate.sh bib.example.org
+   export AWS_PROFILE=klasbak-<organisation>
+   scripts/request-certificate.sh klasbak.example.org
    ```
 
    It shows the first DNS record (a CNAME that proves the address belongs to the organisation) and waits
@@ -162,7 +162,7 @@ DNS records.
 
 3. **Point the address to the library** with the second DNS record:
    `CNAME bib → <CloudFrontDomain>`, where `CloudFrontDomain` is printed by the deploy (or see
-   `aws cloudformation describe-stacks --region eu-west-1 --stack-name library-prod --query "Stacks[0].Outputs" --output table`).
+   `aws cloudformation describe-stacks --region eu-west-1 --stack-name klasbak-prod --query "Stacks[0].Outputs" --output table`).
    Most DNS panels want the name without the domain and the value without a dot at the end.
 
 4. **Publish the website again**; it prints the new address:
@@ -181,8 +181,8 @@ renew the certificate.
 - **Back to the CloudFront address only:**
 
   ```bash
-  aws ssm put-parameter --region eu-west-1 --name /library/domain-name --type String --value none --overwrite
-  aws ssm put-parameter --region eu-west-1 --name /library/certificate-arn --type String --value none --overwrite
+  aws ssm put-parameter --region eu-west-1 --name /klasbak/domain-name --type String --value none --overwrite
+  aws ssm put-parameter --region eu-west-1 --name /klasbak/certificate-arn --type String --value none --overwrite
   npm run deploy:prod && scripts/deploy-web.sh prod
   ```
 
@@ -197,7 +197,7 @@ How to know the library is doing well, and what to do when it isn't, is in
 - **Weekly check:** `scripts/status.sh prod` prints the alarms, the last 24 hours (requests,
   errors, loans), whether the nightly job ran, the costs so far and the latest errors and warnings.
   It needs `jq`.
-- **Dashboard:** CloudWatch → Dashboards → `library-prod` (link in the stack output
+- **Dashboard:** CloudWatch → Dashboards → `klasbak-prod` (link in the stack output
   `DashboardUrl`), with ready-made searches under Logs Insights → Saved queries.
 - **A user reports an error:** the app shows a reference ("referentie: abc12345") on unexpected
   errors; the saved query "Find an error by its reference" finds it.
@@ -215,7 +215,7 @@ without covers). Google Books only answers requests with an API key (free, 1,000
 4. Store it in your AWS account (encrypted, never in git):
 
    ```bash
-   aws ssm put-parameter --region eu-west-1 --name /library/google-books-api-key --type SecureString --value <key>
+   aws ssm put-parameter --region eu-west-1 --name /klasbak/google-books-api-key --type SecureString --value <key>
    ```
 
 The API picks it up within an hour, or right away after a deploy. Without a key, Google Books is
@@ -289,7 +289,7 @@ change in another season), run `DEMO_TODAY=2027-05-20 npm run demo`.
 
 ## Product site
 
-The public page about the project, https://bib.itrw.be (what it is, the webinar, the price, how
+The public page about the project, https://klasbak.itrw.be (what it is, the webinar, the price, how
 to start), lives in [`site/`](site/README.md): a static site in Dutch and English with its own
 small stack. `npm run build:site` builds it, `npm run deploy:site` publishes it.
 

@@ -11,7 +11,7 @@ import {
   UpdateTitleRequestSchema,
   isValidIsbn,
   toIsbn13,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { requireRole, STAFF } from '../lib/auth';
 import { ValidationError } from '../lib/errors';
 import { createApp, getActor, IdSchema, parse, readJson, toLambdaHandler } from '../lib/http';

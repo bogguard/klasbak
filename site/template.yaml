@@ -1,17 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  Schoolbibliotheek product site (bib.itrw.be): static pages in a private S3 bucket behind
-  CloudFront. Separate from the library stacks; costs cents a month (see site/README.md).
+  Klasbak product site (klasbak.itrw.be): static pages in a private S3 bucket behind
+  CloudFront. Separate from the school stacks; costs cents a month (see site/README.md).
 
 Parameters:
   # The site's web address and its certificate in us-east-1, in Parameter Store like the app's
-  # (scripts/request-certificate.sh <domain> /library-site). "none" = the CloudFront address.
+  # (scripts/request-certificate.sh <domain> /klasbak-site). "none" = the CloudFront address.
   DomainName:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /library-site/domain-name
+    Default: /klasbak-site/domain-name
   CertificateArn:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /library-site/certificate-arn
+    Default: /klasbak-site/certificate-arn
 
 Conditions:
   HasCustomDomain: !And
@@ -35,7 +35,7 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
       Tags:
-        - { Key: project, Value: library-site }
+        - { Key: project, Value: klasbak-site }
 
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -125,7 +125,7 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        Comment: !Sub ${AWS::StackName} (Schoolbibliotheek product site)
+        Comment: !Sub ${AWS::StackName} (Klasbak product site)
         HttpVersion: http2and3
         IPV6Enabled: true
         # Europe and North America edge locations only: cheapest, and our visitors are in Belgium.
@@ -159,7 +159,7 @@ Resources:
             ResponsePagePath: /404.html
             ErrorCachingMinTTL: 60
       Tags:
-        - { Key: project, Value: library-site }
+        - { Key: project, Value: klasbak-site }
 
 Outputs:
   BucketName:

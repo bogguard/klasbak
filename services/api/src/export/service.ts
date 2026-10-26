@@ -1,5 +1,5 @@
 import { ScanCommand } from '@aws-sdk/lib-dynamodb';
-import type { ExportPage, ExportRecord } from '@library/shared';
+import type { ExportPage, ExportRecord } from '@klasbak/shared';
 import { z } from 'zod';
 import { writeAudit } from '../lib/audit';
 import type { Actor } from '../lib/auth';

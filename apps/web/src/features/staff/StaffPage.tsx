@@ -4,7 +4,7 @@ import {
   type StaffMember,
   type StaffRole,
   type TemporaryCredentials,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { Copy, KeyRound, ShieldOff, TriangleAlert, UserPlus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

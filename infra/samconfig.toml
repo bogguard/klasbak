@@ -3,7 +3,7 @@ version = 0.1
 # Use a separate AWS account for prod if you can.
 
 [dev.global.parameters]
-stack_name = "library-dev"
+stack_name = "klasbak-dev"
 region = "eu-west-1"
 
 [dev.deploy.parameters]
@@ -11,10 +11,10 @@ capabilities = "CAPABILITY_IAM"
 resolve_s3 = true
 confirm_changeset = false
 parameter_overrides = "Environment=dev MonthlyBudgetUsd=0"
-tags = "project=library environment=dev"
+tags = "project=klasbak environment=dev"
 
 [prod.global.parameters]
-stack_name = "library-prod"
+stack_name = "klasbak-prod"
 region = "eu-west-1"
 
 [prod.deploy.parameters]
@@ -22,4 +22,4 @@ capabilities = "CAPABILITY_IAM"
 resolve_s3 = true
 confirm_changeset = true
 parameter_overrides = "Environment=prod MonthlyBudgetUsd=25"
-tags = "project=library environment=prod"
+tags = "project=klasbak environment=prod"

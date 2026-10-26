@@ -1,4 +1,4 @@
-import { LABEL_LOOKUP_MAX } from '@library/shared';
+import { LABEL_LOOKUP_MAX } from '@klasbak/shared';
 import { CODE128 } from 'jsbarcode/bin/barcodes/CODE128/index.js';
 
 /** One black bar, in modules (the narrowest bar width) from the left edge of the symbol. */

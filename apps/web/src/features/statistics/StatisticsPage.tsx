@@ -1,4 +1,4 @@
-import { libraryYear, localDate, type LibraryKind } from '@library/shared';
+import { libraryYear, localDate, type LibraryKind } from '@klasbak/shared';
 import MiniSearch from 'minisearch';
 import { BarChart3, Download, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';

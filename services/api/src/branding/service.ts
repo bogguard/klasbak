@@ -5,7 +5,7 @@ import {
   type Branding,
   type LibraryKind,
   type LibraryTerms,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ulid } from 'ulid';
 import { writeAudit } from '../lib/audit';
 import type { Actor } from '../lib/auth';

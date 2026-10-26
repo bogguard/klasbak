@@ -2,7 +2,7 @@ import {
   AdminGetUserCommand,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { isStaff } from '@library/shared';
+import { isStaff } from '@klasbak/shared';
 import type { Actor } from './auth';
 import { AppError } from './errors';
 import { tracer } from './observability';

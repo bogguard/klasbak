@@ -1,6 +1,6 @@
 import './env';
-import type { CopyInput, ReaderInput, TitleInput } from '@library/shared';
-import { DEFAULT_SETTINGS, ReaderInputSchema, TitleInputSchema } from '@library/shared';
+import type { CopyInput, ReaderInput, TitleInput } from '@klasbak/shared';
+import { DEFAULT_SETTINGS, ReaderInputSchema, TitleInputSchema } from '@klasbak/shared';
 import { getTitleWithCopies, scanAllTitles } from '../catalog/repository';
 import { addCopy, createTitle, updateCopy } from '../catalog/service';
 import { getSettings, scan, updateSettings } from '../circulation/service';

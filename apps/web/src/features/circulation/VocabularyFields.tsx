@@ -1,4 +1,4 @@
-import { LIBRARY_KINDS, type LibraryKind, type LibraryTerms } from '@library/shared';
+import { LIBRARY_KINDS, type LibraryKind, type LibraryTerms } from '@klasbak/shared';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { inputHeight } from '../../components/ui/Form';

@@ -5,7 +5,7 @@ import {
   UpdateCommand,
   type ScanCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
-import type { Copy, CopyLabel, Title, TitleWithCopies } from '@library/shared';
+import type { Copy, CopyLabel, Title, TitleWithCopies } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import {
   batchGetItems,

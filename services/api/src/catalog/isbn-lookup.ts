@@ -1,5 +1,5 @@
 import { getParameter } from '@aws-lambda-powertools/parameters/ssm';
-import type { IsbnLookupResult } from '@library/shared';
+import type { IsbnLookupResult } from '@klasbak/shared';
 import { z } from 'zod';
 import { AppError } from '../lib/errors';
 import { logger } from '../lib/observability';
@@ -14,7 +14,7 @@ import { logger } from '../lib/observability';
  */
 
 const TIMEOUT_MS = 4000;
-const GOOGLE_KEY_PARAMETER = '/library/google-books-api-key';
+const GOOGLE_KEY_PARAMETER = '/klasbak/google-books-api-key';
 
 /**
  * Returns the first source's result. `undefined` means: no source knows this ISBN.

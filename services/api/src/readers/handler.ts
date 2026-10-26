@@ -3,7 +3,7 @@ import {
   ImportReadersRequestSchema,
   ReaderInputSchema,
   UpdateReaderRequestSchema,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ADMIN, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, IdSchema, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as readers from './service';

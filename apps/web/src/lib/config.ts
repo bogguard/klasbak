@@ -1,4 +1,4 @@
-import { BRANDING_PATH, type Branding, type LibraryKind, type LibraryTerms } from '@library/shared';
+import { BRANDING_PATH, type Branding, type LibraryKind, type LibraryTerms } from '@klasbak/shared';
 import { useQuery } from '@tanstack/react-query';
 
 /**

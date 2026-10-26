@@ -109,7 +109,7 @@ Short architecture decision records. Newest at the bottom. Format: context → d
 ## 018 — Three ISBN sources, including the Dutch libraries' open data
 
 - **Context**: Open Library has few Dutch and Flemish books, and Google Books refuses requests without an API key and still misses many recent Dutch children's books (e.g. 9789043933728, 2024).
-- **Decision**: Look up in order: Open Library, Google Books (optional API key in SSM `/library/google-books-api-key`), and the Dutch public libraries' catalogue at data.bibliotheken.nl (SPARQL, CC0 open data, no key). The first hit wins. When a source fails and none finds the ISBN, the API says "unavailable" (502) instead of "not found".
+- **Decision**: Look up in order: Open Library, Google Books (optional API key in SSM `/klasbak/google-books-api-key`), and the Dutch public libraries' catalogue at data.bibliotheken.nl (SPARQL, CC0 open data, no key). The first hit wins. When a source fails and none finds the ISBN, the API says "unavailable" (502) instead of "not found".
 - **Consequences**: Much better coverage for a Flemish school. The Dutch catalogue has no covers; covers can be added later by hand. Only the ISBN is sent to these services.
 
 ## 019 — Covers can be uploaded by staff

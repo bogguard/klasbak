@@ -6,7 +6,7 @@ import {
   type ClosedPeriod,
   type LibrarySettings,
   type LibrarySettingsInput,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { Plus, Save, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

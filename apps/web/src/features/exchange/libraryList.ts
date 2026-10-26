@@ -4,7 +4,7 @@ import {
   isValidIsbn,
   toIsbn13,
   type AviLevelSchema,
-} from '@library/shared';
+} from '@klasbak/shared';
 import type { z } from 'zod';
 
 /*

@@ -1,4 +1,4 @@
-import { isStaff, ROLES, type Role } from '@library/shared';
+import { isStaff, ROLES, type Role } from '@klasbak/shared';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { apiRequest } from './api';

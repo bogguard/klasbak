@@ -8,7 +8,7 @@ import {
   type ExchangeDetail,
   type ReturnedExchangeBook,
   type TitleInput,
-} from '@library/shared';
+} from '@klasbak/shared';
 import {
   ArrowLeft,
   Barcode,

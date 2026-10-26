@@ -1,8 +1,8 @@
-# Product site (bib.itrw.be)
+# Product site (klasbak.itrw.be)
 
 The public page about Schoolbibliotheek itself: what it is, what it does, the webinar, the price
 and how to get started. It is not part of a library installation; one copy runs for everyone at
-https://bib.itrw.be (decision 035).
+https://klasbak.itrw.be (decision 035).
 
 Static HTML in Dutch (`/`) and English (`/en/`), built without dependencies by `build.mjs` from:
 
@@ -38,7 +38,7 @@ Once per AWS account, the certificate for the address (in us-east-1, as CloudFro
 
 ```bash
 export AWS_PROFILE=library-test
-scripts/request-certificate.sh bib.itrw.be /library-site   # shows a DNS record to add, then waits
+scripts/request-certificate.sh klasbak.itrw.be /library-site   # shows a DNS record to add, then waits
 ```
 
 Then, and after every change:

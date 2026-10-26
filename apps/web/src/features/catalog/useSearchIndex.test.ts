@@ -1,4 +1,4 @@
-import { searchIndexOptions, toSearchDocument, type SearchDocument } from '@library/shared';
+import { searchIndexOptions, toSearchDocument, type SearchDocument } from '@klasbak/shared';
 import { QueryClient } from '@tanstack/react-query';
 import MiniSearch from 'minisearch';
 import { describe, expect, it } from 'vitest';

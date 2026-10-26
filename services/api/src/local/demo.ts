@@ -9,7 +9,7 @@ import {
   type CopyInput,
   type ReaderInput,
   type TitleInput,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { addCopy, createTitle, markLabelsPrinted, updateCopy } from '../catalog/service';

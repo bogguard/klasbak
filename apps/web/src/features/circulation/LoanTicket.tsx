@@ -1,4 +1,4 @@
-import { isOverdue, localDate, readerName, type ReaderAtDesk } from '@library/shared';
+import { isOverdue, localDate, readerName, type ReaderAtDesk } from '@klasbak/shared';
 import { useEffect, useEffectEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';

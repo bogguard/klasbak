@@ -1,4 +1,4 @@
-import { readerName } from '@library/shared';
+import { readerName } from '@klasbak/shared';
 import { FileUp, Plus, Search, TriangleAlert, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

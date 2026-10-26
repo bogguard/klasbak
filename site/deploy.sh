@@ -6,9 +6,9 @@ set -euo pipefail
 export AWS_PAGER=""
 cd "$(dirname "$0")/.."
 
-stack="library-site"
+stack="klasbak-site"
 region="eu-west-1"
-prefix="/library-site"
+prefix="/klasbak-site"
 
 if ! account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)"; then
   echo "Not signed in to AWS. Run first: export AWS_PROFILE=<your profile>  (and aws sso login if needed)" >&2
@@ -28,7 +28,7 @@ node site/build.mjs
 
 aws cloudformation deploy --region "$region" --stack-name "$stack" \
   --template-file site/template.yaml --no-fail-on-empty-changeset \
-  --tags project=library-site
+  --tags project=klasbak-site
 
 output() {
   aws cloudformation describe-stacks --region "$region" --stack-name "$stack" \

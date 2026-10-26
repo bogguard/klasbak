@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >-
-  School library app: web frontend (S3 + CloudFront), API (HTTP API + Lambda),
+  Klasbak, practical tools for a school (the school library first): web frontend (S3 + CloudFront), API (HTTP API + Lambda),
   data (DynamoDB), sign-in (Cognito) and monitoring. One stack per school and environment.
 
 Parameters:
@@ -12,7 +12,7 @@ Parameters:
   # Create it once per account: see README, "First deploy".
   AlarmEmail:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /library/alarm-email
+    Default: /klasbak/alarm-email
     Description: Name of the SSM parameter holding the address for alarm and budget notifications.
   MonthlyBudgetUsd:
     Type: Number
@@ -23,10 +23,10 @@ Parameters:
   # CloudFront address. Set them with scripts/request-certificate.sh.
   DomainName:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /library/domain-name
+    Default: /klasbak/domain-name
   CertificateArn:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /library/certificate-arn
+    Default: /klasbak/certificate-arn
 
 Conditions:
   IsProd: !Equals [!Ref Environment, prod]
@@ -53,11 +53,11 @@ Globals:
         USER_POOL_ID: !Ref UserPool
         # Staff must use two-step verification; the API checks it (services/api/src/lib/mfa.ts).
         STAFF_MFA_REQUIRED: 'true'
-        POWERTOOLS_SERVICE_NAME: library
-        POWERTOOLS_METRICS_NAMESPACE: Library
+        POWERTOOLS_SERVICE_NAME: klasbak
+        POWERTOOLS_METRICS_NAMESPACE: Klasbak
         NODE_OPTIONS: --enable-source-maps
     Tags:
-      project: library
+      project: klasbak
       environment: !Ref Environment
 
 Resources:
@@ -97,7 +97,7 @@ Resources:
             - { AttributeName: gsi1sk, KeyType: RANGE }
           Projection: { ProjectionType: ALL }
       Tags:
-        - { Key: project, Value: library }
+        - { Key: project, Value: klasbak }
         - { Key: environment, Value: !Ref Environment }
 
   # ---------------------------------------------------------------- Sign-in
@@ -107,7 +107,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      UserPoolName: !Sub library-${Environment}
+      UserPoolName: !Sub klasbak-${Environment}
       DeletionProtection: !If [IsProd, ACTIVE, INACTIVE]
       # The school creates accounts; nobody can sign themselves up.
       AdminCreateUserConfig:
@@ -130,7 +130,7 @@ Resources:
         RecoveryMechanisms:
           - { Name: verified_email, Priority: 1 }
       UserPoolTags:
-        project: library
+        project: klasbak
         environment: !Ref Environment
 
   UserPoolClient:
@@ -215,7 +215,7 @@ Resources:
             # Optional Google Books API key for ISBN lookups (README, "Book data").
             - Effect: Allow
               Action: ssm:GetParameter
-              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/library/google-books-api-key
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/klasbak/google-books-api-key
       Events:
         PublicTitle:
           Type: HttpApi
@@ -275,7 +275,7 @@ Resources:
   CirculationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: Lending desk (scan, check-out, check-in), loans and library settings
+      Description: Lending desk (scan, check-out, check-in), loans and settings
       CodeUri: ../services/api/dist/circulation
       Handler: handler.handler
       LoggingConfig:
@@ -440,7 +440,7 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
       Tags:
-        - { Key: project, Value: library }
+        - { Key: project, Value: klasbak }
         - { Key: environment, Value: !Ref Environment }
 
   WebBucketPolicy:
@@ -471,7 +471,7 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Name: !Sub library-${Environment}-web
+        Name: !Sub klasbak-${Environment}-web
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -480,7 +480,7 @@ Resources:
   SpaRewriteFunction:
     Type: AWS::CloudFront::Function
     Properties:
-      Name: !Sub library-${Environment}-spa-rewrite
+      Name: !Sub klasbak-${Environment}-spa-rewrite
       AutoPublish: true
       FunctionConfig:
         Comment: Rewrite app routes to index.html
@@ -497,7 +497,7 @@ Resources:
     Type: AWS::CloudFront::ResponseHeadersPolicy
     Properties:
       ResponseHeadersPolicyConfig:
-        Name: !Sub library-${Environment}-security-headers
+        Name: !Sub klasbak-${Environment}-security-headers
         SecurityHeadersConfig:
           ContentSecurityPolicy:
             Override: true
@@ -533,7 +533,7 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        Comment: !Sub library-${Environment}
+        Comment: !Sub klasbak-${Environment}
         HttpVersion: http2and3
         # Europe and North America edge locations only: cheapest, and our users are in Belgium.
         PriceClass: PriceClass_100
@@ -575,7 +575,7 @@ Resources:
             OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # Managed-AllViewerExceptHostHeader
             ResponseHeadersPolicyId: !Ref SecurityHeadersPolicy
       Tags:
-        - { Key: project, Value: library }
+        - { Key: project, Value: klasbak }
         - { Key: environment, Value: !Ref Environment }
 
   # ---------------------------------------------------------------- Monitoring
@@ -690,21 +690,21 @@ Resources:
       AlarmActions: [!Ref AlarmTopic]
       OKActions: [!Ref AlarmTopic]
 
-  # One page to see how the library is doing (free: up to three dashboards per account).
+  # One page to see how the installation is doing (free: up to three dashboards per account).
   Dashboard:
     Type: AWS::CloudWatch::Dashboard
     Properties:
-      DashboardName: !Sub library-${Environment}
+      DashboardName: !Sub klasbak-${Environment}
       DashboardBody: !Sub
         - |
           {
             "widgets": [
-              { "type": "text", "x": 0, "y": 0, "width": 24, "height": 2, "properties": { "markdown": "## Library (${Environment})  \nAlarms go to the address in Parameter Store (/library/alarm-email). What to do per alarm: docs/runbook.md in the repository." } },
+              { "type": "text", "x": 0, "y": 0, "width": 24, "height": 2, "properties": { "markdown": "## Klasbak (${Environment})  \nAlarms go to the address in Parameter Store (/klasbak/alarm-email). What to do per alarm: docs/runbook.md in the repository." } },
               { "type": "alarm", "x": 0, "y": 2, "width": 24, "height": 3, "properties": { "title": "Alarms", "alarms": [ "${ApiAlarm}", "${IndexerAlarm}", "${RetentionAlarm}", "${DlqAlarm}", "${ThrottlesAlarm}", "${RetentionRunAlarm}" ] } },
               { "type": "metric", "x": 0, "y": 5, "width": 12, "height": 6, "properties": { "title": "API requests and errors", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ "AWS/ApiGateway", "Count", "ApiId", "${HttpApi}", "Stage", "$default", { "label": "requests" } ], [ ".", "4xx", ".", ".", ".", ".", { "label": "4xx (refused, e.g. validation)" } ], [ ".", "5xx", ".", ".", ".", ".", { "label": "5xx (server errors)", "color": "#d62728" } ] ] } },
               { "type": "metric", "x": 12, "y": 5, "width": 12, "height": 6, "properties": { "title": "API response time (ms)", "region": "${AWS::Region}", "period": 300, "metrics": [ [ "AWS/ApiGateway", "Latency", "ApiId", "${HttpApi}", "Stage", "$default", { "stat": "p50", "label": "median" } ], [ "...", { "stat": "p95", "label": "95th percentile" } ] ] } },
-              { "type": "metric", "x": 0, "y": 11, "width": 12, "height": 6, "properties": { "title": "Function errors and throttles", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ { "expression": "SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" library-${Environment}', 'Sum', 300)", "label": "", "id": "errors" } ], [ "AWS/Lambda", "Throttles", { "label": "throttles" } ], [ "AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "${DlqName}", { "stat": "Maximum", "label": "search index dead-letter queue" } ] ] } },
-              { "type": "metric", "x": 12, "y": 11, "width": 12, "height": 6, "properties": { "title": "Library activity per day", "region": "${AWS::Region}", "stat": "Sum", "period": 86400, "view": "bar", "metrics": [ [ { "expression": "SEARCH('{Library,service} MetricName=\"LoanCreated\" OR MetricName=\"LoanReturned\" OR MetricName=\"LoanReturnedOverdue\" OR MetricName=\"TitleCreated\" OR MetricName=\"ReaderCreated\"', 'Sum', 86400)", "label": "", "id": "activity" } ] ] } },
+              { "type": "metric", "x": 0, "y": 11, "width": 12, "height": 6, "properties": { "title": "Function errors and throttles", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ { "expression": "SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" klasbak-${Environment}', 'Sum', 300)", "label": "", "id": "errors" } ], [ "AWS/Lambda", "Throttles", { "label": "throttles" } ], [ "AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "${DlqName}", { "stat": "Maximum", "label": "search index dead-letter queue" } ] ] } },
+              { "type": "metric", "x": 12, "y": 11, "width": 12, "height": 6, "properties": { "title": "Library activity per day", "region": "${AWS::Region}", "stat": "Sum", "period": 86400, "view": "bar", "metrics": [ [ { "expression": "SEARCH('{Klasbak,service} MetricName=\"LoanCreated\" OR MetricName=\"LoanReturned\" OR MetricName=\"LoanReturnedOverdue\" OR MetricName=\"TitleCreated\" OR MetricName=\"ReaderCreated\"', 'Sum', 86400)", "label": "", "id": "activity" } ] ] } },
               { "type": "log", "x": 0, "y": 17, "width": 24, "height": 8, "properties": { "title": "Latest errors and warnings", "region": "${AWS::Region}", "view": "table", "query": "SOURCE '${CatalogLogs}' | SOURCE '${ReadersLogs}' | SOURCE '${CirculationLogs}' | SOURCE '${StaffLogs}' | SOURCE '${RetentionLogs}' | SOURCE '${IndexerLogs}' | fields @timestamp, level, message, function_name, error.message, function_request_id | filter level in ['ERROR', 'WARN'] | sort @timestamp desc | limit 50" } }
             ]
           }
@@ -726,7 +726,7 @@ Resources:
   ErrorsQuery:
     Type: AWS::Logs::QueryDefinition
     Properties:
-      Name: !Sub library-${Environment}/Errors and warnings
+      Name: !Sub klasbak-${Environment}/Errors and warnings
       LogGroupNames:
         [
           !Ref CatalogLogGroup,
@@ -745,7 +745,7 @@ Resources:
   ReferenceQuery:
     Type: AWS::Logs::QueryDefinition
     Properties:
-      Name: !Sub library-${Environment}/Find an error by its reference
+      Name: !Sub klasbak-${Environment}/Find an error by its reference
       LogGroupNames:
         [
           !Ref CatalogLogGroup,
@@ -764,7 +764,7 @@ Resources:
   SlowRequestsQuery:
     Type: AWS::Logs::QueryDefinition
     Properties:
-      Name: !Sub library-${Environment}/Slow requests
+      Name: !Sub klasbak-${Environment}/Slow requests
       LogGroupNames:
         [!Ref CatalogLogGroup, !Ref ReadersLogGroup, !Ref CirculationLogGroup, !Ref StaffLogGroup]
       QueryString: |
@@ -776,7 +776,7 @@ Resources:
   TrafficQuery:
     Type: AWS::Logs::QueryDefinition
     Properties:
-      Name: !Sub library-${Environment}/Requests per route and status
+      Name: !Sub klasbak-${Environment}/Requests per route and status
       LogGroupNames:
         [!Ref CatalogLogGroup, !Ref ReadersLogGroup, !Ref CirculationLogGroup, !Ref StaffLogGroup]
       QueryString: |
@@ -787,7 +787,7 @@ Resources:
   IsbnSourcesQuery:
     Type: AWS::Logs::QueryDefinition
     Properties:
-      Name: !Sub library-${Environment}/ISBN sources failing
+      Name: !Sub klasbak-${Environment}/ISBN sources failing
       LogGroupNames: [!Ref CatalogLogGroup]
       QueryString: |
         filter message = 'isbn source failed'
@@ -799,7 +799,7 @@ Resources:
     Condition: HasBudget
     Properties:
       Budget:
-        BudgetName: !Sub library-${Environment}-monthly
+        BudgetName: !Sub klasbak-${Environment}-monthly
         BudgetType: COST
         TimeUnit: MONTHLY
         BudgetLimit:
@@ -821,8 +821,8 @@ Resources:
 
 Outputs:
   DashboardUrl:
-    Description: How the library is doing (CloudWatch dashboard)
-    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards/dashboard/library-${Environment}
+    Description: How the installation is doing (CloudWatch dashboard)
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards/dashboard/klasbak-${Environment}
   AppUrl:
     Value: !If
       - HasCustomDomain

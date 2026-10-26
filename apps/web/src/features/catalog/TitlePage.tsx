@@ -1,4 +1,4 @@
-import type { CopyStatus, PublicTitle } from '@library/shared';
+import type { CopyStatus, PublicTitle } from '@klasbak/shared';
 import { useQuery } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { ArrowLeft, TriangleAlert } from 'lucide-react';

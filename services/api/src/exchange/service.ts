@@ -7,7 +7,7 @@ import {
   type ExchangeCollection,
   type ExchangeDetail,
   type ExchangeSummary,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ulid } from 'ulid';
 import { addCopy, createTitle } from '../catalog/service';
 import { deleteCover } from '../catalog/covers';

@@ -1,4 +1,4 @@
-import type { TitleType } from '@library/shared';
+import type { TitleType } from '@klasbak/shared';
 import {
   BookOpen,
   Disc3,

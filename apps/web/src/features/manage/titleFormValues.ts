@@ -1,4 +1,4 @@
-import { TitleInputSchema, type Title, type TitleInput, type TitleType } from '@library/shared';
+import { TitleInputSchema, type Title, type TitleInput, type TitleType } from '@klasbak/shared';
 
 /** What the form holds: plain strings, exactly as typed. Converted to a TitleInput on save. */
 export type TitleFormValues = {

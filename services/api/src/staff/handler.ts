@@ -1,4 +1,4 @@
-import { CreateStaffRequestSchema, UpdateStaffRequestSchema } from '@library/shared';
+import { CreateStaffRequestSchema, UpdateStaffRequestSchema } from '@klasbak/shared';
 import { z } from 'zod';
 import { ADMIN, requireRole } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';

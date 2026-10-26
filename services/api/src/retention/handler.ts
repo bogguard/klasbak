@@ -1,7 +1,7 @@
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { DeleteCommand, ScanCommand, type ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
-import type { Loan } from '@library/shared';
+import type { Loan } from '@klasbak/shared';
 import type { Context } from 'aws-lambda';
 import { getSettings } from '../circulation/repository';
 import { db, env } from '../lib/aws';

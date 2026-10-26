@@ -7,7 +7,7 @@ import {
   UpdateVocabularyRequestSchema,
   ScanRequestSchema,
   UpdateSettingsRequestSchema,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ADMIN, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as branding from '../branding/service';

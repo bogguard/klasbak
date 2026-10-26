@@ -2,7 +2,7 @@
 export default {
   lang: 'nl-BE',
   meta: {
-    title: 'Schoolbibliotheek: de schoolbib, eindelijk eenvoudig',
+    title: 'Klasbak: de schoolbib, eindelijk eenvoudig',
     description:
       'Open-source software voor de schoolbibliotheek: uitlenen met twee scans, een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. In de browser, gegevens in de EU, €10 per maand.',
   },
@@ -181,7 +181,7 @@ export default {
     kicker: 'Prijs',
     title: 'Eén prijs, alles inbegrepen',
     hosted: {
-      name: 'Schoolbibliotheek',
+      name: 'Klasbak',
       per: 'per maand, per school',
       note: 'excl. btw',
       points: [
@@ -231,7 +231,7 @@ export default {
     items: [
       {
         q: 'Moeten we iets installeren?',
-        a: 'Nee. Schoolbibliotheek werkt in de browser, op een computer, een tablet of een gsm.',
+        a: 'Nee. Klasbak werkt in de browser, op een computer, een tablet of een gsm.',
       },
       {
         q: 'Welke scanner hebben we nodig?',
@@ -265,7 +265,7 @@ export default {
     button: 'Mail naar',
   },
   footer: {
-    tagline: 'Open-source software voor de schoolbibliotheek.',
+    tagline: 'Praktische open-source tools voor de school, te beginnen met de schoolbibliotheek.',
     by: 'Een project van',
     vat: 'btw',
     source: 'Broncode',

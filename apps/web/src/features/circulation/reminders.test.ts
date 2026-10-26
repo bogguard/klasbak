@@ -1,4 +1,4 @@
-import type { Loan } from '@library/shared';
+import type { Loan } from '@klasbak/shared';
 import { describe, expect, it } from 'vitest';
 import { reminderSlips } from './reminders';
 

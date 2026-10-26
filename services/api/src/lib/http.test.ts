@@ -5,7 +5,7 @@ describe('unexpected errors', () => {
   it('answer with a short reference that is also in the logs, and nothing internal', async () => {
     const app = createApp();
     app.get('/boom', () => {
-      throw new Error('table "library-prod" exploded at line 42');
+      throw new Error('table "klasbak-prod" exploded at line 42');
     });
     const env = {
       event: { requestContext: { requestId: 'r1' } },
@@ -19,6 +19,6 @@ describe('unexpected errors', () => {
     expect(JSON.parse(body)).toEqual({
       error: { code: 'INTERNAL', message: 'Something went wrong', reference: 'abcdef12' },
     });
-    expect(body).not.toContain('library-prod');
+    expect(body).not.toContain('klasbak-prod');
   });
 });

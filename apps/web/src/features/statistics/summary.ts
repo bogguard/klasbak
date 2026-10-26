@@ -1,4 +1,4 @@
-import { AVI_LEVELS, type LoanStatistics, type SearchDocument } from '@library/shared';
+import { AVI_LEVELS, type LoanStatistics, type SearchDocument } from '@klasbak/shared';
 import { compareGroups } from '../../lib/format';
 
 /** What the catalogue search index knows about a title (the statistics only have ids). */
