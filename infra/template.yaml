@@ -27,6 +27,11 @@ Parameters:
   CertificateArn:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /klasbak/certificate-arn
+  # The school's instellingsnummer: the start of every barcode and card number the app makes
+  # (decision 038). Set once by scripts/setup-installation.sh; never changed after labels exist.
+  InstitutionNumber:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /klasbak/institution-number
 
 Conditions:
   IsProd: !Equals [!Ref Environment, prod]
@@ -51,6 +56,7 @@ Globals:
         TABLE_NAME: !Ref Table
         WEB_BUCKET: !Ref WebBucket
         USER_POOL_ID: !Ref UserPool
+        INSTITUTION_NUMBER: !Ref InstitutionNumber
         # Staff must use two-step verification; the API checks it (services/api/src/lib/mfa.ts).
         STAFF_MFA_REQUIRED: 'true'
         POWERTOOLS_SERVICE_NAME: klasbak
@@ -841,3 +847,6 @@ Outputs:
     Value: !Ref UserPoolClient
   TableName:
     Value: !Ref Table
+  # For the frontend (config.json): label ranges can be typed as short numbers.
+  InstitutionNumber:
+    Value: !Ref InstitutionNumber

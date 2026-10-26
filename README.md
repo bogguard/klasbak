@@ -56,13 +56,16 @@ Run everything from the project folder, in one terminal:
 
 ```bash
 export AWS_PROFILE=klasbak-<school>
-scripts/setup-installation.sh replace-with-your-address@example.com
+scripts/setup-installation.sh replace-with-your-address@example.com <instellingsnummer>
 ```
 
 This stores, in the account's Parameter Store (never in git): the address that receives alarms,
-and "no own web address yet". To also look up books in Google Books (recommended, see
+the school's **instellingsnummer** (six digits, from the Departement Onderwijs) and "no own web
+address yet". Every barcode and reader card the app makes starts with the instellingsnummer, so
+codes are unique across schools and a book from another school is recognised at the desk; it
+can't change once labels are printed. To also look up books in Google Books (recommended, see
 [Book data](#book-data-isbn-lookup)), put the key in front:
-`GOOGLE_BOOKS_API_KEY=<key> scripts/setup-installation.sh replace-with-your-address@example.com`.
+`GOOGLE_BOOKS_API_KEY=<key> scripts/setup-installation.sh <address> <instellingsnummer>`.
 
 ### 4. Deploy
 

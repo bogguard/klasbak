@@ -1,6 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { S3Client } from '@aws-sdk/client-s3';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { INSTITUTION_NUMBER_PATTERN } from '@klasbak/shared';
 import { tracer } from './observability';
 
 // Created once per Lambda container and reused across invocations.
@@ -17,6 +18,13 @@ export const env = {
   },
   get webBucket() {
     return required('WEB_BUCKET');
+  },
+  /** The school's instellingsnummer, the start of every code we generate (decision 038). */
+  get institutionNumber() {
+    const value = required('INSTITUTION_NUMBER');
+    if (!INSTITUTION_NUMBER_PATTERN.test(value))
+      throw new Error('INSTITUTION_NUMBER must be six digits');
+    return value;
   },
 };
 

@@ -114,7 +114,7 @@ describe('importing a class list', () => {
     const [result] = await importReaders(admin, [
       { firstName: 'Noor', lastName: 'Claes', schoolNumber: '999' },
     ]);
-    expect(result).toMatchObject({ status: 'created', memberNumber: 'L000007' });
+    expect(result).toMatchObject({ status: 'created', memberNumber: 'L012345000007' });
   });
 
   it('sets pupils who left inactive, and skips readers already inactive', async () => {

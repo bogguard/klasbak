@@ -175,6 +175,21 @@ describe('scanning at the desk', () => {
       code: 'UNKNOWN_CODE',
     });
   });
+
+  it('recognises a book or card from another school instead of calling it unknown', async () => {
+    await expect(scan(librarian, '654321000042', 'R1', NOW)).rejects.toMatchObject({
+      status: 404,
+      code: 'OTHER_SCHOOL_CODE',
+      details: { institutionNumber: '654321' },
+    });
+    await expect(myBooks('L654321000007')).rejects.toMatchObject({ code: 'OTHER_SCHOOL_CODE' });
+  });
+
+  it("calls this school's own codes unknown when they aren't in use", async () => {
+    await expect(scan(librarian, '012345000999', 'R1', NOW)).rejects.toMatchObject({
+      code: 'UNKNOWN_CODE',
+    });
+  });
 });
 
 describe('renewing', () => {

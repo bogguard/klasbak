@@ -13,6 +13,8 @@ export type AppConfig = {
   region?: string;
   userPoolId?: string;
   userPoolClientId?: string;
+  /** The school's instellingsnummer, the start of the codes the app makes (decision 038). */
+  institutionNumber?: string;
   /** Only true on the local dev server: pick a role instead of signing in with Cognito. */
   devAuth?: boolean;
   /** False until the configuration has been fetched (or failed). */
