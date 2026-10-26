@@ -3,7 +3,7 @@
  * before any module that creates AWS clients. Real environment variables win.
  */
 const defaults: Record<string, string> = {
-  TABLE_NAME: 'library-local',
+  TABLE_NAME: 'klasbak-local',
   DYNAMODB_ENDPOINT: 'http://localhost:8000',
   LOCAL_PUBLIC_DIR: '.local/public',
   WEB_BUCKET: 'unused-locally',
@@ -13,8 +13,8 @@ const defaults: Record<string, string> = {
   // DynamoDB Local accepts any credentials; these keep your real AWS profile out of it.
   AWS_ACCESS_KEY_ID: 'local',
   AWS_SECRET_ACCESS_KEY: 'local',
-  POWERTOOLS_SERVICE_NAME: 'library-local',
-  POWERTOOLS_METRICS_NAMESPACE: 'LibraryLocal',
+  POWERTOOLS_SERVICE_NAME: 'klasbak-local',
+  POWERTOOLS_METRICS_NAMESPACE: 'KlasbakLocal',
   POWERTOOLS_METRICS_DISABLED: 'true',
   POWERTOOLS_DEV: 'true',
   POWERTOOLS_LOG_LEVEL: 'INFO',

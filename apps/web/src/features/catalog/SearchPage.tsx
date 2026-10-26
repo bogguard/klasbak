@@ -1,4 +1,4 @@
-import { AVI_LEVELS, TITLE_TYPES, type SearchDocument, type TitleType } from '@library/shared';
+import { AVI_LEVELS, TITLE_TYPES, type SearchDocument, type TitleType } from '@klasbak/shared';
 import { BookOpen, Search, SearchX, TriangleAlert } from 'lucide-react';
 import MiniSearch, { type SearchResult } from 'minisearch';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';

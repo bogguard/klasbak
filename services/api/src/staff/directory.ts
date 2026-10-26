@@ -1,4 +1,4 @@
-import type { CreateStaffRequest, StaffMember, StaffRole } from '@library/shared';
+import type { CreateStaffRequest, StaffMember, StaffRole } from '@klasbak/shared';
 import { cognitoDirectory } from './cognito-directory';
 import { memoryDirectory } from './memory-directory';
 

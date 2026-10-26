@@ -1,6 +1,6 @@
 # Security
 
-Schoolbibliotheek holds data about children, so we take reports seriously.
+Klasbak holds data about children, so we take reports seriously.
 
 ## Reporting a vulnerability
 

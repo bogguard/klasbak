@@ -1,4 +1,4 @@
-import type { ImportRowResult, Loan, Reader, ReaderInput } from '@library/shared';
+import type { ImportRowResult, Loan, Reader, ReaderInput } from '@klasbak/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';

@@ -1,5 +1,5 @@
 import { TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { DEFAULT_SETTINGS, type Copy, type LibrarySettings, type Loan } from '@library/shared';
+import { DEFAULT_SETTINGS, type Copy, type LibrarySettings, type Loan } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import { failedConditionAt, getItem, queryAll, stripKeys, type Item } from '../lib/dynamo';
 import { ConflictError } from '../lib/errors';

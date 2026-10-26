@@ -1,4 +1,4 @@
-import { ROLES, STAFF_ROLES, type Role } from '@library/shared';
+import { ROLES, STAFF_ROLES, type Role } from '@klasbak/shared';
 import { ForbiddenError, UnauthorizedError } from './errors';
 
 export { ROLES, type Role };

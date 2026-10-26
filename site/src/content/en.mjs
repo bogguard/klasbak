@@ -2,7 +2,7 @@
 export default {
   lang: 'en',
   meta: {
-    title: 'Schoolbibliotheek: the school library, simple at last',
+    title: 'Klasbak: the school library, simple at last',
     description:
       'Open-source software for the school library: lending in two scans, a catalogue with real covers, labels, reader cards and statistics. In the browser, data in the EU, €10 a month.',
   },
@@ -180,7 +180,7 @@ export default {
     kicker: 'Price',
     title: 'One price, everything included',
     hosted: {
-      name: 'Schoolbibliotheek',
+      name: 'Klasbak',
       per: 'a month, per school',
       note: 'excl. VAT',
       points: [
@@ -230,7 +230,7 @@ export default {
     items: [
       {
         q: 'Do we need to install anything?',
-        a: 'No. Schoolbibliotheek runs in the browser, on a computer, a tablet or a phone.',
+        a: 'No. Klasbak runs in the browser, on a computer, a tablet or a phone.',
       },
       {
         q: 'Which scanner do we need?',
@@ -264,7 +264,7 @@ export default {
     button: 'Email',
   },
   footer: {
-    tagline: 'Open-source software for the school library.',
+    tagline: 'Practical open-source tools for schools, starting with the school library.',
     by: 'A project by',
     vat: 'VAT',
     source: 'Source code',

@@ -1,4 +1,4 @@
-import { localDate, type Loan } from '@library/shared';
+import { localDate, type Loan } from '@klasbak/shared';
 import { BookCheck, FileText, Printer, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

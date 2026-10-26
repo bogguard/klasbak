@@ -4,7 +4,7 @@ import {
   readerName,
   type ReaderAtDesk,
   type ScanResult,
-} from '@library/shared';
+} from '@klasbak/shared';
 import {
   Barcode,
   BookCheck,

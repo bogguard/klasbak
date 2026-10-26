@@ -9,7 +9,7 @@ import type {
   MyBooks,
   ReaderAtDesk,
   ScanResult,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';

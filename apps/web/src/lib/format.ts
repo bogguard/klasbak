@@ -1,4 +1,4 @@
-import { LIBRARY_TIME_ZONE } from '@library/shared';
+import { LIBRARY_TIME_ZONE } from '@klasbak/shared';
 
 /** "do 5 nov. 2026" for a calendar date like "2026-11-05". */
 export function formatDate(isoDate: string, language: string): string {

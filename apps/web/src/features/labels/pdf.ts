@@ -1,4 +1,4 @@
-import { readerName, type CopyLabel, type Reader } from '@library/shared';
+import { readerName, type CopyLabel, type Reader } from '@klasbak/shared';
 import type { jsPDF } from 'jspdf';
 import { code128, QUIET_ZONE_MODULES } from './barcode';
 import { CARD_SHEET, labelPositions, type SheetLayout } from './sheets';

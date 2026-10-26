@@ -96,7 +96,7 @@ const sizes = Object.fromEntries(
 function page(t, lang) {
   const other = lang === 'nl' ? { href: '/en/', lang: 'en' } : { href: '/', lang: 'nl-BE' };
   const url = lang === 'nl' ? `${config.siteUrl}/` : `${config.siteUrl}/en/`;
-  const mail = `mailto:${config.email}?subject=${encodeURIComponent('Schoolbibliotheek')}`;
+  const mail = `mailto:${config.email}?subject=${encodeURIComponent('Klasbak')}`;
   const repo = config.github;
   const og = has('img/og.jpg') ? `${config.siteUrl}${asset('img/og.jpg')}` : '';
 
@@ -147,7 +147,7 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
 
 <header class="top">
   <div class="wrap top-inner">
-    <a class="brand" href="${lang === 'nl' ? '/' : '/en/'}">${svg('logo', 'brand-mark')}<span>Schoolbibliotheek</span></a>
+    <a class="brand" href="${lang === 'nl' ? '/' : '/en/'}">${svg('logo', 'brand-mark')}<span>Klasbak</span></a>
     <nav class="nav" aria-label="${esc(t.nav.menu)}">
       <a href="#functies">${esc(t.nav.features)}</a>
       <a href="#video">${esc(t.nav.video)}</a>
@@ -183,7 +183,7 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
     </div>
   </section>
 
-  <section class="strip" aria-label="Schoolbibliotheek">
+  <section class="strip" aria-label="Klasbak">
     <ul class="wrap strip-inner">
       ${t.strip.map((s) => `<li><strong>${esc(s.value)}</strong><span>${esc(s.label)}</span></li>`).join('')}
     </ul>
@@ -302,7 +302,7 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
 <footer class="footer">
   <div class="wrap footer-inner">
     <div>
-      <a class="brand" href="${lang === 'nl' ? '/' : '/en/'}">${svg('logo', 'brand-mark')}<span>Schoolbibliotheek</span></a>
+      <a class="brand" href="${lang === 'nl' ? '/' : '/en/'}">${svg('logo', 'brand-mark')}<span>Klasbak</span></a>
       <p>${esc(t.footer.tagline)}</p>
     </div>
     <div>

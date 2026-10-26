@@ -1,4 +1,4 @@
-import type { Copy, ExportRecord, Loan, Reader, Title } from '@library/shared';
+import type { Copy, ExportRecord, Loan, Reader, Title } from '@klasbak/shared';
 import { strToU8, zipSync } from 'fflate';
 
 /*

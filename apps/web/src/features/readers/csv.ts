@@ -1,4 +1,4 @@
-import { ReaderInputSchema, type ReaderInput } from '@library/shared';
+import { ReaderInputSchema, type ReaderInput } from '@klasbak/shared';
 import { splitRecords } from '../../lib/spreadsheet';
 
 /*

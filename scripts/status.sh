@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# How is the library doing? Alarms, traffic and errors of the last 24 hours, the nightly job,
+# How is the installation doing? Alarms, traffic and errors of the last 24 hours, the nightly job,
 # costs, and the latest errors and warnings from the logs. Read-only: changes nothing.
 # Exits with 1 when an alarm is on, so it can also run from a scheduled job.
 # Usage: scripts/status.sh dev|prod
@@ -9,7 +9,7 @@ export AWS_PAGER=""
 
 env="${1:?usage: scripts/status.sh dev|prod}"
 region="eu-west-1"
-stack="library-${env}"
+stack="klasbak-${env}"
 
 if ! account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)"; then
   echo "Not signed in to AWS. Run first: export AWS_PROFILE=<your profile>  (and aws sso login if needed)" >&2
@@ -38,7 +38,7 @@ sum() { # namespace metric dimensions... -> total over the last 24 hours
   printf '%.0f' "$value"
 }
 
-echo "Library ${env} — account ${account} — $(date '+%a %d %b %Y %H:%M')"
+echo "Klasbak ${env} — account ${account} — $(date '+%a %d %b %Y %H:%M')"
 echo "  App:       $(output AppUrl)"
 echo "  Dashboard: $(output DashboardUrl)"
 
@@ -73,8 +73,8 @@ while read -r logical physical; do
   [[ "$errors" != "0" ]] && echo "  Errors in ${logical}: ${errors}"
 done < <(resources AWS::Serverless::Function; resources AWS::Lambda::Function)
 echo "  Throttled:             $(sum AWS/Lambda Throttles)"
-echo "  Loans:                 $(aws cloudwatch get-metric-statistics --region "$region" --namespace Library \
-  --metric-name LoanCreated --dimensions Name=service,Value=library --start-time "$day" --end-time "$now" \
+echo "  Loans:                 $(aws cloudwatch get-metric-statistics --region "$region" --namespace Klasbak \
+  --metric-name LoanCreated --dimensions Name=service,Value=klasbak --start-time "$day" --end-time "$now" \
   --period 86400 --statistics Sum --query 'Datapoints[0].Sum' --output text | sed 's/None/0/; s/\.0$//')"
 
 retention="$(resources AWS::Lambda::Function | awk '$1=="RetentionFunction"{print $2}')"

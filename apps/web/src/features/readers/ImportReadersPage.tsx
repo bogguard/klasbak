@@ -4,7 +4,7 @@ import {
   readerName,
   type ImportRowResult,
   type Reader,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ArrowLeft, FileUp, Upload } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

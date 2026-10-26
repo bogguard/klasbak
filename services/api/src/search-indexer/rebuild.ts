@@ -1,4 +1,4 @@
-import { SEARCH_INDEX_PATH, searchIndexOptions, toSearchDocument } from '@library/shared';
+import { SEARCH_INDEX_PATH, searchIndexOptions, toSearchDocument } from '@klasbak/shared';
 import MiniSearch from 'minisearch';
 import { scanCatalogue } from '../catalog/repository';
 import { putPublicFile } from '../lib/public-files';

@@ -6,7 +6,7 @@ import {
   type Loan,
   type Reader,
   type ReaderInput,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { ulid } from 'ulid';
 import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';

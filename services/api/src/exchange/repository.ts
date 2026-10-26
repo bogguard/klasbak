@@ -4,7 +4,7 @@ import {
   TransactWriteCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import type { Copy, ExchangeCollection, Loan, ReturnedExchangeBook, Title } from '@library/shared';
+import type { Copy, ExchangeCollection, Loan, ReturnedExchangeBook, Title } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import {
   batchGetItems,

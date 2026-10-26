@@ -6,7 +6,7 @@ import type {
   Title,
   TitleInput,
   TitleWithCopies,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import { ulid } from 'ulid';
 import { auditItem } from '../lib/audit';

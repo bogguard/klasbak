@@ -3,7 +3,7 @@ import type {
   StaffMember,
   StaffRole,
   TemporaryCredentials,
-} from '@library/shared';
+} from '@klasbak/shared';
 import { randomInt } from 'node:crypto';
 import { writeAudit } from '../lib/audit';
 import type { Actor } from '../lib/auth';

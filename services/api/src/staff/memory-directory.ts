@@ -1,4 +1,4 @@
-import type { StaffMember } from '@library/shared';
+import type { StaffMember } from '@klasbak/shared';
 import { ConflictError } from '../lib/errors';
 import type { StaffDirectory } from './directory';
 

@@ -1,4 +1,4 @@
-import type { TitleWithCopies } from '@library/shared';
+import type { TitleWithCopies } from '@klasbak/shared';
 import { Camera, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,14 +1,14 @@
 # Runbook: following up an installation
 
 What to watch, what each alarm means, and what to do. One installation is one AWS account and
-stack (`library-prod` for an organisation, `library-dev` for testing); run commands with that account's
+stack (`klasbak-prod` for an organisation, `klasbak-dev` for testing); run commands with that account's
 profile (`export AWS_PROFILE=...`).
 
 ## How you hear about problems
 
 | Signal                                 | Comes from                                    | Sent to                                                      |
 | -------------------------------------- | --------------------------------------------- | ------------------------------------------------------------ |
-| Alarm emails ("ALARM" and later "OK")  | CloudWatch alarms in the stack                | `/library/alarm-email` (confirm the subscription email once) |
+| Alarm emails ("ALARM" and later "OK")  | CloudWatch alarms in the stack                | `/klasbak/alarm-email` (confirm the subscription email once) |
 | Budget emails at 80% and 100% (prod)   | AWS Budgets                                   | the same address                                             |
 | A user mentions "referentie: abc12345" | The app, on unexpected errors                 | you (by phone or email)                                      |
 | Security updates for dependencies      | Dependabot pull requests and alerts on GitHub | GitHub notifications                                         |
@@ -66,7 +66,7 @@ see the data processing agreement).
 2. "Did not run": check the schedule in EventBridge Scheduler (it runs at 03:00 Brussels time).
 3. After fixing, run it once by hand: Lambda console → `RetentionFunction` → Test, with `{}`.
 
-Right after a new deployment this alarm can show "insufficient data" for a day; that's normal.
+On a new installation this alarm is on ("did not run") until the first night: the job runs at 03:00 and the alarm clears by itself, with an OK email. A function that never runs sends no data at all, so the alarm has to count missing data as a problem.
 
 ### Lambda functions were throttled
 
@@ -84,9 +84,9 @@ volume, many requests (misuse), or resources created by hand outside the stack.
 
 ## Investigating
 
-- **Dashboard** `library-<env>` (CloudWatch → Dashboards): alarms, requests and errors, response
+- **Dashboard** `klasbak-<env>` (CloudWatch → Dashboards): alarms, requests and errors, response
   times, errors per function, library activity per day, latest errors and warnings.
-- **Saved queries** (CloudWatch → Logs Insights → Saved queries, folder `library-<env>`):
+- **Saved queries** (CloudWatch → Logs Insights → Saved queries, folder `klasbak-<env>`):
   "Errors and warnings", "Find an error by its reference", "Slow requests", "Requests per route and
   status", "ISBN sources failing".
 - **Traces** (X-Ray): every request with its calls to DynamoDB, S3 and Cognito, with timings.

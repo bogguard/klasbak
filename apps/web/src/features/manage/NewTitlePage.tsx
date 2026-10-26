@@ -1,4 +1,4 @@
-import { isValidIsbn, toIsbn13, type IsbnLookupResult } from '@library/shared';
+import { isValidIsbn, toIsbn13, type IsbnLookupResult } from '@klasbak/shared';
 import { ArrowLeft, Barcode, Camera, PenLine, Plus, Search } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

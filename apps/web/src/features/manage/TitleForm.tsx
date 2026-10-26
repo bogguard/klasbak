@@ -1,4 +1,4 @@
-import { AVI_LEVELS, TITLE_TYPES, type TitleInput } from '@library/shared';
+import { AVI_LEVELS, TITLE_TYPES, type TitleInput } from '@klasbak/shared';
 import { ArrowRight, Save } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';

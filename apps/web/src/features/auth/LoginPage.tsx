@@ -1,4 +1,4 @@
-import { isStaff, ROLES, type Role } from '@library/shared';
+import { isStaff, ROLES, type Role } from '@klasbak/shared';
 import { KeyRound, LogIn, Wrench } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

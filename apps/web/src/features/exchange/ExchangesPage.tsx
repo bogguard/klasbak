@@ -1,4 +1,4 @@
-import { CreateExchangeRequestSchema, type ExchangeSummary } from '@library/shared';
+import { CreateExchangeRequestSchema, type ExchangeSummary } from '@klasbak/shared';
 import { ArrowLeftRight, Plus, TriangleAlert } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';

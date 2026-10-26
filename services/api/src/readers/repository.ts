@@ -1,5 +1,5 @@
 import { BatchWriteCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import type { Loan, Reader } from '@library/shared';
+import type { Loan, Reader } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import {
   failedConditionAt,

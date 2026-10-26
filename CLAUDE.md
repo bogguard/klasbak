@@ -1,6 +1,6 @@
-# Library App
+# Klasbak
 
-School library software: a public online catalogue, a circulation desk for librarians, a self-service kiosk and a portal for readers (pupils, teachers). Feature scope and roadmap: `docs/features.md`.
+Practical tools for schools (decision 036). The first module is the school library: a public online catalogue, a circulation desk for librarians, a self-service kiosk and a portal for readers (pupils, teachers). Feature scope and roadmap: `docs/features.md`.
 
 **Always follow the `pragmatic-serverless` skill** (`.claude/skills/pragmatic-serverless/`) for code, infrastructure, UI and reviews. The skill is generic and maintained in [bogguard/pragmatic-serverless-skill](https://github.com/bogguard/pragmatic-serverless-skill); the copy here is updated from there, so improve it there first. This file holds what is specific to this project and wins where it is more specific. Architecture decisions are logged in `docs/decisions.md` — read it before changing architecture and add an entry when you make a new decision.
 
@@ -30,7 +30,7 @@ packages/shared/src/     one file per domain: auth, branding, catalog, circulati
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
 docs/                    features.md, decisions.md
-site/                    the product site at bib.itrw.be (static, own stack; site/README.md)
+site/                    the product site at klasbak.itrw.be (static, own stack; site/README.md)
 ```
 
 npm workspaces monorepo. Shared code goes in `packages/shared` only when used by both web and api.
@@ -51,7 +51,7 @@ npm run deploy:dev               # build:api + sam deploy of the dev stack (no `
 scripts/deploy-web.sh dev       # publish the frontend to the dev stack (name and logo: in the app)
 scripts/setup-installation.sh <alarm email>      # once per AWS account, before the first deploy
 scripts/create-admin.sh dev|prod <user> <email>  # first administrator (random temporary password)
-scripts/request-certificate.sh bib.example.org   # own web address (see README)
+scripts/request-certificate.sh klasbak.example.org   # own web address (see README)
 scripts/status.sh dev|prod                       # how the installation is doing (docs/runbook.md)
 ```
 

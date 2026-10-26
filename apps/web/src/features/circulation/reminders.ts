@@ -1,4 +1,4 @@
-import type { Loan } from '@library/shared';
+import type { Loan } from '@klasbak/shared';
 import type { jsPDF } from 'jspdf';
 import { compareGroups } from '../../lib/format';
 import { ACCENT, fit, MUTED, newDocument, pdfText, PT, type PdfLogo } from '../labels/pdf';

@@ -7,7 +7,7 @@ set -euo pipefail
 export AWS_PAGER=""
 
 env="${1:?usage: deploy-web.sh dev|prod}"
-stack="library-${env}"
+stack="klasbak-${env}"
 region="eu-west-1"
 
 output() {

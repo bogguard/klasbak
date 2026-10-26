@@ -19,22 +19,22 @@ echo "AWS account ${account} (profile: ${AWS_PROFILE:-default}), region ${region
 put() { aws ssm put-parameter --region "$region" --name "$1" --type "$2" --value "$3" --overwrite >/dev/null; }
 exists() { aws ssm get-parameter --region "$region" --name "$1" >/dev/null 2>&1; }
 
-put /library/alarm-email String "$email"
+put /klasbak/alarm-email String "$email"
 echo "  alarms go to ${email}"
 
-# Without an own web address the library runs on its CloudFront address (d1234.cloudfront.net).
+# Without an own web address the app runs on its CloudFront address (d1234.cloudfront.net).
 # "none" means exactly that; scripts/request-certificate.sh replaces it later.
 for name in domain-name certificate-arn; do
-  if exists "/library/${name}"; then
-    echo "  /library/${name} already set: $(aws ssm get-parameter --region "$region" --name "/library/${name}" --query Parameter.Value --output text)"
+  if exists "/klasbak/${name}"; then
+    echo "  /klasbak/${name} already set: $(aws ssm get-parameter --region "$region" --name "/klasbak/${name}" --query Parameter.Value --output text)"
   else
-    put "/library/${name}" String none
-    echo "  /library/${name} = none (no own web address yet)"
+    put "/klasbak/${name}" String none
+    echo "  /klasbak/${name} = none (no own web address yet)"
   fi
 done
 
 if [[ -n "${GOOGLE_BOOKS_API_KEY:-}" ]]; then
-  put /library/google-books-api-key SecureString "$GOOGLE_BOOKS_API_KEY"
+  put /klasbak/google-books-api-key SecureString "$GOOGLE_BOOKS_API_KEY"
   echo "  Google Books API key stored (encrypted)"
 fi
 

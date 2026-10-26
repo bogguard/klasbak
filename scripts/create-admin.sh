@@ -12,7 +12,7 @@ env="${1:?usage: scripts/create-admin.sh dev|prod <username> <email>}"
 username="${2:?usage: scripts/create-admin.sh dev|prod <username> <email>}"
 email="${3:?usage: scripts/create-admin.sh dev|prod <username> <email>}"
 region="eu-west-1"
-stack="library-${env}"
+stack="klasbak-${env}"
 
 if ! account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null)"; then
   echo "Not signed in to AWS. Run first: export AWS_PROFILE=<your profile>  (and aws sso login if needed)" >&2
@@ -27,7 +27,10 @@ if [[ -z "$pool" || "$pool" == "None" ]]; then
 fi
 
 # 16 characters from an alphabet without look-alikes (0/O, 1/l/I): easy to pass on.
-password="$(LC_ALL=C tr -dc 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789' </dev/urandom | head -c 16)"
+# No `tr </dev/urandom | head`: head closes the pipe, tr dies of SIGPIPE and pipefail stops the
+# script without a word. 4 KB of random bytes leave about 850 usable characters.
+password="$(head -c 4096 /dev/urandom | LC_ALL=C tr -dc 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789')"
+password="${password:0:16}"
 
 aws cognito-idp admin-create-user --region "$region" --user-pool-id "$pool" \
   --username "$username" --temporary-password "$password" --message-action SUPPRESS \

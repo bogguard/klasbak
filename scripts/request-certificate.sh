@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Gets a free certificate for the organisation's own web address (e.g. bib.example.org) and stores
+# Gets a free certificate for the organisation's own web address (e.g. klasbak.example.org) and stores
 # the settings for the next deploy. Safe to run again: it picks up where it left off.
-# Usage: scripts/request-certificate.sh bib.example.org
-#        scripts/request-certificate.sh bib.itrw.be /library-site   (the product site, see site/README.md)
+# Usage: scripts/request-certificate.sh klasbak.example.org
+#        scripts/request-certificate.sh klasbak.itrw.be /klasbak-site   (the product site, see site/README.md)
 set -euo pipefail
 # AWS CLI v2 shows some output in a pager (less), which waits for 'q'; scripts must not stop.
 export AWS_PAGER=""
 
-domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. bib.example.org> [settings prefix]}"
-# Where the settings go: /library for the library stack, /library-site for the product site.
-prefix="${2:-/library}"
-region="eu-west-1"       # where the library stack and its settings live
+domain="${1:?usage: scripts/request-certificate.sh <web address, e.g. klasbak.example.org> [settings prefix]}"
+# Where the settings go: /klasbak for the app's stack, /klasbak-site for the product site.
+prefix="${2:-/klasbak}"
+region="eu-west-1"       # where the app's stack and its settings live
 cert_region="us-east-1"  # CloudFront only accepts certificates from this region
 
 # Fail early and clearly when the terminal isn't signed in to AWS (e.g. AWS_PROFILE not set).
@@ -60,7 +60,7 @@ if [[ "$status" != "ISSUED" ]]; then
   # Combell, one.com) reject that dot and want the name relative to the domain.
   name="${name%.}"
   value="${value%.}"
-  zone="${domain#*.}"  # bib.example.org -> example.org
+  zone="${domain#*.}"  # klasbak.example.org -> example.org
   short_name="${name%."$zone"}"
   cat <<INSTRUCTIONS
 
@@ -107,7 +107,7 @@ aws ssm put-parameter --region "$region" --name "${prefix}/domain-name" --type S
 aws ssm put-parameter --region "$region" --name "${prefix}/certificate-arn" --type String \
   --value "$arn" --overwrite >/dev/null
 
-if [[ "$prefix" == "/library" ]]; then
+if [[ "$prefix" == "/klasbak" ]]; then
   deploy="npm run deploy:dev   (or deploy:prod)"
   publish="  3. Publish the website again:  scripts/deploy-web.sh <env>"
 else

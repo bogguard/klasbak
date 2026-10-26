@@ -1,4 +1,4 @@
-import type { LibraryKind, LibraryTerms } from '@library/shared';
+import type { LibraryKind, LibraryTerms } from '@klasbak/shared';
 import type { TFunction } from 'i18next';
 
 /*
