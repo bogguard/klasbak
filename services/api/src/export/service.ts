@@ -39,6 +39,9 @@ function classify(item: Item): ExportRecord | undefined {
   if (pk.startsWith('READER#') && sk === 'READER') return { kind: 'reader', data: stripKeys(item) };
   if (pk.startsWith('READER#') && sk.startsWith('LOAN#'))
     return { kind: 'loan', data: stripKeys(item) };
+  if (pk.startsWith('ASSET#') && sk === 'ASSET') return { kind: 'asset', data: stripKeys(item) };
+  if (pk.startsWith('READER#') && sk.startsWith('ASSIGNMENT#'))
+    return { kind: 'assignment', data: stripKeys(item) };
   if (pk === 'SETTINGS' && sk === 'LIBRARY') return { kind: 'settings', data: stripKeys(item) };
   return undefined;
 }

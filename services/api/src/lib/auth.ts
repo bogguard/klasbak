@@ -1,4 +1,4 @@
-import { ROLES, STAFF_ROLES, type Role } from '@klasbak/shared';
+import { EQUIPMENT_ROLES, ROLES, STAFF_ROLES, type Role } from '@klasbak/shared';
 import { ForbiddenError, UnauthorizedError } from './errors';
 
 export { ROLES, type Role };
@@ -7,6 +7,7 @@ export { ROLES, type Role };
 export type Actor = { userId: string; username?: string; roles: Role[] };
 
 export const STAFF = STAFF_ROLES;
+export const EQUIPMENT = EQUIPMENT_ROLES;
 
 /**
  * Tasks with wide impact: library settings (loan rules, retention), bulk imports, deleting a

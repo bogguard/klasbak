@@ -114,7 +114,13 @@
     "NOT_A_READER_CARD": "This is a book. Please scan your library card.",
     "EXCHANGE_RETURNED": "This exchange collection was already returned.",
     "EXCHANGE_HAS_LOANS": "{{count}} books are still on loan. Have them returned first.",
-    "reference": "(Reference for support: {{reference}})"
+    "reference": "(Reference for support: {{reference}})",
+    "MODULE_OFF": "Equipment isn’t switched on yet. An administrator can do that under Settings.",
+    "ASSET_NOT_AVAILABLE": "This item was just handed out or is no longer available. Reload the page.",
+    "ASSET_ASSIGNED": "This item is handed out. Take it back first.",
+    "SERIAL_IN_USE": "This serial number is already used for something else.",
+    "READER_HAS_EQUIPMENT": "This reader still has equipment. Take it back first.",
+    "CODE_IS_EQUIPMENT": "This is the code of a piece of equipment, not a book. Look under Equipment."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -124,7 +130,8 @@
     "admin": "administrator",
     "librarian": "librarian",
     "teacher": "teacher",
-    "reader": "reader"
+    "reader": "reader",
+    "equipment": "equipment manager"
   },
   "auth": {
     "heading": "Sign in",
@@ -274,7 +281,8 @@
     "labels": "Labels",
     "staff": "Staff",
     "statistics": "Statistics",
-    "exchanges": "Exchange collections"
+    "exchanges": "Exchange collections",
+    "equipment": "Equipment"
   },
   "readers": {
     "heading": "Readers",
@@ -373,8 +381,11 @@
       "export": "Download data",
       "delete": "Delete reader",
       "hasBooks": "You can delete the reader once all books are returned.",
-      "confirmDelete": "Permanently delete {{name}} and their full reading history? This can't be undone."
-    }
+      "confirmDelete": "Permanently delete {{name}} and their full reading history? This can't be undone.",
+      "hasEquipment": "Take the equipment back first; then you can erase."
+    },
+    "equipment_one": "{{count}} piece of equipment in use",
+    "equipment_other": "{{count}} pieces of equipment in use"
   },
   "loans": {
     "late": "Late",
@@ -495,6 +506,11 @@
       "busy_other": "Working… {{count}} records",
       "done_one": "Done: {{count}} record exported.",
       "done_other": "Done: {{count}} records exported."
+    },
+    "modules": {
+      "heading": "Modules",
+      "equipment": "Equipment",
+      "equipmentHint": "Keep track of Chromebooks and other equipment: how many there are, where they are and who has what."
     }
   },
   "labels": {
@@ -580,19 +596,19 @@
     },
     "what": {
       "heading": "What data do we keep?",
-      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. We don't ask for a date of birth, address or photo."
+      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. If the school gives you equipment, such as a Chromebook, we also note which device you have and until when. We don't ask for a date of birth, address or photo."
     },
     "why": {
       "heading": "What do we use it for?",
-      "body": "To lend books, remind you when they're due and run the library well. Not for advertising. We don't sell or share your data with anyone."
+      "body": "To lend books, remind you when they're due and run the library well, and to know where the school's equipment is. Not for advertising. We don't sell or share your data with anyone."
     },
     "retention": {
       "heading": "How long do we keep it?",
-      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. When you leave the school, the school can delete all your data."
+      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). The same goes for equipment you returned. For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. When you leave the school, the school can delete all your data."
     },
     "where": {
       "heading": "Where is the data?",
-      "body": "Encrypted at Amazon Web Services, in a data centre in Ireland (European Union). Only the people who run the library can see it, and their access is protected with two-step verification. We store book covers ourselves, so browsing the catalogue doesn't reach other companies."
+      "body": "Encrypted at Amazon Web Services, in a data centre in Ireland (European Union). Only the people who run the library or the equipment can see it, and their access is protected with two-step verification. We store book covers ourselves, so browsing the catalogue doesn't reach other companies."
     },
     "cookies": {
       "heading": "Cookies",
@@ -617,7 +633,7 @@
     "name": "Name",
     "role": "Role",
     "roleOf": "Role of {{name}}",
-    "roleHint": "Choose ‘administrator’ only for people who also need to manage staff.",
+    "roleHint": "Choose ‘equipment manager’ for people who only manage equipment, like the ICT coordinator. Choose ‘administrator’ only for people who also need to manage staff.",
     "status": "Status",
     "you": "you",
     "active": "Active",
@@ -845,6 +861,115 @@
       "copyNotice_one": "{{count}} copy comes from the exchange collection {{name}} and goes back to the library on {{date}}. The school's own copies stay.",
       "copyNotice_other": "{{count}} copies come from the exchange collection {{name}} and go back to the library on {{date}}. The school's own copies stay.",
       "open": "Go to the exchange collection"
+    }
+  },
+  "assetStatus": {
+    "available": "Available",
+    "assigned": "Handed out",
+    "repair": "In repair",
+    "lost": "Missing",
+    "withdrawn": "Withdrawn"
+  },
+  "equipment": {
+    "heading": "Equipment",
+    "add": "Add equipment",
+    "back": "Back to equipment",
+    "search": "Search or scan: name, serial number, class, pupil",
+    "status": "Status",
+    "allStatuses": "All in stock",
+    "overdue": "Overdue",
+    "location": "Place",
+    "allLocations": "All places",
+    "count_one": "{{count}} item",
+    "count_other": "{{count}} items",
+    "item": "Item",
+    "code": "Code / serial number",
+    "due": "Due {{date}}",
+    "details": "Details",
+    "save": "Save",
+    "saved": "Saved.",
+    "empty": {
+      "title": "No equipment yet",
+      "hint": "Add your Chromebooks: scan the serial numbers one after the other, then print the labels."
+    },
+    "summary": {
+      "available": "{{available}} of {{total}} free",
+      "assigned_one": "{{count}} handed out",
+      "assigned_other": "{{count}} handed out",
+      "repair_one": "{{count}} in repair",
+      "repair_other": "{{count}} in repair",
+      "lost_one": "{{count}} missing",
+      "lost_other": "{{count}} missing"
+    },
+    "form": {
+      "kind": "Kind",
+      "name": "Make and model",
+      "nameHint": "For example Acer Chromebook 314.",
+      "locationHint": "For example Cart A or Room 12.",
+      "purchasedOn": "Purchased on",
+      "warrantyUntil": "Warranty until",
+      "note": "Note",
+      "noteHint": "For example the state of the device. No details about pupils.",
+      "serialNumber": "Serial number",
+      "statusAssigned": "Take the item back to change its status.",
+      "required": "Please fill this in."
+    },
+    "new": {
+      "howMany": "How many?",
+      "serials": "With serial numbers",
+      "quantity": "Without serial number",
+      "serialList": "Serial numbers",
+      "serialHint": "Scan or paste them, one per line (at most {{max}}). Scan the number on the device: the scanner then finds it later, even without our label.",
+      "invalidSerials": "This doesn’t look like a serial number: {{serials}}. Only letters, digits and hyphens.",
+      "tooMany": "That’s more than {{max}}. Add them in two rounds.",
+      "quantityLabel": "Quantity",
+      "quantityError": "Enter a quantity from 1 to {{max}}.",
+      "submit_one": "Add {{count}} item",
+      "submit_other": "Add {{count}} items",
+      "added_one": "{{count}} item added.",
+      "added_other": "{{count}} items added.",
+      "duplicates_one": "{{count}} serial number already existed and was skipped: {{serials}}.",
+      "duplicates_other": "{{count}} serial numbers already existed and were skipped: {{serials}}.",
+      "printLabels": "Print labels"
+    },
+    "handOut": {
+      "heading": "Hand out",
+      "who": "To whom?",
+      "whoHint": "Scan the card, or search by name or class.",
+      "noMatch": "Nobody found. Is this reader active?",
+      "change": "Someone else",
+      "dueDate": "Due",
+      "dueHint": "Optional. Leave empty for a device someone keeps all year.",
+      "today": "Back today",
+      "submit": "Hand out to {{name}}"
+    },
+    "holder": {
+      "heading": "With",
+      "since": "Since {{date}}",
+      "condition": "How does it come back?",
+      "fine": "Fine",
+      "takeBack": "Take back",
+      "markLost": "Note as missing"
+    },
+    "history": {
+      "heading": "History",
+      "none": "This item hasn’t been handed to anyone yet.",
+      "now": "now",
+      "privacy": "Who had something is erased after the retention period in the settings."
+    },
+    "labels": {
+      "heading": "Labels for equipment",
+      "link_one": "Labels ({{count}} to do)",
+      "link_other": "Labels ({{count}} to do)",
+      "printOne": "Print label",
+      "none": "All labels are printed.",
+      "waiting_one": "{{count}} label ready to print.",
+      "waiting_other": "{{count}} labels ready to print.",
+      "make": "Make PDF",
+      "confirmQuestion": "Did the printing work?",
+      "confirm": "Yes, printed",
+      "confirmed_one": "{{count}} label ticked off.",
+      "confirmed_other": "{{count}} labels ticked off."
     }
   }
 }

@@ -4,7 +4,7 @@ export default {
   meta: {
     title: 'Klasbak: de schoolbib, eindelijk eenvoudig',
     description:
-      'Open-source software voor de schoolbibliotheek: uitlenen met twee scans, een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. In de browser, gegevens in de EU, €10 per maand.',
+      'Open-source software voor de schoolbibliotheek: uitlenen met twee scans, een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. Ook je Chromebooks en ander materiaal houd je erin bij. In de browser, gegevens in de EU, €10 per maand.',
   },
   nav: {
     features: 'Functies',
@@ -107,6 +107,25 @@ export default {
       image: 'statistics',
       alt: 'De statistieken van het schooljaar met cijfers en een grafiek per maand.',
     },
+    {
+      id: 'materiaal',
+      kicker: 'Voor de ICT-coördinator',
+      title: 'Weten welk materiaal er is en waar het ligt',
+      text: 'Ook de Chromebooks, tablets en opladers van de school staan erin, als je dat wil. Per soort zie je hoeveel er zijn, en per toestel waar het ligt en hoe het ermee staat. Een nieuwe levering scan je in één keer in.',
+      points: [
+        'Scan het label of het serienummer op het toestel, en je hebt de fiche',
+        'Filter op een plaats, zoals Kar A, om snel te controleren',
+        'Beschikbaar, in herstelling, vermist of afgevoerd',
+        'Een eigen account voor de ICT-coördinator, zonder toegang tot de bib',
+      ],
+      image: 'equipment',
+      video: {
+        config: 'equipmentYoutubeId',
+        target: 'video-materiaal',
+        label: 'Bekijk het in drie minuten',
+      },
+      alt: 'Het overzicht van het materiaal: per soort hoeveel er vrij zijn, en daaronder elk toestel met zijn plaats en status.',
+    },
   ],
   more: {
     title: 'En verder',
@@ -145,6 +164,11 @@ export default {
     play: 'Speel de webinar af',
     playNote: 'De video komt van YouTube; die laden we pas als je op afspelen klikt.',
     soon: 'De webinar staat binnenkort online.',
+    equipment: {
+      title: 'Materiaal, in drie minuten',
+      text: 'Voor de ICT-coördinator: een levering inscannen, labels afdrukken, een toestel terugvinden en af en toe een kar controleren.',
+      play: 'Speel de webinar over Materiaal af',
+    },
   },
   privacy: {
     kicker: 'Veilig en privacyvriendelijk',
@@ -153,7 +177,7 @@ export default {
       { title: 'In Europa', text: 'Alles staat in een datacenter in Ierland en is versleuteld.' },
       {
         title: 'Alleen het team',
-        text: 'Wie de bib beheert, meldt aan met een wachtwoord en een code op de gsm.',
+        text: 'Wie de bib of het materiaal beheert, meldt aan met een wachtwoord en een code op de gsm.',
       },
       {
         title: 'Zo weinig mogelijk',
@@ -240,6 +264,10 @@ export default {
       {
         q: 'Kunnen we onze bestaande catalogus overzetten?',
         a: 'Een import uit een ander bibliotheekprogramma zit er nog niet in. Boeken met een ISBN scan je snel in: de gegevens en de kaft zoeken we voor je op.',
+      },
+      {
+        q: 'Kunnen we er ook onze Chromebooks in bijhouden?',
+        a: 'Ja. Zet Materiaal aan in de instellingen. Je ziet wat de school heeft en waar het ligt. Geef je een toestel mee aan een leerling, dan kan je ook dat noteren.',
       },
       {
         q: 'Is het echt open source?',

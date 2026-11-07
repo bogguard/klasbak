@@ -210,4 +210,6 @@ await shot(await open(`/manage/titles/${damaged}`, { height: 700 }), 'copies');
   await shot(page, 'statistics');
 }
 
+await shot(await open('/manage/equipment', { role: 'equipment', height: 700 }), 'equipment');
+
 await browser.close();

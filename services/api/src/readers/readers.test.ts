@@ -59,6 +59,22 @@ describe('deleting a reader', () => {
     expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
   });
 
+  it('refuses while they still have equipment, and erases who had what', async () => {
+    const assignment = { pk: 'READER#R1', sk: 'ASSIGNMENT#S1', id: 'S1' };
+    ddb.on(QueryCommand).resolves({ Items: [reader, assignment] });
+    await expect(deleteReader(admin, 'R1')).rejects.toMatchObject({
+      code: 'READER_HAS_EQUIPMENT',
+    });
+
+    ddb.on(QueryCommand).resolves({
+      Items: [reader, { ...assignment, returnedAt: '2026-10-01T10:00:00Z' }],
+    });
+    await deleteReader(admin, 'R1');
+    const deletes =
+      ddb.commandCalls(BatchWriteCommand)[0]?.args[0].input.RequestItems?.['test-table'];
+    expect(deletes).toEqual([{ DeleteRequest: { Key: { pk: 'READER#R1', sk: 'ASSIGNMENT#S1' } } }]);
+  });
+
   it('refuses when a book was lent at the very moment of deleting', async () => {
     ddb.on(QueryCommand).resolves({ Items: [reader] });
     ddb.on(TransactWriteCommand).rejects(

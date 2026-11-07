@@ -1,4 +1,4 @@
-import type { ImportRowResult, Loan, Reader, ReaderInput } from '@klasbak/shared';
+import type { Assignment, ImportRowResult, Loan, Reader, ReaderInput } from '@klasbak/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shouldRetry } from '../../lib/api';
 import { useAuthorizedApi } from '../../lib/auth';
@@ -19,7 +19,10 @@ export function useReader(id: string) {
   const api = useAuthorizedApi();
   return useQuery({
     queryKey: readerKey(id),
-    queryFn: () => api<{ reader: Reader; loans: Loan[] }>(`/api/readers/${encodeURIComponent(id)}`),
+    queryFn: () =>
+      api<{ reader: Reader; loans: Loan[]; assignments: Assignment[] }>(
+        `/api/readers/${encodeURIComponent(id)}`,
+      ),
     retry: shouldRetry,
     enabled: id !== '',
   });

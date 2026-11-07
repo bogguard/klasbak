@@ -84,9 +84,14 @@ export async function nextCounterValue(name: string): Promise<number> {
 export async function getCodePointer(code: string): Promise<CodePointer | undefined> {
   const pointer = await getItem<Partial<CodePointer> & Item>(codeKey(code));
   if (!pointer) return undefined;
-  return (pointer.kind ?? 'copy') === 'copy'
-    ? { kind: 'copy', titleId: String(pointer.titleId), copyId: String(pointer.copyId) }
-    : { kind: 'reader', readerId: String(pointer.readerId) };
+  switch (pointer.kind ?? 'copy') {
+    case 'copy':
+      return { kind: 'copy', titleId: String(pointer.titleId), copyId: String(pointer.copyId) };
+    case 'reader':
+      return { kind: 'reader', readerId: String(pointer.readerId) };
+    case 'asset':
+      return { kind: 'asset', assetId: String(pointer.assetId) };
+  }
 }
 
 /** True when the transaction was cancelled because the condition of item `index` failed. */

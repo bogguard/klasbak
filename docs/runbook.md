@@ -28,6 +28,9 @@ days in prod, 7 in dev.
   next Node.js LTS (`Runtime` in `infra/template.yaml`); try a backup restore in the test account
   (below); check with the school that the retention period (Instellingen) is still right.
 
+- **When a school switches on Materiaal:** make sure the data processing agreement mentions it
+  first (`modules.equipment` in the settings, decision 039). Who had which device is personal data.
+
 ## Alarms
 
 Each alarm email has the alarm's description; the matching section is below.

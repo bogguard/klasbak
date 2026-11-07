@@ -4,7 +4,7 @@ export default {
   meta: {
     title: 'Klasbak: the school library, simple at last',
     description:
-      'Open-source software for the school library: lending in two scans, a catalogue with real covers, labels, reader cards and statistics. In the browser, data in the EU, €10 a month.',
+      'Open-source software for the school library: lending in two scans, a catalogue with real covers, labels, reader cards and statistics. Keeps track of your Chromebooks and other equipment too. In the browser, data in the EU, €10 a month.',
   },
   nav: {
     features: 'Features',
@@ -106,6 +106,25 @@ export default {
       image: 'statistics',
       alt: 'The school year’s statistics with figures and a chart per month.',
     },
+    {
+      id: 'equipment',
+      kicker: 'For the ICT coordinator',
+      title: 'Know what equipment you have and where it is',
+      text: 'The school’s Chromebooks, tablets and chargers can go in too, if you like. See how many you have of each kind, and for every device where it is and how it’s doing. A new delivery is scanned in one go.',
+      points: [
+        'Scan the label or the serial number on the device to open its record',
+        'Filter on a place, like Cart A, for a quick check',
+        'Available, in repair, missing or withdrawn',
+        'An account of their own for the ICT coordinator, without access to the library',
+      ],
+      image: 'equipment',
+      video: {
+        config: 'equipmentYoutubeId',
+        target: 'video-materiaal',
+        label: 'Watch it in three minutes',
+      },
+      alt: 'The equipment overview: how many are free per kind, and below it every device with its place and status.',
+    },
   ],
   more: {
     title: 'And also',
@@ -144,6 +163,11 @@ export default {
     play: 'Play the webinar',
     playNote: 'The video comes from YouTube; it only loads when you press play.',
     soon: 'The webinar will be online soon.',
+    equipment: {
+      title: 'Equipment, in three minutes',
+      text: 'For the ICT coordinator: scanning in a delivery, printing labels, finding a device and checking a cart now and then. In Dutch, with Dutch subtitles.',
+      play: 'Play the webinar about equipment',
+    },
   },
   privacy: {
     kicker: 'Safe and privacy-friendly',
@@ -152,7 +176,7 @@ export default {
       { title: 'In Europe', text: 'Everything is stored in a data centre in Ireland, encrypted.' },
       {
         title: 'Only the team',
-        text: 'Whoever runs the library signs in with a password and a code on their phone.',
+        text: 'Whoever runs the library or the equipment signs in with a password and a code on their phone.',
       },
       {
         title: 'As little as possible',
@@ -239,6 +263,10 @@ export default {
       {
         q: 'Can we bring over our existing catalogue?',
         a: 'Importing from other library software isn’t available yet. Books with an ISBN are scanned in quickly: we look up the details and the cover for you.',
+      },
+      {
+        q: 'Can we keep track of our Chromebooks too?',
+        a: 'Yes. Switch on Equipment in the settings. You see what the school has and where it is. If a device goes home with a pupil, you can note that too.',
       },
       {
         q: 'Is it really open source?',

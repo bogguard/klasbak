@@ -9,10 +9,15 @@
  *                                                         EXCHANGE#<exchangeId> / <barcode>
  *   Code pointer  pk CODE#<code>        sk CODE          { kind: 'copy', titleId, copyId }
  *                                                        { kind: 'reader', readerId }
- *                 One namespace for book barcodes and reader cards: a scanned code always
- *                 means exactly one thing, and uniqueness is a conditional put.
+ *                                                        { kind: 'asset', assetId }
+ *                 One namespace for book barcodes, reader cards and equipment (its label and
+ *                 its serial number): a scanned code always means exactly one thing, and
+ *                 uniqueness is a conditional put.
  *   Reader        pk READER#<readerId>  sk READER        gsi1: READERS / <group>#<name>#<id>
  *   Loan          pk READER#<readerId>  sk LOAN#<loanId> gsi1 while active: LOANS#ACTIVE / <dueDate>#<loanId>
+ *   Asset         pk ASSET#<assetId>    sk ASSET          gsi1: ASSETS / <assetId>
+ *   Assignment    pk READER#<readerId>  sk ASSIGNMENT#<id> gsi1: ASSET#<assetId> / <id>
+ *                 In the reader's partition, like loans: erasing a reader erases these too.
  *   Settings      pk SETTINGS           sk LIBRARY
  *   Branding      pk SETTINGS           sk BRANDING      name and logo, also published as a file
  *   Counter       pk COUNTER            sk <name>        last generated number
@@ -40,6 +45,14 @@ export const loanKey = (readerId: string, loanId: string) => ({
   sk: `LOAN#${loanId}`,
 });
 
+export const assetKey = (assetId: string) => ({ pk: `ASSET#${assetId}`, sk: 'ASSET' });
+
+export const assignmentKey = (readerId: string, assignmentId: string) => ({
+  pk: `READER#${readerId}`,
+  sk: `ASSIGNMENT#${assignmentId}`,
+});
+export const assetHistoryIndexPk = (assetId: string) => `ASSET#${assetId}`;
+
 /** Counter for loans in a month (Brussels time), in total or per title or class. */
 export const statsKey = (month: string, sk: string) => ({ pk: `STATS#${month}`, sk });
 
@@ -51,9 +64,12 @@ export const exchangeKey = (exchangeId: string) => ({ pk: 'EXCHANGE', sk: exchan
 export const exchangeCopiesIndexPk = (exchangeId: string) => `EXCHANGE#${exchangeId}`;
 
 export const READERS_INDEX_PK = 'READERS';
+export const ASSETS_INDEX_PK = 'ASSETS';
 export const ACTIVE_LOANS_INDEX_PK = 'LOANS#ACTIVE';
 export const PENDING_LABELS_INDEX_PK = 'LABELS#PENDING';
 export const GSI1 = 'gsi1';
 
 export type CodePointer =
-  { kind: 'copy'; titleId: string; copyId: string } | { kind: 'reader'; readerId: string };
+  | { kind: 'copy'; titleId: string; copyId: string }
+  | { kind: 'reader'; readerId: string }
+  | { kind: 'asset'; assetId: string };

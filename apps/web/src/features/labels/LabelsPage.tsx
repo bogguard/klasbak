@@ -16,9 +16,8 @@ import { useReaders } from '../readers/api';
 import { useMarkLabelsPrinted, usePendingLabels } from './api';
 import { expandRange } from './barcode';
 import { bookLabelsPdf, loadLogo, readerCardsPdf } from './pdf';
-import { LABEL_SHEETS } from './sheets';
+import { LABEL_OFFSET_KEY, LABEL_SHEETS, storedLabelOffset } from './sheets';
 
-const OFFSET_KEY = 'label-offset';
 const NEXT_START_KEY = 'label-next-start';
 
 /** Where the next label goes on a partly used sheet, remembered per sheet type on this computer. */
@@ -43,18 +42,6 @@ function rememberStart(sheetId: string, next: number) {
     localStorage.setItem(NEXT_START_KEY, JSON.stringify({ ...value, [sheetId]: next }));
   } catch {
     // Not remembered; fine.
-  }
-}
-
-function storedOffset(): { x: number; y: number } {
-  try {
-    const value = JSON.parse(localStorage.getItem(OFFSET_KEY) ?? '{}') as {
-      x?: number;
-      y?: number;
-    };
-    return { x: Number(value.x) || 0, y: Number(value.y) || 0 };
-  } catch {
-    return { x: 0, y: 0 };
   }
 }
 
@@ -114,7 +101,7 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
   const [to, setTo] = useState('');
   const [sheetId, setSheetId] = useState(LABEL_SHEETS[0]?.id ?? '');
   const [startAt, setStartAt] = useState(() => storedStart(LABEL_SHEETS[0]?.id ?? ''));
-  const [offset, setOffset] = useState(storedOffset);
+  const [offset, setOffset] = useState(storedLabelOffset);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string>();
   // After a PDF: which codes it held, until the librarian confirms the print went well.
@@ -211,7 +198,7 @@ function BookLabels({ initialCodes }: { initialCodes: string }) {
     const next = { ...offset, [axis]: Number(value.replace(',', '.')) || 0 };
     setOffset(next);
     try {
-      localStorage.setItem(OFFSET_KEY, JSON.stringify(next));
+      localStorage.setItem(LABEL_OFFSET_KEY, JSON.stringify(next));
     } catch {
       // Not remembered; fine.
     }

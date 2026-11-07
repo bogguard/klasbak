@@ -7,6 +7,8 @@ export const config = {
   github: 'https://github.com/bogguard/klasbak',
   // The webinar on YouTube (the part after watch?v=). Empty: "coming soon".
   youtubeId: 'C4mgS-DkCsQ',
+  // The short webinar about Materiaal (the equipment module), shown below the tour.
+  equipmentYoutubeId: 'nw4dn-Ha5ZI',
   company: {
     name: 'InTheRealWorld BV',
     address: 'Burgemeester Van Ackerwijk A 39, 9240 Zele',

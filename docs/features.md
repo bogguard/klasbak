@@ -1,6 +1,6 @@
 # Features & roadmap
 
-Features a school library needs, from cataloguing to lending to reading promotion. We ship in phases; each phase is usable on its own.
+What Klasbak does and what's planned: first the school library, from cataloguing to lending to reading promotion, then other school tools as modules. We ship in phases; each phase is usable on its own.
 
 ## Status
 
@@ -18,6 +18,7 @@ Features a school library needs, from cataloguing to lending to reading promotio
 | Import from Informat/Wisa/Smartschool (xlsx, CSV), new school year, report | Built; runs on AWS            |
 | Exchange collections from the public library (decision 031)                | Built; runs on AWS            |
 | Demo library for local development (`npm run demo`)                        | Built                         |
+| Equipment stock: items, handing out, labels (decision 039)                 | Built; not yet run on AWS     |
 
 ## Phase 1 — MVP: run a school library
 
@@ -77,22 +78,35 @@ Features a school library needs, from cataloguing to lending to reading promotio
 
 ## Beyond the library — modules (decision 036)
 
-Other school tools on the same installation, each switched on per school. Order: equipment lending, lost and found, maintenance requests, duty planning.
+Other school tools on the same installation, each switched on per school. Order: equipment, lost and found, maintenance requests, duty planning.
 
-### Module 1 — Equipment lending (`equipment`, UI "Materiaal")
+### Module 1 — Equipment (`equipment`, UI "Materiaal")
 
-Laptops, tablets, cameras, calculators, sports gear: lent to a pupil or teacher, often for a day or a lesson.
+Chromebooks, tablets, chargers, cameras, sports gear: what the school has, where it is and who has it. Switched on in Instellingen → Modules; decision 039.
 
-**Version 1: lend and return at a desk**
+The first need is stock: what the school has and where it is, checked now and then. Teachers fetch and return a cart themselves; there is often no lending service, so handing out is optional.
 
-- Equipment items (`Asset`): name, kind (laptop, tablet…), barcode, optional serial number, location, status (available, on loan, in repair, withdrawn), notes on condition. Not in the public catalogue or search index.
-- Barcodes in the existing code namespace (011, a new pointer kind `asset`), so the same scanner and label printing work and a scanned code still means one thing.
-- Lending reuses the reader, the loan and the "one active loan" condition (012): a loan points to a copy or an asset. A teacher's reminder slip then shows late books and late equipment together.
-- Loan periods per kind of equipment, in days, with "back today" (due at the end of the school day) as the common case; due dates skip closed days as for books.
-- Return asks for a condition note when something is wrong, and can set the item to "in repair" in one step.
-- Lend to a group: one loan per item to the teacher, for a class set (e.g. 25 tablets for one lesson).
-- Overdue list and reminder slips as in the library, filtered by module.
-- Who manages equipment: a role per module (`equipment`), so the ICT coordinator doesn't need library rights.
+**Version 1: stock (built)**
+
+- Items (`Asset`), each counted on its own: kind (free text with suggestions), make and model, label code `M<instellingsnummer><number>`, optional serial number, place, status (available, handed out, in repair, missing, withdrawn), purchase date, warranty date, note. Not in the public catalogue or search index.
+- Overview per kind (how many, how many free, out, in repair, missing), a list with search and filters. Scanning the label or the serial number opens the item.
+- Checking a place: filter on it and compare the list with what's there.
+- A delivery is one form: scan or paste up to 200 serial numbers. Known ones are skipped, so a list can be pasted twice. Without serial numbers: a quantity.
+- Labels from the existing sheets, with their own print queue.
+- Handing out to a reader, when a school wants it (scan the card or search), with an optional due date and a filter for what's late. Taking back asks in what state it returns.
+- Who had an item is personal data: on the reader's page, in the export and the erasure, and removed after the retention period.
+- Role `equipment` for the ICT coordinator: only this module, no rights in the library. Librarians and administrators can manage equipment too.
+
+**Next, when a school misses it**
+
+- Stock count: pick a place, scan what's there, see what's missing. The likeliest next step, since schools check their stock now and then.
+- Consumables counted as a number (cables, toner) instead of per item.
+
+**Only for schools with a lending service**
+
+- Equipment on the desk: the same scan for books and equipment.
+- Overdue reminder slips, late books and late equipment together.
+- Lend to a group: one assignment per item to the teacher, for a class set.
 
 **Version 2: booking**
 
@@ -100,6 +114,5 @@ Laptops, tablets, cameras, calculators, sports gear: lent to a pupil or teacher,
 
 **Open questions**
 
-- Where loans live: in the same `LOAN#` items with an `assetId` (one overdue list and history) or in their own items (no change to the library's queries). Leaning towards the first; to be settled in the design step with the access patterns.
 - Statistics for equipment (use per kind and month) or none.
 - Liability for damage: stays outside the app (no fines, decision 007).

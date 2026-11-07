@@ -6,7 +6,10 @@ import {
   localDate,
   ReaderInputSchema,
   TitleInputSchema,
+  type Asset,
   type CopyInput,
+  type CreateAssetsRequest,
+  type Reader,
   type ReaderInput,
   type TitleInput,
 } from '@klasbak/shared';
@@ -15,6 +18,13 @@ import { join } from 'node:path';
 import { addCopy, createTitle, markLabelsPrinted, updateCopy } from '../catalog/service';
 import { lookupIsbn } from '../catalog/isbn-lookup';
 import { scan, updateSettings } from '../circulation/service';
+import {
+  assignAsset,
+  createAssets,
+  markLabelsPrinted as markAssetLabelsPrinted,
+  returnAsset,
+  updateAsset,
+} from '../equipment/service';
 import { addExchangeBooks, createExchange, returnExchange } from '../exchange/service';
 import type { Actor } from '../lib/auth';
 import { db, env } from '../lib/aws';
@@ -368,6 +378,7 @@ async function main() {
     actor,
     {
       ...DEFAULT_SETTINGS,
+      modules: { equipment: true },
       closedPeriods: [
         { from: on('2026-10-26'), to: on('2026-11-01'), label: 'Herfstvakantie' },
         { from: on('2026-12-21'), to: on('2027-01-03'), label: 'Kerstvakantie' },
@@ -647,7 +658,71 @@ async function main() {
       at(on('2026-10-12')),
     );
 
+  await addEquipment(pupils);
   console.log(`Search index: ${await rebuildSearchIndex()} titles.`);
+}
+
+async function setStatus(asset: Asset, status: 'repair' | 'lost', day: string, note?: string) {
+  const { kind, name, serialNumber, location, version } = asset;
+  const input = { kind, name, serialNumber, location, status, note };
+  await updateAsset(actor, asset.id, input, version, at(day));
+}
+
+/** A cart of Chromebooks in use, a few tablets and chargers, and some with a story. */
+async function addEquipment(pupils: Reader[]) {
+  const delivered = at(on('2026-09-02'));
+  const created = async (request: CreateAssetsRequest, labelled = true) => {
+    const results = await createAssets(actor, request, delivered);
+    const items = results.flatMap((r) => (r.status === 'created' ? [r.asset] : []));
+    if (labelled)
+      await markAssetLabelsPrinted(
+        items.map((a) => a.id),
+        delivered,
+      );
+    return items;
+  };
+  const warranty = { purchasedOn: on('2026-08-20'), warrantyUntil: on('2029-08-20') };
+
+  const chromebooks = await created({
+    details: { kind: 'Chromebook', name: 'Acer Chromebook 314', location: 'Kar A', ...warranty },
+    serialNumbers: Array.from({ length: 24 }, (_, i) => `NXKQ${String(4100 + i * 37)}`),
+  });
+  await created({
+    details: { kind: 'Tablet', name: 'iPad 10,2"', location: 'Lokaal 12' },
+    serialNumbers: Array.from({ length: 8 }, (_, i) => `DMPX${String(7000 + i * 13)}`),
+  });
+  await created({
+    details: { kind: 'Oplader', name: 'USB-C 45 W', location: 'ICT-kast' },
+    serialNumbers: [],
+    quantity: 6,
+  });
+  // A fresh delivery, still waiting for its labels.
+  await created(
+    {
+      details: { kind: 'Chromebook', name: 'Lenovo 300e', location: 'ICT-kast', ...warranty },
+      serialNumbers: ['PF3WT01', 'PF3WT02', 'PF3WT03'],
+    },
+    false,
+  );
+
+  // Pupils who keep one all year, one that is late, and one back in the cart.
+  const [first, second, third, fourth] = chromebooks;
+  for (const [index, asset] of chromebooks.slice(4, 10).entries()) {
+    const pupil = pupils[index * 4];
+    if (pupil) await assignAsset(actor, asset.id, pupil.id, undefined, at(on('2026-09-05')));
+  }
+  const [a, b] = pupils.slice(25);
+  if (first && a) {
+    await assignAsset(actor, first.id, a.id, localDate(at(on('2026-10-02'))), at(on('2026-09-28')));
+  }
+  if (second && b) {
+    await assignAsset(actor, second.id, b.id, undefined, at(on('2026-09-15')));
+    await returnAsset(actor, second.id, 'available', at(on('2026-09-22')));
+  }
+  if (third)
+    await setStatus(third, 'repair', on('2026-10-06'), 'Scherm gebarsten, bij de leverancier');
+  if (fourth) await setStatus(fourth, 'lost', on('2026-10-13'));
+  console.log('Equipment: Chromebooks, tablets and chargers added.');
 }
 
 await main();

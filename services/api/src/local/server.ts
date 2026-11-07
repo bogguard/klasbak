@@ -6,6 +6,7 @@ import type { LambdaEvent } from 'hono/aws-lambda';
 import { ROLES, type Role } from '../lib/auth';
 import { app as catalog } from '../catalog/handler';
 import { app as circulation } from '../circulation/handler';
+import { app as equipment } from '../equipment/handler';
 import { app as readers } from '../readers/handler';
 import { app as staff } from '../staff/handler';
 import { logger } from '../lib/observability';
@@ -76,6 +77,9 @@ server.all('/api/readers', (c) =>
 );
 server.all('/api/staff', (c) => staff.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))));
 server.all('/api/staff/*', (c) => staff.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))));
+server.all('/api/equipment/*', (c) =>
+  equipment.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
+);
 server.all('/api/circulation/*', async (c) => {
   const response = await circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization')));
   // Loans change copy statuses, and availability is part of the search index.

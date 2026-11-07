@@ -1,5 +1,5 @@
 import { BatchWriteCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { memberNumber, type Loan, type Reader } from '@klasbak/shared';
+import { memberNumber, type Assignment, type Loan, type Reader } from '@klasbak/shared';
 import { db, env } from '../lib/aws';
 import {
   failedConditionAt,
@@ -10,7 +10,7 @@ import {
   type Item,
 } from '../lib/dynamo';
 import { ConflictError } from '../lib/errors';
-import { codeKey, GSI1, loanKey, READERS_INDEX_PK, readerKey } from '../lib/keys';
+import { assignmentKey, codeKey, GSI1, loanKey, READERS_INDEX_PK, readerKey } from '../lib/keys';
 
 /** Sorts the reader list by class, then last name, then first name. */
 function readerIndexKeys(reader: Reader) {
@@ -32,7 +32,7 @@ export function getReader(readerId: string): Promise<Reader | undefined> {
 
 export async function getReaderWithLoans(
   readerId: string,
-): Promise<{ reader: Reader; loans: Loan[] } | undefined> {
+): Promise<{ reader: Reader; loans: Loan[]; assignments: Assignment[] } | undefined> {
   const items = await queryAll({
     KeyConditionExpression: 'pk = :pk',
     ExpressionAttributeValues: { ':pk': readerKey(readerId).pk },
@@ -43,7 +43,10 @@ export async function getReaderWithLoans(
   const loans = items
     .filter((item) => String(item.sk).startsWith('LOAN#'))
     .map((item) => stripKeys<Loan>(item));
-  return { reader: stripKeys<Reader>(readerItem), loans };
+  const assignments = items
+    .filter((item) => String(item.sk).startsWith('ASSIGNMENT#'))
+    .map((item) => stripKeys<Assignment>(item));
+  return { reader: stripKeys<Reader>(readerItem), loans, assignments };
 }
 
 export async function listReaders(): Promise<Reader[]> {
@@ -152,9 +155,14 @@ export async function updateReaderDetails(
 
 /**
  * Removes a reader, their card number and their loan history (right to erasure). Refused while
- * they still have books: the loan counter must be 0 at the moment of deleting.
+ * they still have books or equipment: both counters must be 0 at the moment of deleting.
  */
-export async function deleteReaderAndHistory(reader: Reader, loans: Loan[], audit: Item) {
+export async function deleteReaderAndHistory(
+  reader: Reader,
+  loans: Loan[],
+  assignments: Assignment[],
+  audit: Item,
+) {
   try {
     await db.send(
       new TransactWriteCommand({
@@ -164,7 +172,8 @@ export async function deleteReaderAndHistory(reader: Reader, loans: Loan[], audi
               TableName: env.tableName,
               Key: readerKey(reader.id),
               ConditionExpression:
-                'attribute_not_exists(activeLoanCount) OR activeLoanCount = :zero',
+                '(attribute_not_exists(activeLoanCount) OR activeLoanCount = :zero) AND ' +
+                '(attribute_not_exists(activeAssetCount) OR activeAssetCount = :zero)',
               ExpressionAttributeValues: { ':zero': 0 },
             },
           },
@@ -182,14 +191,17 @@ export async function deleteReaderAndHistory(reader: Reader, loans: Loan[], audi
     );
   } catch (error) {
     if (failedConditionAt(error, 0)) {
-      throw new ConflictError('READER_HAS_LOANS', 'This reader still has books on loan');
+      throw new ConflictError('READER_HAS_LOANS', 'This reader still has books or equipment');
     }
     throw error;
   }
 
   // The reader is gone; now their history. If this is interrupted, the daily retention job
   // removes the rest once it's older than the retention period.
-  const keys = loans.map((loan) => loanKey(reader.id, loan.id));
+  const keys = [
+    ...loans.map((loan) => loanKey(reader.id, loan.id)),
+    ...assignments.map((assignment) => assignmentKey(reader.id, assignment.id)),
+  ];
   for (let start = 0; start < keys.length; start += 25) {
     let pending = keys.slice(start, start + 25).map((Key) => ({ DeleteRequest: { Key } }));
     for (let attempt = 0; pending.length > 0 && attempt < 5; attempt++) {

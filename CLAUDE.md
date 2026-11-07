@@ -21,11 +21,11 @@ The layout from the skill (section 3), with these domain areas:
 
 ```
 apps/web/src/features/   catalog, manage (titles and copies), exchange, circulation (desk, loans, kiosk,
-                         settings), readers, labels, statistics, staff, export, auth
-services/api/src/        catalog, circulation, readers, staff (API functions); search-indexer, retention (jobs);
+                         settings), equipment, readers, labels, statistics, staff, export, auth
+services/api/src/        catalog, circulation, equipment, readers, staff (API functions); search-indexer, retention (jobs);
                          branding, export (used by the circulation function), exchange (used by the
                          catalog function); local/ (local dev server)
-packages/shared/src/     one file per domain: auth, branding, catalog, circulation, codes, exchange, export,
+packages/shared/src/     one file per domain: auth, branding, catalog, circulation, codes, equipment, exchange, export,
                          isbn, readers, search, staff
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
@@ -62,8 +62,8 @@ Local development: the API runs as plain Hono apps on Node (`services/api/src/lo
 ## Users, roles and privacy
 
 - **Personas**: the librarian at the desk with a queue of children; a pupil (often young) at the "Mijn boeken" screen; the school's administrator a few times a year; the class teacher handing out reminder slips; parents and pupils browsing the public catalogue on a phone.
-- **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin` and `librarian`, enforced by the API.
-- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional school number (stamboeknummer, only to recognise pupils in imports; never printed), optional email; their loans. No birth dates, addresses or photos. Staff: name, username, optional email, role.
+- **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics, equipment), `equipment` (only the equipment module, e.g. the ICT coordinator). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin`, `librarian` and `equipment`, enforced by the API.
+- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional school number (stamboeknummer, only to recognise pupils in imports; never printed), optional email; their loans and the equipment they were given. No birth dates, addresses or photos. Staff: name, username, optional email, role.
 - **Third parties** receive only ISBNs (book lookups); covers are stored on our own server, so visitors never contact them.
 - **Statistics** are anonymous counters (month, title, class), never per pupil.
 - **Privacy notice**: `/privacy`, in plain Dutch for parents and children. A data processing agreement (verwerkersovereenkomst) exists between the school and ITRW; keep the app consistent with what it promises (e.g. retention, MFA, dependency checks).
@@ -89,6 +89,8 @@ Local development: the API runs as plain Hono apps on Node (`services/api/src/lo
 | Theme list           | Themalijst                          | Curated list of titles                                  |
 | New acquisitions     | Aanwinsten                          | Recently added titles                                   |
 | Closed day           | Sluitingsdag                        | Day the library is closed (affects due dates)           |
+| Asset                | Materiaal / Toestel                 | One item of equipment, with its own label               |
+| Assignment           | Uitgifte (uitgeven / terugnemen)    | An asset handed to a reader, often for a whole year     |
 
 ## Domain rules to keep in mind
 

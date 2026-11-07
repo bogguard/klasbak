@@ -4,6 +4,7 @@ import {
   READER_CATEGORIES,
   ReaderInputSchema,
   readerName,
+  type Assignment,
   type Loan,
   type Reader,
   type ReaderInput,
@@ -130,7 +131,7 @@ export function ReaderPage() {
     );
   }
 
-  const { reader, loans } = existing.data;
+  const { reader, loans, assignments } = existing.data;
   return (
     <div className="space-y-8">
       {back}
@@ -149,27 +150,37 @@ export function ReaderPage() {
         </Link>
       </header>
       <LoansSection loans={loans} />
+      <EquipmentSection assignments={assignments} />
       <section aria-labelledby="reader-details" className="space-y-4">
         <h2 id="reader-details" className="text-xl font-semibold">
           {t('readers.details')}
         </h2>
         <ReaderForm reader={reader} />
       </section>
-      {isAdmin && <PrivacyActions reader={reader} loans={loans} />}
+      {isAdmin && <PrivacyActions reader={reader} loans={loans} assignments={assignments} />}
     </div>
   );
 }
 
 /** The reader's rights: a copy of their data, and erasure. */
-function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
+function PrivacyActions({
+  reader,
+  loans,
+  assignments,
+}: {
+  reader: Reader;
+  loans: Loan[];
+  assignments: Assignment[];
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const remove = useDeleteReader(reader.id);
   const errorMessage = useErrorMessage();
   const hasBooks = loans.some((loan) => !loan.returnedAt);
+  const hasEquipment = assignments.some((assignment) => !assignment.returnedAt);
 
   function download() {
-    const data = JSON.stringify({ reader, loans }, null, 2);
+    const data = JSON.stringify({ reader, loans, assignments }, null, 2);
     const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
@@ -202,7 +213,7 @@ function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
         <Button
           variant="secondary"
           onClick={() => void erase()}
-          disabled={hasBooks || remove.isPending}
+          disabled={hasBooks || hasEquipment || remove.isPending}
           className="text-danger"
         >
           <Trash2 className="size-4" aria-hidden="true" />
@@ -210,6 +221,7 @@ function PrivacyActions({ reader, loans }: { reader: Reader; loans: Loan[] }) {
         </Button>
       </div>
       {hasBooks && <p className="text-sm text-muted">{t('readers.privacy.hasBooks')}</p>}
+      {hasEquipment && <p className="text-sm text-muted">{t('readers.privacy.hasEquipment')}</p>}
       {remove.isError && <Alert tone="danger">{errorMessage(remove.error)}</Alert>}
     </section>
   );
@@ -403,6 +415,43 @@ function ReaderForm({ reader }: { reader?: Reader }) {
         {mutation.isPending ? t('manage.form.saving') : t('readers.form.save')}
       </Button>
     </form>
+  );
+}
+
+/** Only shown when there is something to show: most readers never get equipment. */
+function EquipmentSection({ assignments }: { assignments: Assignment[] }) {
+  const { t, i18n } = useTranslation();
+  const active = assignments.filter((assignment) => !assignment.returnedAt);
+  if (active.length === 0) return null;
+
+  return (
+    <section aria-labelledby="reader-equipment" className="space-y-3">
+      <h2 id="reader-equipment" className="text-xl font-semibold">
+        {t('readers.equipment', { count: active.length })}
+      </h2>
+      <ul className="divide-y divide-line rounded-xl border border-line bg-surface">
+        {active.map((assignment) => (
+          <li
+            key={assignment.id}
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+          >
+            <Link
+              to={`/manage/equipment/${assignment.assetId}`}
+              className="font-medium hover:underline"
+            >
+              {assignment.assetName}
+            </Link>
+            <span className="text-sm text-muted">
+              {assignment.dueDate
+                ? t('equipment.due', { date: formatDate(assignment.dueDate, i18n.language) })
+                : t('equipment.holder.since', {
+                    date: formatTimestampDate(assignment.assignedAt, i18n.language),
+                  })}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

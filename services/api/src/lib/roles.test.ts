@@ -1,6 +1,7 @@
 import type { LambdaEvent } from 'hono/aws-lambda';
 import { describe, expect, it } from 'vitest';
 import { app as circulation } from '../circulation/handler';
+import { app as equipment } from '../equipment/handler';
 import { app as readers } from '../readers/handler';
 
 const as = (role: string) => ({
@@ -33,5 +34,27 @@ describe('administrator-only tasks', () => {
       ),
     ];
     for (const response of await Promise.all(attempts)) expect(response.status).toBe(403);
+  });
+});
+
+describe('the equipment role', () => {
+  it('has no rights in the library', async () => {
+    const attempts = [
+      readers.request('/api/readers', {}, as('equipment')),
+      circulation.request('/api/circulation/loans', {}, as('equipment')),
+      circulation.request(
+        '/api/circulation/scan',
+        { method: 'POST', headers: json, body: '{}' },
+        as('equipment'),
+      ),
+    ];
+    for (const response of await Promise.all(attempts)) expect(response.status).toBe(403);
+  });
+
+  it('keeps teachers and readers out of the equipment API', async () => {
+    for (const role of ['teacher', 'reader']) {
+      const response = await equipment.request('/api/equipment/recipients', {}, as(role));
+      expect(response.status).toBe(403);
+    }
   });
 });

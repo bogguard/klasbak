@@ -1,4 +1,4 @@
-import { isStaff, ROLES, type Role } from '@klasbak/shared';
+import { isLibraryStaff, isStaff, ROLES, type Role } from '@klasbak/shared';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { apiRequest } from './api';
@@ -232,6 +232,11 @@ export function useAuth(): AuthContextValue {
 export function useIsStaff(): boolean {
   const { session } = useAuth();
   return Boolean(session && isStaff(session.roles));
+}
+
+export function useIsLibraryStaff(): boolean {
+  const { session } = useAuth();
+  return Boolean(session && isLibraryStaff(session.roles));
 }
 
 export function useIsAdmin(): boolean {

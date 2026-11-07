@@ -1,4 +1,4 @@
-import type { Copy, ExportRecord, Loan, Reader, Title } from '@klasbak/shared';
+import type { Asset, Assignment, Copy, ExportRecord, Loan, Reader, Title } from '@klasbak/shared';
 import { strToU8, zipSync } from 'fflate';
 
 /*
@@ -40,6 +40,8 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
   const copies = of('copy') as Copy[];
   const readers = of('reader') as Reader[];
   const loans = of('loan') as Loan[];
+  const assets = of('asset') as Asset[];
+  const assignments = of('assignment') as Assignment[];
   const titleById = new Map(titles.map((t) => [t.id, t.title]));
   const memberNumberById = new Map(readers.map((r) => [r.id, r.memberNumber]));
 
@@ -92,6 +94,29 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
       ['verlengd', (l) => l.renewals ?? 0],
       ['teruggebracht', (l) => l.returnedAt],
     ]),
+    'materiaal.csv': toCsv(assets, [
+      ['barcode', (a) => a.barcode],
+      ['serienummer', (a) => a.serialNumber],
+      ['soort', (a) => a.kind],
+      ['naam', (a) => a.name],
+      ['status', (a) => a.status],
+      ['plaats', (a) => a.location],
+      ['bij', (a) => a.holder?.readerName],
+      ['aangekocht', (a) => a.purchasedOn],
+      ['garantie_tot', (a) => a.warrantyUntil],
+      ['opmerking', (a) => a.note],
+      ['toegevoegd', (a) => a.createdAt],
+    ]),
+    'materiaal-uitgiftes.csv': toCsv(assignments, [
+      ['kaartnummer', (a) => memberNumberById.get(a.readerId)],
+      ['lezer', (a) => a.readerName],
+      ['klas', (a) => a.readerGroup],
+      ['barcode', (a) => a.barcode],
+      ['materiaal', (a) => a.assetName],
+      ['uitgegeven', (a) => a.assignedAt],
+      ['terug_op', (a) => a.dueDate],
+      ['teruggenomen', (a) => a.returnedAt],
+    ]),
     'alles.json': JSON.stringify(
       {
         exportedAt: exportedAt.toISOString(),
@@ -99,6 +124,8 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
         copies,
         readers,
         loans,
+        assets,
+        assignments,
         settings: of('settings')[0],
       },
       null,
