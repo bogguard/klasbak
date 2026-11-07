@@ -54,6 +54,8 @@ export type Reader = Omit<ReaderInput, 'memberNumber'> & {
   id: string;
   memberNumber: string;
   activeLoanCount: number;
+  /** Equipment they have: apart from books, so a Chromebook doesn't use up their maximum. */
+  activeAssetCount?: number;
   createdAt: string;
   updatedAt: string;
   version: number;

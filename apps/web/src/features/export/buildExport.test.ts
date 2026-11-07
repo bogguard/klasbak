@@ -106,6 +106,8 @@ describe('buildExportZip', () => {
       'alles.json',
       'exemplaren.csv',
       'lezers.csv',
+      'materiaal-uitgiftes.csv',
+      'materiaal.csv',
       'titels.csv',
       'uitleningen.csv',
     ]);

@@ -101,6 +101,30 @@ const router = createBrowserRouter([
             }),
           },
           {
+            path: 'equipment',
+            lazy: async () => ({
+              Component: (await import('./features/equipment/EquipmentPage')).EquipmentPage,
+            }),
+          },
+          {
+            path: 'equipment/new',
+            lazy: async () => ({
+              Component: (await import('./features/equipment/NewAssetsPage')).NewAssetsPage,
+            }),
+          },
+          {
+            path: 'equipment/labels',
+            lazy: async () => ({
+              Component: (await import('./features/equipment/AssetLabelsPage')).AssetLabelsPage,
+            }),
+          },
+          {
+            path: 'equipment/:id',
+            lazy: async () => ({
+              Component: (await import('./features/equipment/AssetPage')).AssetPage,
+            }),
+          },
+          {
             path: 'exchanges',
             lazy: async () => ({
               Component: (await import('./features/exchange/ExchangesPage')).ExchangesPage,

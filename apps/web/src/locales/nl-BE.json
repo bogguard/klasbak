@@ -114,7 +114,13 @@
     "NOT_A_READER_CARD": "Dit is een boek. Scan je bibliotheekpasje.",
     "EXCHANGE_RETURNED": "Deze wisselcollectie is al teruggebracht.",
     "EXCHANGE_HAS_LOANS": "Er zijn nog {{count}} boeken uitgeleend. Laat ze eerst terugbrengen.",
-    "reference": "(Referentie voor de helpdesk: {{reference}})"
+    "reference": "(Referentie voor de helpdesk: {{reference}})",
+    "MODULE_OFF": "Materiaal staat nog niet aan. Een beheerder kan het aanzetten bij Instellingen.",
+    "ASSET_NOT_AVAILABLE": "Dit toestel is net uitgegeven of niet meer beschikbaar. Herlaad de pagina.",
+    "ASSET_ASSIGNED": "Dit toestel is uitgegeven. Neem het eerst terug.",
+    "SERIAL_IN_USE": "Dit serienummer is al in gebruik voor iets anders.",
+    "READER_HAS_EQUIPMENT": "Deze lezer heeft nog materiaal. Neem het eerst terug.",
+    "CODE_IS_EQUIPMENT": "Dit is de code van materiaal, geen boek. Kijk bij Materiaal."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -124,7 +130,8 @@
     "admin": "beheerder",
     "librarian": "bibliothecaris",
     "teacher": "leerkracht",
-    "reader": "lezer"
+    "reader": "lezer",
+    "equipment": "materiaalbeheerder"
   },
   "auth": {
     "heading": "Aanmelden",
@@ -274,7 +281,8 @@
     "labels": "Labels",
     "staff": "Medewerkers",
     "statistics": "Statistieken",
-    "exchanges": "Wisselcollecties"
+    "exchanges": "Wisselcollecties",
+    "equipment": "Materiaal"
   },
   "readers": {
     "heading": "Lezers",
@@ -373,8 +381,11 @@
       "export": "Gegevens downloaden",
       "delete": "Lezer verwijderen",
       "hasBooks": "Verwijderen kan pas als alle boeken terug zijn.",
-      "confirmDelete": "{{name}} en de volledige leesgeschiedenis definitief verwijderen? Dit kan niet ongedaan gemaakt worden."
-    }
+      "confirmDelete": "{{name}} en de volledige leesgeschiedenis definitief verwijderen? Dit kan niet ongedaan gemaakt worden.",
+      "hasEquipment": "Neem eerst het materiaal terug; daarna kan je wissen."
+    },
+    "equipment_one": "{{count}} stuk materiaal in gebruik",
+    "equipment_other": "{{count}} stuks materiaal in gebruik"
   },
   "loans": {
     "late": "Te laat",
@@ -495,6 +506,11 @@
       "busy_other": "Bezig… {{count}} records",
       "done_one": "Klaar: {{count}} record geëxporteerd.",
       "done_other": "Klaar: {{count}} records geëxporteerd."
+    },
+    "modules": {
+      "heading": "Modules",
+      "equipment": "Materiaal",
+      "equipmentHint": "Chromebooks en ander materiaal bijhouden: hoeveel er zijn, waar ze staan en wie wat heeft."
     }
   },
   "labels": {
@@ -580,19 +596,19 @@
     },
     "what": {
       "heading": "Welke gegevens bewaren we?",
-      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. We vragen geen geboortedatum, adres of foto."
+      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. Krijg je van de school materiaal mee, zoals een Chromebook, dan noteren we ook welk toestel je hebt en tot wanneer. We vragen geen geboortedatum, adres of foto."
     },
     "why": {
       "heading": "Waarvoor gebruiken we ze?",
-      "body": "Om boeken uit te lenen, eraan te herinneren als ze terug moeten en de bibliotheek goed te beheren. Niet voor reclame. We verkopen of delen je gegevens met niemand."
+      "body": "Om boeken uit te lenen, eraan te herinneren als ze terug moeten en de bibliotheek goed te beheren. En om bij te houden waar het materiaal van de school is. Niet voor reclame. We verkopen of delen je gegevens met niemand."
     },
     "retention": {
       "heading": "Hoe lang bewaren we ze?",
-      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Verlaat je de school, dan kan de school al je gegevens wissen."
+      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Hetzelfde geldt voor materiaal dat je terugbracht. Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Verlaat je de school, dan kan de school al je gegevens wissen."
     },
     "where": {
       "heading": "Waar staan de gegevens?",
-      "body": "Versleuteld bij Amazon Web Services, in een datacenter in Ierland (Europese Unie). Alleen wie de bibliotheek beheert, kan ze bekijken, en hun toegang is beveiligd met tweestapsverificatie. Boekomslagen bewaren we zelf, zodat wie de catalogus bekijkt niet bij andere bedrijven terechtkomt."
+      "body": "Versleuteld bij Amazon Web Services, in een datacenter in Ierland (Europese Unie). Alleen wie de bibliotheek of het materiaal beheert, kan ze bekijken, en hun toegang is beveiligd met tweestapsverificatie. Boekomslagen bewaren we zelf, zodat wie de catalogus bekijkt niet bij andere bedrijven terechtkomt."
     },
     "cookies": {
       "heading": "Cookies",
@@ -617,7 +633,7 @@
     "name": "Naam",
     "role": "Rol",
     "roleOf": "Rol van {{name}}",
-    "roleHint": "Kies ‘beheerder’ alleen voor wie ook medewerkers moet kunnen beheren.",
+    "roleHint": "Kies ‘materiaalbeheerder’ voor wie alleen het materiaal beheert, zoals de ICT-coördinator. Kies ‘beheerder’ alleen voor wie ook medewerkers moet kunnen beheren.",
     "status": "Status",
     "you": "jij",
     "active": "Actief",
@@ -845,6 +861,115 @@
       "copyNotice_one": "{{count}} exemplaar komt uit de wisselcollectie {{name}} en gaat op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
       "copyNotice_other": "{{count}} exemplaren komen uit de wisselcollectie {{name}} en gaan op {{date}} terug naar de bib. De eigen exemplaren van de school blijven.",
       "open": "Naar de wisselcollectie"
+    }
+  },
+  "assetStatus": {
+    "available": "Beschikbaar",
+    "assigned": "Uitgegeven",
+    "repair": "In herstelling",
+    "lost": "Vermist",
+    "withdrawn": "Afgevoerd"
+  },
+  "equipment": {
+    "heading": "Materiaal",
+    "add": "Materiaal toevoegen",
+    "back": "Terug naar het materiaal",
+    "search": "Zoek of scan: naam, serienummer, klas, leerling",
+    "status": "Status",
+    "allStatuses": "Alles in stock",
+    "overdue": "Te laat terug",
+    "location": "Plaats",
+    "allLocations": "Alle plaatsen",
+    "count_one": "{{count}} stuk",
+    "count_other": "{{count}} stuks",
+    "item": "Materiaal",
+    "code": "Code / serienummer",
+    "due": "Terug op {{date}}",
+    "details": "Gegevens",
+    "save": "Opslaan",
+    "saved": "Opgeslagen.",
+    "empty": {
+      "title": "Nog geen materiaal",
+      "hint": "Voeg je Chromebooks toe: scan de serienummers na elkaar, en druk daarna de labels af."
+    },
+    "summary": {
+      "available": "{{available}} van {{total}} vrij",
+      "assigned_one": "{{count}} uitgegeven",
+      "assigned_other": "{{count}} uitgegeven",
+      "repair_one": "{{count}} in herstelling",
+      "repair_other": "{{count}} in herstelling",
+      "lost_one": "{{count}} vermist",
+      "lost_other": "{{count}} vermist"
+    },
+    "form": {
+      "kind": "Soort",
+      "name": "Merk en model",
+      "nameHint": "Bijvoorbeeld Acer Chromebook 314.",
+      "locationHint": "Bijvoorbeeld Kar A of Lokaal 12.",
+      "purchasedOn": "Aangekocht op",
+      "warrantyUntil": "Garantie tot",
+      "note": "Opmerking",
+      "noteHint": "Bijvoorbeeld de staat van het toestel. Geen gegevens over leerlingen.",
+      "serialNumber": "Serienummer",
+      "statusAssigned": "Neem het toestel terug om de status te wijzigen.",
+      "required": "Vul dit in."
+    },
+    "new": {
+      "howMany": "Hoeveel?",
+      "serials": "Met serienummers",
+      "quantity": "Zonder serienummer",
+      "serialList": "Serienummers",
+      "serialHint": "Scan of plak ze, één per regel (maximaal {{max}}). Scan het nummer op het toestel: dan vindt de scanner het later ook zonder ons label terug.",
+      "invalidSerials": "Dit lijkt geen serienummer: {{serials}}. Alleen letters, cijfers en streepjes.",
+      "tooMany": "Dat zijn er meer dan {{max}}. Voeg ze in twee keer toe.",
+      "quantityLabel": "Aantal",
+      "quantityError": "Vul een aantal in van 1 tot {{max}}.",
+      "submit_one": "{{count}} stuk toevoegen",
+      "submit_other": "{{count}} stuks toevoegen",
+      "added_one": "{{count}} stuk toegevoegd.",
+      "added_other": "{{count}} stuks toegevoegd.",
+      "duplicates_one": "{{count}} serienummer bestond al en werd overgeslagen: {{serials}}.",
+      "duplicates_other": "{{count}} serienummers bestonden al en werden overgeslagen: {{serials}}.",
+      "printLabels": "Labels afdrukken"
+    },
+    "handOut": {
+      "heading": "Uitgeven",
+      "who": "Aan wie?",
+      "whoHint": "Scan de kaart, of zoek op naam of klas.",
+      "noMatch": "Niemand gevonden. Is deze lezer actief?",
+      "change": "Iemand anders",
+      "dueDate": "Terug op",
+      "dueHint": "Niet verplicht. Leeg laten voor een toestel dat iemand het hele jaar houdt.",
+      "today": "Vandaag nog terug",
+      "submit": "Uitgeven aan {{name}}"
+    },
+    "holder": {
+      "heading": "Is bij",
+      "since": "Sinds {{date}}",
+      "condition": "Hoe komt het terug?",
+      "fine": "In orde",
+      "takeBack": "Terugnemen",
+      "markLost": "Als vermist noteren"
+    },
+    "history": {
+      "heading": "Geschiedenis",
+      "none": "Dit toestel werd nog aan niemand uitgegeven.",
+      "now": "nu",
+      "privacy": "Wie iets had, wordt gewist na de bewaartermijn uit de instellingen."
+    },
+    "labels": {
+      "heading": "Labels voor materiaal",
+      "link_one": "Labels ({{count}} te doen)",
+      "link_other": "Labels ({{count}} te doen)",
+      "printOne": "Label afdrukken",
+      "none": "Alle labels zijn afgedrukt.",
+      "waiting_one": "{{count}} label klaar om af te drukken.",
+      "waiting_other": "{{count}} labels klaar om af te drukken.",
+      "make": "PDF maken",
+      "confirmQuestion": "Is het afdrukken gelukt?",
+      "confirm": "Ja, afgedrukt",
+      "confirmed_one": "{{count}} label afgevinkt.",
+      "confirmed_other": "{{count}} labels afgevinkt."
     }
   }
 }

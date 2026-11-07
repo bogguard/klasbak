@@ -216,6 +216,24 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
       </fieldset>
 
       <fieldset className="space-y-3">
+        <legend className="mb-2 text-xl font-semibold">{t('settings.modules.heading')}</legend>
+        <label className="flex min-h-11 items-start gap-3">
+          <input
+            type="checkbox"
+            checked={values.modules.equipment}
+            onChange={(e) =>
+              change({ ...values, modules: { ...values.modules, equipment: e.target.checked } })
+            }
+            className="mt-1 size-4 accent-[var(--accent)]"
+          />
+          <span>
+            <span className="block font-medium">{t('settings.modules.equipment')}</span>
+            <span className="block text-sm text-muted">{t('settings.modules.equipmentHint')}</span>
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset className="space-y-3">
         <legend className="mb-2 text-xl font-semibold">{t('settings.privacy.heading')}</legend>
         <label className="block space-y-1.5">
           <span className="block text-sm font-medium">{t('settings.privacy.retention')}</span>

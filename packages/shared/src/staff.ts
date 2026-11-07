@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { text } from './catalog';
 
-export const STAFF_MEMBER_ROLES = ['admin', 'librarian'] as const;
+export const STAFF_MEMBER_ROLES = ['admin', 'librarian', 'equipment'] as const;
 export const StaffRoleSchema = z.enum(STAFF_MEMBER_ROLES);
 export type StaffRole = z.infer<typeof StaffRoleSchema>;
 

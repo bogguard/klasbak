@@ -2,9 +2,9 @@
 export default {
   lang: 'en',
   meta: {
-    title: 'Klasbak: the school library, simple at last',
+    title: 'Klasbak: solid, affordable software for your school',
     description:
-      'Open-source software for the school library: lending in two scans, a catalogue with real covers, labels, reader cards and statistics. In the browser, data in the EU, €10 a month.',
+      'Open-source software for schools. A school library that lends in two scans, with a catalogue with real covers, labels, reader cards and statistics. And an overview of your Chromebooks and other equipment. In the browser, data in the EU, €10 a month for everything.',
   },
   nav: {
     features: 'Features',
@@ -19,8 +19,8 @@ export default {
   },
   hero: {
     eyebrow: 'Open source · Made in Flanders',
-    title: 'The school library, simple at last.',
-    lead: 'Lending in two scans, a catalogue with real covers, labels and reader cards, and figures for the head teacher. All in the browser, ready to use.',
+    title: 'Software for your school, solid and affordable.',
+    lead: 'Klasbak starts with what every school needs: a school library that lends in two scans, and an overview of the Chromebooks and other equipment. All in the browser, ready to use, for one price.',
     primary: 'Get started with your school',
     secondary: 'See it in action',
     facts: ['€10 a month', 'Nothing to install', 'Data in the EU'],
@@ -30,7 +30,7 @@ export default {
     badgeText: 'Holidays are skipped automatically',
   },
   strip: [
-    { value: '2 scans', label: 'to lend a book' },
+    { value: '1 price', label: 'for the library and the equipment' },
     { value: '0', label: 'installs: it runs in the browser' },
     { value: 'EU', label: 'data in Europe, encrypted' },
     { value: 'MIT', label: 'open source, self-hosting welcome' },
@@ -106,6 +106,25 @@ export default {
       image: 'statistics',
       alt: 'The school year’s statistics with figures and a chart per month.',
     },
+    {
+      id: 'equipment',
+      kicker: 'For the ICT coordinator',
+      title: 'Know what equipment you have and where it is',
+      text: 'The school’s Chromebooks, tablets and chargers can go in too, if you like. See how many you have of each kind, and for every device where it is and how it’s doing. A new delivery is scanned in one go.',
+      points: [
+        'Scan the label or the serial number on the device to open its record',
+        'Filter on a place, like Cart A, for a quick check',
+        'Available, in repair, missing or withdrawn',
+        'An account of their own for the ICT coordinator, without access to the library',
+      ],
+      image: 'equipment',
+      video: {
+        config: 'equipmentYoutubeId',
+        target: 'video-materiaal',
+        label: 'Watch it in three minutes',
+      },
+      alt: 'The equipment overview: how many are free per kind, and below it every device with its place and status.',
+    },
   ],
   more: {
     title: 'And also',
@@ -144,6 +163,11 @@ export default {
     play: 'Play the webinar',
     playNote: 'The video comes from YouTube; it only loads when you press play.',
     soon: 'The webinar will be online soon.',
+    equipment: {
+      title: 'Equipment, in three minutes',
+      text: 'For the ICT coordinator: scanning in a delivery, printing labels, finding a device and checking a cart now and then. In Dutch, with Dutch subtitles.',
+      play: 'Play the webinar about equipment',
+    },
   },
   privacy: {
     kicker: 'Safe and privacy-friendly',
@@ -152,7 +176,7 @@ export default {
       { title: 'In Europe', text: 'Everything is stored in a data centre in Ireland, encrypted.' },
       {
         title: 'Only the team',
-        text: 'Whoever runs the library signs in with a password and a code on their phone.',
+        text: 'Whoever runs the library or the equipment signs in with a password and a code on their phone.',
       },
       {
         title: 'As little as possible',
@@ -183,7 +207,8 @@ export default {
         'Your own installation, with data in the EU',
         'Updates and security fixes',
         'Backups: any moment of the last 35 days',
-        'No limit on pupils or books',
+        'The school library and Equipment, and whatever comes next',
+        'No limit on pupils, books or devices',
         'Help by email',
         'Data processing agreement',
       ],
@@ -203,11 +228,11 @@ export default {
     steps: [
       {
         title: 'Send an email',
-        text: 'Tell us briefly about your library. Questions or a guided tour are welcome too.',
+        text: 'Tell us briefly about your school. Questions or a guided tour are welcome too.',
       },
       {
-        title: 'We set up your library',
-        text: 'With your school’s name and logo, and an account for whoever runs the library.',
+        title: 'We set up Klasbak',
+        text: 'With your school’s name and logo, and an account for whoever runs the library or the equipment.',
       },
       {
         title: 'Import and start lending',
@@ -241,6 +266,14 @@ export default {
         a: 'Importing from other library software isn’t available yet. Books with an ISBN are scanned in quickly: we look up the details and the cover for you.',
       },
       {
+        q: 'Can we keep track of our Chromebooks too?',
+        a: 'Yes. Switch on Equipment in the settings. You see what the school has and where it is. If a device goes home with a pupil, you can note that too.',
+      },
+      {
+        q: 'Will there be more?',
+        a: 'That’s the plan. Klasbak is made of modules you switch on when you need them, all for the same price. What comes first depends on what schools ask for. Got an idea? Email us.',
+      },
+      {
         q: 'Is it really open source?',
         a: 'Yes, under the MIT licence. You may read the source code, change it and host the app yourself.',
       },
@@ -256,7 +289,8 @@ export default {
     button: 'Email',
   },
   footer: {
-    tagline: 'Practical open-source tools for schools, starting with the school library.',
+    tagline:
+      'Solid, affordable open-source software for schools: the library, the equipment, and what comes next.',
     by: 'A project by',
     vat: 'VAT',
     source: 'Source code',

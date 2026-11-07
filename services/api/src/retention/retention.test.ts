@@ -41,6 +41,21 @@ describe('removeOldLoanHistory', () => {
     expect(deleted?.ConditionExpression).toBe('attribute_exists(returnedAt)');
   });
 
+  it('also deletes who had which piece of equipment, and only once it is back', async () => {
+    ddb.on(ScanCommand).resolves({
+      Items: [{ pk: 'READER#R1', sk: 'ASSIGNMENT#A1', returnedAt: '2025-03-20T10:00:00Z' }],
+    });
+
+    expect(await removeOldLoanHistory(new Date('2026-10-16T03:00:00Z'))).toBe(1);
+
+    const scan = ddb.commandCalls(ScanCommand)[0]?.args[0].input;
+    expect(scan?.FilterExpression).toContain('returnedAt < :cutoff');
+    expect(scan?.ExpressionAttributeValues?.[':assignment']).toBe('ASSIGNMENT#');
+    const deleted = ddb.commandCalls(DeleteCommand)[0]?.args[0].input;
+    expect(deleted?.Key).toEqual({ pk: 'READER#R1', sk: 'ASSIGNMENT#A1' });
+    expect(deleted?.ConditionExpression).toBe('attribute_exists(returnedAt)');
+  });
+
   it('uses the retention period from the settings', async () => {
     ddb.on(GetCommand).resolves({ Item: { historyRetentionDays: 30 } });
     ddb.on(ScanCommand).resolves({ Items: [] });

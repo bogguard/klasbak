@@ -6,7 +6,8 @@
 Practical open-source tools for schools, starting with the school library: a public catalogue
 with real covers, a lending desk with barcodes, readers, labels and reader cards, reminder slips
 and anonymous statistics, imports from school administrations (Informat, Wisa, Smartschool) and
-exchange collections from the public library. More tools (equipment lending, lost and found,
+exchange collections from the public library. A second module keeps track of Chromebooks and other
+equipment: what the school has and where it is. More tools (lost and found,
 maintenance requests, duty planning) are planned as modules of the same installation
 ([decision 036](docs/decisions.md), [roadmap](docs/features.md)). Dutch (Flemish) and English.
 Serverless on AWS, one installation per school, data in the EU.
@@ -103,9 +104,10 @@ The administrator then, in the app:
 - sets the library's name and logo (Instellingen → **Bibliotheek**), the loan rules and the days the
   library is closed (Instellingen);
 - adds colleagues who run the library (Beheer → **Medewerkers**);
-- adds the readers, one by one or imported from a spreadsheet (Lezers → **Importeren**): a list of
-  employees, members or, in a school, the pupils from Informat, Wisa or Smartschool;
-- prints reader cards and labels (**Labels**).
+- adds the readers, one by one or imported from a spreadsheet (Lezers → **Importeren**): the
+  pupils from Informat, Wisa or Smartschool;
+- prints reader cards and labels (**Labels**);
+- switches on **Materiaal** if the school wants it (Instellingen → **Modules**).
 
 ### A test environment
 
@@ -155,7 +157,7 @@ DNS records.
    ```
 
 3. **Point the address to the library** with the second DNS record:
-   `CNAME bib → <CloudFrontDomain>`, where `CloudFrontDomain` is printed by the deploy (or see
+   `CNAME klasbak → <CloudFrontDomain>`, where `CloudFrontDomain` is printed by the deploy (or see
    `aws cloudformation describe-stacks --region eu-west-1 --stack-name klasbak-prod --query "Stacks[0].Outputs" --output table`).
    Most DNS panels want the name without the domain and the value without a dot at the end.
 
@@ -230,6 +232,28 @@ skipped. Locally, set `GOOGLE_BOOKS_API_KEY` in the terminal before `npm run dev
     --username <name> --software-token-mfa-settings Enabled=false,PreferredMfa=false
   ```
 
+## Keeping track of equipment
+
+Switched on in Instellingen → **Modules**; the menu then shows **Materiaal**. It is off by default,
+and the API refuses requests while it is off. Give the ICT coordinator the role
+_materiaalbeheerder_ (Beheer → **Medewerkers**): they see this module and nothing of the library.
+
+- **The overview**: per kind, how many there are and how many are free; below it every item with
+  its place and status. Filter on a place or status, or search.
+- **A delivery**: Materiaal toevoegen, fill in what the items share, then scan or paste the serial
+  numbers, up to 200 at a time. A serial number that's already known is skipped, so pasting a list
+  twice is safe. Items without one (chargers) are added as a quantity.
+- **Labels**: new items wait under **Labels** on the Materiaal page, on the same sheets as books.
+- **Finding an item**: scan its label or the manufacturer's sticker in the search box.
+- **Checking a place**: filter on it (say Kar A) and compare the list with what's there. On the
+  item, set what's gone to _Vermist_ and correct the place of what has moved.
+- **Handing out** is optional, for a device that goes home with someone: open the item, scan the
+  card or search for the reader, optionally set a date. Taking back asks whether it returns fine,
+  needs repair or is missing. A school that only keeps stock never needs this.
+- **Privacy**: who had what shows on the reader's page, is part of the export and the erasure, and
+  is deleted after the retention period for reading history. See
+  [decision 039](docs/decisions.md).
+
 ## Local development
 
 Everything runs on your machine; no AWS account is needed. Requires Docker Desktop.
@@ -243,12 +267,12 @@ npm run seed        # once, in a second terminal: a small sample catalogue
 The local API runs the same code as the Lambdas. A small server
 ([services/api/src/local/server.ts](services/api/src/local/server.ts)) stands in for the AWS parts:
 
-| On AWS                                  | Locally                                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------------------ |
-| Cognito sign-in + API Gateway JWT check | Dev sign-in: header `Authorization: Dev librarian` (or `admin`, `teacher`, `reader`) |
-| DynamoDB                                | DynamoDB Local in Docker (data kept in a Docker volume)                              |
-| DynamoDB stream → search indexer Lambda | Index rebuilt right after each change                                                |
-| S3 + CloudFront for covers and search   | Files in `.local/public`, served by the local server                                 |
+| On AWS                                  | Locally                                                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Cognito sign-in + API Gateway JWT check | Dev sign-in: header `Authorization: Dev librarian` (or `admin`, `equipment`, `teacher`, `reader`) |
+| DynamoDB                                | DynamoDB Local in Docker (data kept in a Docker volume)                                           |
+| DynamoDB stream → search indexer Lambda | Index rebuilt right after each change                                                             |
+| S3 + CloudFront for covers and search   | Files in `.local/public`, served by the local server                                              |
 
 To work on the frontend against a deployed dev stack instead, put its `AppUrl` in
 `apps/web/.env.local` (see `.env.example`) and run `npm run dev`.
@@ -271,13 +295,15 @@ Bibliotheek) are kept. It refuses to run against AWS. Then it loads:
 - classes of pupils and a few teachers, all with made-up names, and one inactive reader;
 - loans since last March up to today, a few of them overdue now, so the statistics, the overdue
   list and the reminder slips have something to show;
+- Chromebooks, tablets and chargers (one late, one in repair, one missing, some awaiting a label);
 - a few damaged, missing and withdrawn copies, books waiting for a label, two exchange collections
   from the public library (in use until their return date, then returned with their book list) and
   the school holidays as closed days.
 
 Open http://localhost:5173, choose **Aanmelden** and sign in as a role (no password locally):
 **beheerder** (admin) sees everything, including Instellingen; **bibliothecaris** (librarian) the
-desk, catalogue, readers and statistics. Run `npm run demo` again to start from a clean demo; after
+desk, catalogue, readers, statistics and equipment; **materiaalbeheerder** (equipment) only the
+equipment. Run `npm run demo` again to start from a clean demo; after
 `docker compose down -v` the database is empty. To see the demo as on another day (e.g. to check a
 change in another season), run `DEMO_TODAY=2027-05-20 npm run demo`.
 
@@ -295,7 +321,7 @@ npm run typecheck && npm run lint && npm test && npm run validate:infra
 
 ## Costs
 
-At the scale of a school or office library the stack stays mostly within the AWS free tier.
+At the scale of a school the stack stays mostly within the AWS free tier.
 Expect a few euros per month, mainly CloudWatch and S3/CloudFront. There are no always-on resources
 (no NAT, no databases with minimum capacity, no OpenSearch). A budget alarm (`MonthlyBudgetUsd`)
 warns you before surprises.

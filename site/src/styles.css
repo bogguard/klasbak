@@ -653,6 +653,41 @@ a {
   margin-top: 10px;
   text-align: center;
 }
+.video-small {
+  max-width: 640px;
+  margin-top: 72px;
+  scroll-margin-top: 96px;
+}
+.video-small h3 {
+  margin-bottom: 18px;
+  text-align: center;
+}
+.video-small .play-button {
+  padding: 12px 20px;
+  font-size: 0.95rem;
+}
+@media (max-width: 560px) {
+  /* Small enough to stay below the title on the still. */
+  .play {
+    padding-bottom: 4% !important;
+  }
+  .play .play-button,
+  .video-small .play-button {
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}
+.feature-video {
+  margin-top: 22px;
+}
+.feature-video a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-weight: 700;
+}
 
 /* privacy */
 .section-dark {

@@ -3,7 +3,6 @@ import {
   matchReader,
   ReaderInputSchema,
   type ImportRowResult,
-  type Loan,
   type Reader,
   type ReaderInput,
 } from '@klasbak/shared';
@@ -19,7 +18,7 @@ export function listReaders(): Promise<Reader[]> {
   return repository.listReaders();
 }
 
-export async function getReader(readerId: string): Promise<{ reader: Reader; loans: Loan[] }> {
+export async function getReader(readerId: string) {
   const result = await repository.getReaderWithLoans(readerId);
   if (!result) throw new NotFoundError('Reader');
   return result;
@@ -85,13 +84,17 @@ export async function deleteReader(
   readerId: string,
   now = new Date(),
 ): Promise<void> {
-  const { reader, loans } = await getReader(readerId);
+  const { reader, loans, assignments } = await getReader(readerId);
   if (loans.some((loan) => !loan.returnedAt)) {
     throw new ConflictError('READER_HAS_LOANS', 'This reader still has books on loan');
+  }
+  if (assignments.some((assignment) => !assignment.returnedAt)) {
+    throw new ConflictError('READER_HAS_EQUIPMENT', 'This reader still has equipment');
   }
   await repository.deleteReaderAndHistory(
     reader,
     loans,
+    assignments,
     auditItem({ entity: `READER#${readerId}`, action: 'reader.deleted', actor }, now),
   );
   metrics.addMetric('ReaderDeleted', MetricUnit.Count, 1);
@@ -136,8 +139,8 @@ async function importRow(
   readers: Reader[],
 ): Promise<{ status: 'created' | 'updated'; reader: Reader }> {
   const pointer = input.memberNumber ? await getCodePointer(input.memberNumber) : undefined;
-  if (pointer?.kind === 'copy') {
-    throw new AppError(409, 'CODE_IN_USE', 'This number is used by a copy');
+  if (pointer && pointer.kind !== 'reader') {
+    throw new AppError(409, 'CODE_IN_USE', 'This number is used by a copy or equipment');
   }
   const existing = matchReader(input, readers);
   if (!existing) return { status: 'created', reader: await createReader(actor, input) };

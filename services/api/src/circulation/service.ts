@@ -66,6 +66,10 @@ export async function scan(
     return { outcome: 'reader', ...(await readerAtDesk(pointer.readerId)) };
   }
 
+  if (pointer.kind === 'asset') {
+    throw new AppError(409, 'CODE_IS_EQUIPMENT', 'This code belongs to equipment');
+  }
+
   const copy = await getItem<Copy>(copyKey(pointer.titleId, pointer.copyId));
   if (!copy) throw unknownCode(code);
 

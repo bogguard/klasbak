@@ -2,9 +2,9 @@
 export default {
   lang: 'nl-BE',
   meta: {
-    title: 'Klasbak: de schoolbib, eindelijk eenvoudig',
+    title: 'Klasbak: degelijke, betaalbare software voor je school',
     description:
-      'Open-source software voor de schoolbibliotheek: uitlenen met twee scans, een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. In de browser, gegevens in de EU, €10 per maand.',
+      'Open-source software voor de school. Een schoolbib die vlot uitleent, met een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. En een overzicht van de Chromebooks en ander materiaal. In de browser, gegevens in de EU, €10 per maand voor alles.',
   },
   nav: {
     features: 'Functies',
@@ -19,8 +19,8 @@ export default {
   },
   hero: {
     eyebrow: 'Open source · Gemaakt in Vlaanderen',
-    title: 'De schoolbib, eindelijk eenvoudig.',
-    lead: 'Uitlenen met twee scans, een catalogus met echte kaften, etiketten en lezerskaarten, en cijfers voor de directie. Alles in de browser, klaar om te gebruiken.',
+    title: 'Software voor je school, degelijk en betaalbaar.',
+    lead: 'Klasbak begint met wat elke school nodig heeft: een schoolbib die uitleent in twee scans, en een overzicht van de Chromebooks en ander materiaal. Alles in de browser, klaar om te gebruiken, voor één prijs.',
     primary: 'Starten met je school',
     secondary: 'Bekijk het in actie',
     facts: ['€10 per maand', 'Geen installatie', 'Gegevens in de EU'],
@@ -31,7 +31,7 @@ export default {
     badgeText: 'Vakanties tellen vanzelf niet mee',
   },
   strip: [
-    { value: '2 scans', label: 'om een boek uit te lenen' },
+    { value: '1 prijs', label: 'voor de schoolbib en het materiaal' },
     { value: '0', label: 'installaties: het werkt in de browser' },
     { value: 'EU', label: 'gegevens in Europa, versleuteld' },
     { value: 'MIT', label: 'open source, zelf hosten mag' },
@@ -107,6 +107,25 @@ export default {
       image: 'statistics',
       alt: 'De statistieken van het schooljaar met cijfers en een grafiek per maand.',
     },
+    {
+      id: 'materiaal',
+      kicker: 'Voor de ICT-coördinator',
+      title: 'Weten welk materiaal er is en waar het ligt',
+      text: 'Ook de Chromebooks, tablets en opladers van de school staan erin, als je dat wil. Per soort zie je hoeveel er zijn, en per toestel waar het ligt en hoe het ermee staat. Een nieuwe levering scan je in één keer in.',
+      points: [
+        'Scan het label of het serienummer op het toestel, en je hebt de fiche',
+        'Filter op een plaats, zoals Kar A, om snel te controleren',
+        'Beschikbaar, in herstelling, vermist of afgevoerd',
+        'Een eigen account voor de ICT-coördinator, zonder toegang tot de bib',
+      ],
+      image: 'equipment',
+      video: {
+        config: 'equipmentYoutubeId',
+        target: 'video-materiaal',
+        label: 'Bekijk het in drie minuten',
+      },
+      alt: 'Het overzicht van het materiaal: per soort hoeveel er vrij zijn, en daaronder elk toestel met zijn plaats en status.',
+    },
   ],
   more: {
     title: 'En verder',
@@ -145,6 +164,11 @@ export default {
     play: 'Speel de webinar af',
     playNote: 'De video komt van YouTube; die laden we pas als je op afspelen klikt.',
     soon: 'De webinar staat binnenkort online.',
+    equipment: {
+      title: 'Materiaal, in drie minuten',
+      text: 'Voor de ICT-coördinator: een levering inscannen, labels afdrukken, een toestel terugvinden en af en toe een kar controleren.',
+      play: 'Speel de webinar over Materiaal af',
+    },
   },
   privacy: {
     kicker: 'Veilig en privacyvriendelijk',
@@ -153,7 +177,7 @@ export default {
       { title: 'In Europa', text: 'Alles staat in een datacenter in Ierland en is versleuteld.' },
       {
         title: 'Alleen het team',
-        text: 'Wie de bib beheert, meldt aan met een wachtwoord en een code op de gsm.',
+        text: 'Wie de bib of het materiaal beheert, meldt aan met een wachtwoord en een code op de gsm.',
       },
       {
         title: 'Zo weinig mogelijk',
@@ -184,7 +208,8 @@ export default {
         'Een eigen installatie, met gegevens in de EU',
         'Updates en beveiligingsfixes',
         'Back-ups: elk moment van de laatste 35 dagen',
-        'Geen limiet op leerlingen of boeken',
+        'De schoolbib en Materiaal, en wat er nog bijkomt',
+        'Geen limiet op leerlingen, boeken of toestellen',
         'Hulp per e-mail',
         'Verwerkersovereenkomst',
       ],
@@ -204,11 +229,11 @@ export default {
     steps: [
       {
         title: 'Stuur een mailtje',
-        text: 'Vertel kort over jullie bib. Vragen stellen of een rondleiding vragen mag ook.',
+        text: 'Vertel kort over jullie school. Vragen stellen of een rondleiding vragen mag ook.',
       },
       {
-        title: 'Wij zetten jullie bib klaar',
-        text: 'Met de naam en het logo van je school, en een account voor wie de bib beheert.',
+        title: 'Wij zetten Klasbak klaar',
+        text: 'Met de naam en het logo van je school, en een account voor wie de bib of het materiaal beheert.',
       },
       {
         title: 'Importeer en leen uit',
@@ -242,6 +267,14 @@ export default {
         a: 'Een import uit een ander bibliotheekprogramma zit er nog niet in. Boeken met een ISBN scan je snel in: de gegevens en de kaft zoeken we voor je op.',
       },
       {
+        q: 'Kunnen we er ook onze Chromebooks in bijhouden?',
+        a: 'Ja. Zet Materiaal aan in de instellingen. Je ziet wat de school heeft en waar het ligt. Geef je een toestel mee aan een leerling, dan kan je ook dat noteren.',
+      },
+      {
+        q: 'Komt er nog meer bij?',
+        a: 'Dat is de bedoeling. Klasbak bestaat uit modules die je aanzet als je ze nodig hebt, allemaal voor dezelfde prijs. Wat er eerst komt, hangt af van wat scholen vragen. Een idee? Mail het ons.',
+      },
+      {
         q: 'Is het echt open source?',
         a: 'Ja, onder de MIT-licentie. Je mag de broncode bekijken, aanpassen en de app zelf hosten.',
       },
@@ -257,7 +290,8 @@ export default {
     button: 'Mail naar',
   },
   footer: {
-    tagline: 'Praktische open-source tools voor de school, te beginnen met de schoolbibliotheek.',
+    tagline:
+      'Degelijke, betaalbare open-source software voor de school: de schoolbib, het materiaal, en wat nog volgt.',
     by: 'Een project van',
     vat: 'btw',
     source: 'Broncode',

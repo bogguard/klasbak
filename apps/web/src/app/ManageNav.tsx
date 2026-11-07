@@ -3,6 +3,7 @@ import {
   BarChart3,
   BookCopy,
   ClipboardList,
+  Laptop,
   ScanBarcode,
   Settings2,
   Tags,
@@ -11,7 +12,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import { useIsAdmin } from '../lib/auth';
+import { useSettings } from '../features/circulation/api';
+import { useIsAdmin, useIsLibraryStaff } from '../lib/auth';
 
 const items = [
   { to: '/manage/desk', key: 'desk', icon: ScanBarcode },
@@ -19,6 +21,7 @@ const items = [
   { to: '/manage', key: 'collection', icon: BookCopy, end: true },
   { to: '/manage/exchanges', key: 'exchanges', icon: ArrowLeftRight },
   { to: '/manage/readers', key: 'readers', icon: Users },
+  { to: '/manage/equipment', key: 'equipment', icon: Laptop, module: true },
   { to: '/manage/labels', key: 'labels', icon: Tags },
   { to: '/manage/statistics', key: 'statistics', icon: BarChart3 },
   { to: '/manage/settings', key: 'settings', icon: Settings2, adminOnly: true },
@@ -29,6 +32,8 @@ const items = [
 export function ManageNav() {
   const { t } = useTranslation();
   const isAdmin = useIsAdmin();
+  const isLibraryStaff = useIsLibraryStaff();
+  const equipmentOn = useSettings().data?.modules.equipment ?? false;
   return (
     <nav
       aria-label={t('manageNav.label')}
@@ -36,7 +41,9 @@ export function ManageNav() {
     >
       <ul className="flex min-w-max gap-1 border-b border-line">
         {items
-          .filter((item) => isAdmin || !('adminOnly' in item))
+          .filter((item) =>
+            'module' in item ? equipmentOn : isLibraryStaff && (isAdmin || !('adminOnly' in item)),
+          )
           .map(({ to, key, icon: Icon, ...rest }) => (
             <li key={key}>
               <NavLink

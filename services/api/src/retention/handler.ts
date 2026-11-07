@@ -11,7 +11,8 @@ import { logger, metrics } from '../lib/observability';
 /*
  * Runs daily (see the template). Reading history is personal data, so returned loans older
  * than the retention period (a library setting) are deleted. Statistics don't need them:
- * every loan was already counted anonymously when it was lent (decision 028).
+ * every loan was already counted anonymously when it was lent (decision 028). Who had which
+ * piece of equipment follows the same rule (decision 039).
  *
  * A full table scan is fine at school scale (tens of thousands of items, a fraction of a cent).
  */
@@ -34,8 +35,13 @@ export async function removeOldLoanHistory(now = new Date()): Promise<number> {
     const page: ScanCommandOutput = await db.send(
       new ScanCommand({
         TableName: env.tableName,
-        FilterExpression: 'begins_with(sk, :loan) AND returnedAt < :cutoff',
-        ExpressionAttributeValues: { ':loan': 'LOAN#', ':cutoff': cutoff },
+        FilterExpression:
+          '(begins_with(sk, :loan) OR begins_with(sk, :assignment)) AND returnedAt < :cutoff',
+        ExpressionAttributeValues: {
+          ':loan': 'LOAN#',
+          ':assignment': 'ASSIGNMENT#',
+          ':cutoff': cutoff,
+        },
         ExclusiveStartKey: startKey,
       }),
     );
@@ -47,7 +53,7 @@ export async function removeOldLoanHistory(now = new Date()): Promise<number> {
   return removed;
 }
 
-/** Deletes one returned loan; false when it was already gone (e.g. a retried run). */
+/** Deletes one returned loan or assignment; false when it was already gone (e.g. a retried run). */
 async function removeLoan(loan: Item & Loan): Promise<boolean> {
   try {
     await db.send(

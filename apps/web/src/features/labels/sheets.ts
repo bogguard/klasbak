@@ -107,3 +107,18 @@ export function labelPositions(
     };
   });
 }
+
+export const LABEL_OFFSET_KEY = 'label-offset';
+
+/** The printer's adjustment, remembered on this computer. */
+export function storedLabelOffset(): { x: number; y: number } {
+  try {
+    const value = JSON.parse(localStorage.getItem(LABEL_OFFSET_KEY) ?? '{}') as {
+      x?: number;
+      y?: number;
+    };
+    return { x: Number(value.x) || 0, y: Number(value.y) || 0 };
+  } catch {
+    return { x: 0, y: 0 };
+  }
+}

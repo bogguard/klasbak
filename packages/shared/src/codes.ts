@@ -5,6 +5,7 @@
  *
  *   Book        123456 000042    12 digits: Code 128 prints digit pairs compactly
  *   Reader card L 123456 000123  the "L" keeps cards and books apart at a glance
+ *   Equipment   M 123456 000007  the "M" of materiaal, with its own counter
  *
  * Codes typed or imported by the school (e.g. labels from a previous library program) keep
  * whatever form they have.
@@ -31,10 +32,14 @@ export function memberNumber(institutionNumber: string, n: number): string {
   return `L${institutionNumber}${sequence(n)}`;
 }
 
+export function assetBarcode(institutionNumber: string, n: number): string {
+  return `M${institutionNumber}${sequence(n)}`;
+}
+
 /** The school a generated code belongs to, or undefined for codes Klasbak didn't make. */
 export function institutionNumberOf(code: string): string | undefined {
   if (/^\d{12}$/.test(code)) return code.slice(0, 6);
-  if (/^L\d{12}$/.test(code)) return code.slice(1, 7);
+  if (/^[LM]\d{12}$/.test(code)) return code.slice(1, 7);
   return undefined;
 }
 

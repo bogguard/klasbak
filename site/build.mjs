@@ -107,17 +107,32 @@ function page(t, lang) {
         <h3>${esc(f.title)}</h3>
         <p>${esc(f.text)}</p>
         <ul class="checks">${f.points.map((p) => `<li>${svg('check')}${esc(p)}</li>`).join('')}</ul>
+        ${f.video && config[f.video.config] ? `<p class="feature-video"><a href="#${f.video.target}">${svg('play')}${esc(f.video.label)}</a></p>` : ''}
       </div>
       <div class="feature-shot">${shot(f.image, f.alt, lang)}</div>
     </article>`;
 
-  const webinar = config.youtubeId
-    ? `<button type="button" class="play" data-youtube="${esc(config.youtubeId)}" data-title="${esc(t.video.play)}">
-         ${has('img/webinar.jpg') ? `<img src="${asset('img/webinar.jpg')}" alt="" loading="lazy" decoding="async">` : ''}
-         <span class="play-button">${svg('play')}<span>${esc(t.video.play)}</span></span>
+  // A YouTube video behind a play button with its still (img/<still>.jpg); "coming soon" without an id.
+  const player = (id, still, play) => {
+    const image = has(`img/${still}.jpg`)
+      ? `<img src="${asset(`img/${still}.jpg`)}" alt="" loading="lazy" decoding="async">`
+      : '';
+    return id
+      ? `<button type="button" class="play" data-youtube="${esc(id)}" data-title="${esc(play)}">
+         ${image}
+         <span class="play-button">${svg('play')}<span>${esc(play)}</span></span>
        </button>
        <p class="small">${esc(t.video.playNote)}</p>`
-    : `<div class="soon">${has('img/webinar.jpg') ? `<img src="${asset('img/webinar.jpg')}" alt="" loading="lazy" decoding="async">` : ''}<p>${esc(t.video.soon)}</p></div>`;
+      : `<div class="soon">${image}<p>${esc(t.video.soon)}</p></div>`;
+  };
+  const webinar = player(config.youtubeId, 'webinar', t.video.play);
+  const equipmentWebinar = config.equipmentYoutubeId
+    ? `<figure class="video video-small" id="video-materiaal">
+        <h3>${esc(t.video.equipment.title)}</h3>
+        ${player(config.equipmentYoutubeId, 'materiaal-webinar', t.video.equipment.play)}
+        <figcaption>${esc(t.video.equipment.text)}</figcaption>
+      </figure>`
+    : '';
 
   return `<!doctype html>
 <html lang="${t.lang}">
@@ -222,6 +237,7 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
         ${webinar}
         <figcaption>${esc(t.video.webinar)}</figcaption>
       </figure>
+      ${equipmentWebinar}
     </div>
   </section>
 
