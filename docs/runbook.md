@@ -28,8 +28,14 @@ days in prod, 7 in dev.
   next Node.js LTS (`Runtime` in `infra/template.yaml`); try a backup restore in the test account
   (below); check with the school that the retention period (Instellingen) is still right.
 
-- **When a school switches on Materiaal:** make sure the data processing agreement mentions it
+- **When a school switches on Materiaal:** make sure its signed data processing agreement
+  ([current version](legal/verwerkersovereenkomst.md)) mentions it
   first (`modules.equipment` in the settings, decision 039). Who had which device is personal data.
+- **When a school switches on Schoolfoto’s:** its signed data processing agreement must cover photos of
+  pupils first, and a hired photographer is a processor of the school (`modules.photos`, decision
+  040). Photos are deleted by the nightly job (the same alarms as the reading history apply); the
+  photos bucket (`PhotosBucketName` output) also expires anything older than 400 days, as a safety
+  net. Deleting the stack keeps the bucket (it's retained): empty it by hand.
 
 ## Alarms
 

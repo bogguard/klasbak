@@ -23,7 +23,8 @@ python3 -m http.server 8090 -d site/dist  # http://localhost:8090 and /en/
 ```
 
 New screenshots after an app change (with `npm run dev:local` running; macOS, uses Quick Look
-for the PDFs):
+for the PDFs; book covers need an internet connection). The school photos shot uploads drawn
+portraits (never real children) to the demo's photo day, once; the English run reuses them:
 
 ```bash
 npm run demo && node site/scripts/screenshots.mjs

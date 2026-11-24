@@ -20,7 +20,15 @@ export const LIBRARY_LABEL_FORMATS: ScanFormat[] = [
 ];
 
 export type Detector = {
-  detect(source: HTMLVideoElement): Promise<{ rawValue: string; format: string }[]>;
+  /** A video frame at the desk, or a photo that was drawn on a canvas. */
+  detect(source: HTMLVideoElement | HTMLCanvasElement): Promise<DetectedCode[]>;
+};
+
+/** Where in the image a code was found, when the reader says. */
+export type DetectedCode = {
+  rawValue: string;
+  format: string;
+  boundingBox?: { x: number; y: number; width: number; height: number };
 };
 
 type NativeDetectorClass = {
@@ -36,8 +44,14 @@ export async function createDetector(formats: ScanFormat[]): Promise<Detector> {
   const native = (window as unknown as { BarcodeDetector?: NativeDetectorClass }).BarcodeDetector;
   if (native) {
     const supported: string[] = await native.getSupportedFormats().catch(() => []);
-    if (formats.every((format) => supported.includes(format))) return new native({ formats });
+    if (formats.every((format) => supported.includes(format))) {
+      return withFallback(new native({ formats }), formats);
+    }
   }
+  return zxingDetector(formats);
+}
+
+async function zxingDetector(formats: ScanFormat[]): Promise<Detector> {
   const { BarcodeDetector, prepareZXingModule } = await import('barcode-detector/ponyfill');
   prepareZXingModule({
     overrides: {
@@ -46,6 +60,26 @@ export async function createDetector(formats: ScanFormat[]): Promise<Detector> {
     },
   });
   return new BarcodeDetector({ formats });
+}
+
+/**
+ * Some browsers offer a built-in detector whose service isn't there (Chrome without the
+ * system's barcode service): then every detect() fails. The first failure switches to the
+ * WebAssembly reader for good, instead of silently reading nothing.
+ */
+function withFallback(native: Detector, formats: ScanFormat[]): Detector {
+  let fallback: Promise<Detector> | undefined;
+  return {
+    async detect(source) {
+      if (fallback) return (await fallback).detect(source);
+      try {
+        return await native.detect(source);
+      } catch {
+        fallback = zxingDetector(formats);
+        return (await fallback).detect(source);
+      }
+    },
+  };
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   type ReaderInput,
 } from '@klasbak/shared';
 import { ulid } from 'ulid';
+import { deleteReaderPhotos } from '../photos/service';
 import { auditItem } from '../lib/audit';
 import type { Actor } from '../lib/auth';
 import { getCodePointer } from '../lib/dynamo';
@@ -91,6 +92,8 @@ export async function deleteReader(
   if (assignments.some((assignment) => !assignment.returnedAt)) {
     throw new ConflictError('READER_HAS_EQUIPMENT', 'This reader still has equipment');
   }
+  // Photos first: if this fails the reader is still there, and erasing again finishes it.
+  await deleteReaderPhotos(readerId);
   await repository.deleteReaderAndHistory(
     reader,
     loans,

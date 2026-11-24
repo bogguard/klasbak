@@ -6,8 +6,9 @@ export const ReaderCategorySchema = z.enum(READER_CATEGORIES);
 export type ReaderCategory = z.infer<typeof ReaderCategorySchema>;
 
 /*
- * Only what the library needs (privacy by design): no birth dates, addresses or photos.
- * Email is optional; most pupils won't have one.
+ * Only what the library needs (privacy by design): no birth dates or addresses. Email is
+ * optional; most pupils won't have one. School photos are kept apart, per photo day, and
+ * deleted with it (decision 040); the reader record never holds a photo.
  */
 export const ReaderInputSchema = z
   .object({

@@ -27,7 +27,7 @@ export const LibrarySettingsInputSchema = z
     /** Returned loans are removed (anonymised) after this many days: reading history is personal. */
     historyRetentionDays: z.number().int().min(30).max(3650),
     /** Modules the school uses (decision 036). The library is always on, for now. */
-    modules: z.object({ equipment: z.boolean() }).strict(),
+    modules: z.object({ equipment: z.boolean(), photos: z.boolean() }).strict(),
   })
   .strict();
 export type LibrarySettingsInput = z.infer<typeof LibrarySettingsInputSchema>;
@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: LibrarySettings = {
     teacher: { loanDays: 28, maxLoans: 10 },
   },
   historyRetentionDays: 365,
-  modules: { equipment: false },
+  modules: { equipment: false, photos: false },
   version: 0,
 };
 

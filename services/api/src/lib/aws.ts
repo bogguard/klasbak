@@ -19,6 +19,10 @@ export const env = {
   get webBucket() {
     return required('WEB_BUCKET');
   },
+  /** Private: school photos, reached only through short-lived links (decision 040). */
+  get photosBucket() {
+    return required('PHOTOS_BUCKET');
+  },
   /** The school's instellingsnummer, the start of every code we generate (decision 038). */
   get institutionNumber() {
     const value = required('INSTITUTION_NUMBER');

@@ -7,7 +7,7 @@ import {
   ScanRequestSchema,
   UpdateSettingsRequestSchema,
 } from '@klasbak/shared';
-import { ADMIN, EQUIPMENT, requireRole, STAFF } from '../lib/auth';
+import { ADMIN, MANAGEMENT, requireRole, STAFF } from '../lib/auth';
 import { createApp, getActor, parse, readJson, toLambdaHandler } from '../lib/http';
 import * as branding from '../branding/service';
 import { exportPage } from '../export/service';
@@ -50,7 +50,7 @@ app.get('/statistics', async (c) => {
 
 // Every staff role reads these: the menu shows the modules that are switched on.
 app.get('/settings', async (c) => {
-  requireRole(getActor(c), EQUIPMENT);
+  requireRole(getActor(c), MANAGEMENT);
   return c.json(await circulation.getSettings());
 });
 

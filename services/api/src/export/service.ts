@@ -42,6 +42,11 @@ function classify(item: Item): ExportRecord | undefined {
   if (pk.startsWith('ASSET#') && sk === 'ASSET') return { kind: 'asset', data: stripKeys(item) };
   if (pk.startsWith('READER#') && sk.startsWith('ASSIGNMENT#'))
     return { kind: 'assignment', data: stripKeys(item) };
+  // Photo days and what each photo is (not the files, nor the download codes).
+  if (pk.startsWith('PHOTODAY#') && sk === 'PHOTODAY')
+    return { kind: 'photoDay', data: stripKeys(item) };
+  if (pk.startsWith('PHOTODAY#') && sk.startsWith('PHOTO#'))
+    return { kind: 'photo', data: stripKeys(item) };
   if (pk === 'SETTINGS' && sk === 'LIBRARY') return { kind: 'settings', data: stripKeys(item) };
   return undefined;
 }

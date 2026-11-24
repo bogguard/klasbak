@@ -6,6 +6,10 @@ export default defineConfig({
     env: {
       TABLE_NAME: 'test-table',
       WEB_BUCKET: 'test-bucket',
+      PHOTOS_BUCKET: 'test-photos',
+      // Signed links are made locally (no request), but need credentials to sign with.
+      AWS_ACCESS_KEY_ID: 'test',
+      AWS_SECRET_ACCESS_KEY: 'test',
       POWERTOOLS_METRICS_NAMESPACE: 'KlasbakTest',
       INSTITUTION_NUMBER: '012345',
       POWERTOOLS_DEV: 'true',

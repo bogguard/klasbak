@@ -7,22 +7,31 @@ import { getSettings } from '../circulation/repository';
 import { db, env } from '../lib/aws';
 import type { Item } from '../lib/dynamo';
 import { logger, metrics } from '../lib/observability';
+import { removeExpiredPhotoDays } from '../photos/service';
 
 /*
  * Runs daily (see the template). Reading history is personal data, so returned loans older
  * than the retention period (a library setting) are deleted. Statistics don't need them:
  * every loan was already counted anonymously when it was lent (decision 028). Who had which
- * piece of equipment follows the same rule (decision 039).
+ * piece of equipment follows the same rule (decision 039). School photos are deleted, files and
+ * all, after the last day parents could download them, or when the school deleted the photo
+ * day (decision 040).
  *
  * A full table scan is fine at school scale (tens of thousands of items, a fraction of a cent).
  */
-export async function handler(_event: unknown, context?: Context): Promise<{ removed: number }> {
+export async function handler(
+  _event: unknown,
+  context?: Context,
+): Promise<{ removed: number; photoDaysRemoved: number }> {
   if (context) logger.addContext(context);
   const removed = await removeOldLoanHistory();
   logger.info('loan history cleaned up', { removed });
   metrics.addMetric('LoansAnonymised', MetricUnit.Count, removed);
+  const photoDaysRemoved = await removeExpiredPhotoDays();
+  logger.info('photo days cleaned up', { photoDaysRemoved });
+  metrics.addMetric('PhotoDaysRemoved', MetricUnit.Count, photoDaysRemoved);
   metrics.publishStoredMetrics();
-  return { removed };
+  return { removed, photoDaysRemoved };
 }
 
 export async function removeOldLoanHistory(now = new Date()): Promise<number> {

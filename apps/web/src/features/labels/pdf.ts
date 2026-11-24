@@ -61,7 +61,7 @@ export function fit(doc: jsPDF, raw: string, maxWidth: number): string {
 }
 
 /** Draws a barcode centred in a box, with bars no wider than `maxModule` millimetres. */
-function drawBarcode(
+export function drawBarcode(
   doc: jsPDF,
   code: string,
   box: { x: number; y: number; width: number; height: number },

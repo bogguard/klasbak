@@ -4,7 +4,7 @@ export default {
   meta: {
     title: 'Klasbak: solid, affordable software for your school',
     description:
-      'Open-source software for schools. A school library that lends in two scans, with a catalogue with real covers, labels, reader cards and statistics. And an overview of your Chromebooks and other equipment. In the browser, data in the EU, €10 a month for everything.',
+      'Open-source software for schools. A school library that lends in two scans, with a catalogue with real covers, labels, reader cards and statistics. An overview of your Chromebooks and other equipment. And school photos in your own hands, affordable for school and parents. In the browser, data in the EU, €10 a month; school photos €50 a school year extra.',
   },
   nav: {
     features: 'Features',
@@ -20,7 +20,7 @@ export default {
   hero: {
     eyebrow: 'Open source · Made in Flanders',
     title: 'Software for your school, solid and affordable.',
-    lead: 'Klasbak starts with what every school needs: a school library that lends in two scans, and an overview of the Chromebooks and other equipment. All in the browser, ready to use, for one price.',
+    lead: 'Klasbak starts with what every school needs: a school library that lends in two scans, an overview of the Chromebooks and other equipment, and school photos in your own hands. All in the browser, ready to use, for a fixed monthly price.',
     primary: 'Get started with your school',
     secondary: 'See it in action',
     facts: ['€10 a month', 'Nothing to install', 'Data in the EU'],
@@ -30,7 +30,7 @@ export default {
     badgeText: 'Holidays are skipped automatically',
   },
   strip: [
-    { value: '1 price', label: 'for the library and the equipment' },
+    { value: '€10', label: 'a month for the library and the equipment' },
     { value: '0', label: 'installs: it runs in the browser' },
     { value: 'EU', label: 'data in Europe, encrypted' },
     { value: 'MIT', label: 'open source, self-hosting welcome' },
@@ -125,6 +125,21 @@ export default {
       },
       alt: 'The equipment overview: how many are free per kind, and below it every device with its place and status.',
     },
+    {
+      id: 'school-photos',
+      kicker: 'Photo day',
+      title: 'School photos, affordable for school and parents',
+      text: 'The whole platform for school photos is included: take the photos yourselves, or hire a photographer to take them. Upload the whole memory card at once: a photo of the pupil card or the class list before the portraits puts every photo with the right pupil. Parents get a slip with a code and download the original photos. What that costs is up to the school.',
+      points: [
+        'Class lists with a barcode per pupil and a code for the class photo',
+        'Per class you see who has a photo; moving a photo is typing a name',
+        'Pupils who may not be photographed are skipped',
+        'Location and camera details are removed; everything is deleted after the date you pick',
+        '€50 a school year extra, only if you use the module',
+      ],
+      image: 'photos',
+      alt: 'Checking a photo day: the progress per class, the class photo and the portraits of each pupil.',
+    },
   ],
   more: {
     title: 'And also',
@@ -176,11 +191,11 @@ export default {
       { title: 'In Europe', text: 'Everything is stored in a data centre in Ireland, encrypted.' },
       {
         title: 'Only the team',
-        text: 'Whoever runs the library or the equipment signs in with a password and a code on their phone.',
+        text: 'Whoever runs the library, the equipment or the school photos signs in with a password and a code on their phone.',
       },
       {
         title: 'As little as possible',
-        text: 'No date of birth, address or photo. An email address isn’t needed.',
+        text: 'No date of birth or address. An email address isn’t needed. School photos only if the school uses that module, and they are deleted automatically.',
       },
       {
         title: 'Removed automatically',
@@ -198,7 +213,7 @@ export default {
   },
   price: {
     kicker: 'Price',
-    title: 'One price, everything included',
+    title: 'A fixed price, no surprises',
     hosted: {
       name: 'Klasbak',
       per: 'a month, per school',
@@ -207,7 +222,8 @@ export default {
         'Your own installation, with data in the EU',
         'Updates and security fixes',
         'Backups: any moment of the last 35 days',
-        'The school library and Equipment, and whatever comes next',
+        'The school library and Equipment',
+        'School photos: €50 a school year extra, if you use the module',
         'No limit on pupils, books or devices',
         'Help by email',
         'Data processing agreement',
@@ -232,7 +248,7 @@ export default {
       },
       {
         title: 'We set up Klasbak',
-        text: 'With your school’s name and logo, and an account for whoever runs the library or the equipment.',
+        text: 'With your school’s name and logo, and an account for whoever runs the library, the equipment or the school photos.',
       },
       {
         title: 'Import and start lending',
@@ -270,8 +286,12 @@ export default {
         a: 'Yes. Switch on Equipment in the settings. You see what the school has and where it is. If a device goes home with a pupil, you can note that too.',
       },
       {
+        q: 'Can we take our school photos ourselves?',
+        a: 'Yes. Switch on School photos in the settings. You take the photos yourselves, or a photographer takes them and uploads them with an account of their own. Parents download the original files with the code on their slip, until the date you pick. After that, the photos are deleted. Whether parents pay, and how much, is up to the school. The module costs €50 a school year extra, however many photo days you hold.',
+      },
+      {
         q: 'Will there be more?',
-        a: 'That’s the plan. Klasbak is made of modules you switch on when you need them, all for the same price. What comes first depends on what schools ask for. Got an idea? Email us.',
+        a: 'That’s the plan. Klasbak is made of modules you switch on when you need them. What comes first depends on what schools ask for. Got an idea? Email us.',
       },
       {
         q: 'Is it really open source?',
@@ -290,7 +310,7 @@ export default {
   },
   footer: {
     tagline:
-      'Solid, affordable open-source software for schools: the library, the equipment, and what comes next.',
+      'Solid, affordable open-source software for schools: the library, the equipment, the school photos and what comes next.',
     by: 'A project by',
     vat: 'VAT',
     source: 'Source code',

@@ -17,6 +17,7 @@ const UI = {
     reminders: /herinneringsbriefje/i,
     preview: 'Controleer voor je importeert',
     group: 'Klas',
+    uploaded: /Klaar: \d+ foto/,
   },
   en: {
     cards: 'Reader cards',
@@ -24,6 +25,7 @@ const UI = {
     reminders: /reminder slip/i,
     preview: 'Check before importing',
     group: 'Class',
+    uploaded: /Done: \d+ photo/,
   },
 }[LANG];
 const OUT = 'site/src/img';
@@ -211,5 +213,183 @@ await shot(await open(`/manage/titles/${damaged}`, { height: 700 }), 'copies');
 }
 
 await shot(await open('/manage/equipment', { role: 'equipment', height: 700 }), 'equipment');
+
+// School photos: illustrated portraits (never real children), uploaded through the app to the
+// demo's photo day, which is then opened to parents. Only once: the English run reuses them.
+{
+  const admin = async (path, method, body) =>
+    fetch(BASE + path, {
+      method,
+      headers: { authorization: 'Dev admin', 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  const [day] = await get('/api/photos/days', 'admin');
+  if (!day) throw new Error('Run `npm run demo` first');
+  const detail = await get(`/api/photos/days/${day.id}`, 'admin');
+  const pupils = await get('/api/photos/pupils', 'admin');
+  const noPhoto = new Set(detail.pupils.filter((p) => p.noPhoto).map((p) => p.readerId));
+  const byClass = Object.groupBy(
+    pupils.filter((p) => p.group),
+    (p) => p.group,
+  );
+  // The class with the "may not be photographed" pupil shows the most of the page.
+  const group =
+    pupils.find((p) => noPhoto.has(p.id))?.group ??
+    Object.keys(byClass).sort((a, b) => byClass[b].length - byClass[a].length)[0];
+  const inClass = byClass[group].sort((a, b) => a.lastName.localeCompare(b.lastName, 'nl'));
+  if (detail.photos.length === 0) {
+    const page = await open('/', { role: 'admin' });
+    const pictures = await page.evaluate(drawPictures, inClass.length);
+    await page.context().close();
+    const upload = async (query, files) => {
+      const up = await open(`/manage/photos/${day.id}/upload?${query}`, { role: 'admin' });
+      await up.locator('input[type=file]').setInputFiles(
+        files.map((data, i) => ({
+          name: `IMG_${1000 + i}.JPG`,
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from(data, 'base64'),
+        })),
+      );
+      await up.getByText(UI.uploaded).waitFor({ timeout: 60000 });
+      await up.context().close();
+    };
+    // Everyone but the last pupil (who missed the photo day) and the one without consent.
+    const photographed = inClass.filter((p) => !noPhoto.has(p.id)).slice(0, -1);
+    for (const [i, pupil] of photographed.entries()) {
+      await upload(`reader=${pupil.id}`, pictures.portraits.slice(i * 2, i * 2 + 2));
+    }
+    await upload(`group=${encodeURIComponent(group)}`, [pictures.group]);
+    const until = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+    await admin(`/api/photos/days/${day.id}`, 'PUT', {
+      name: day.name,
+      takenOn: day.takenOn,
+      open: true,
+      availableUntil: until,
+    });
+  }
+  const page = await open(`/manage/photos/${day.id}?class=${encodeURIComponent(group)}`, {
+    role: 'admin',
+    height: 760,
+  });
+  await page.waitForTimeout(800);
+  await page.evaluate(() => {
+    const review = document.getElementById('review');
+    if (review) window.scrollTo(0, review.getBoundingClientRect().top + window.scrollY - 24);
+  });
+  await shot(page, 'photos');
+}
+
+/**
+ * Friendly flat illustrations, drawn in the browser as JPEG (base64): two portraits per pupil
+ * (the same child, a slightly different pose) and one class photo. Same input, same pictures.
+ */
+function drawPictures(pupils) {
+  let seed = 7;
+  const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pick = (list) => list[Math.floor(random() * list.length)];
+  const skins = ['#f3d2b6', '#e8b896', '#c98f6a', '#a86d4a', '#7a4b31', '#f7dcc6'];
+  const hairs = ['#2b1d16', '#4a2f1f', '#7b4a26', '#c8913f', '#e2c07a', '#1c1c1c'];
+  const shirts = ['#2f6f73', '#c8553d', '#3d5a80', '#e0a458', '#6b8f71', '#8e6c8a', '#d1495b'];
+  const backgrounds = [
+    ['#dfe7ec', '#b9c7d1'],
+    ['#ece4da', '#cdbca8'],
+    ['#e3e8e1', '#bccab7'],
+  ];
+  const look = () => ({
+    skin: pick(skins),
+    hair: pick(hairs),
+    shirt: pick(shirts),
+    style: Math.floor(random() * 4),
+  });
+  function person(c, x, y, size, { skin, hair, shirt, style }, smile = 0.17) {
+    // Shoulders and shirt.
+    c.fillStyle = shirt;
+    c.beginPath();
+    c.ellipse(x, y + size * 1.55, size * 1.05, size * 0.75, 0, Math.PI, 0);
+    c.fill();
+    // Long hair behind the head.
+    c.fillStyle = hair;
+    if (style === 2 || style === 3) {
+      c.beginPath();
+      c.ellipse(x, y + size * 0.35, size * 0.62, size * 0.85, 0, 0, Math.PI * 2);
+      c.fill();
+    }
+    // Neck and head.
+    c.fillStyle = skin;
+    c.fillRect(x - size * 0.17, y + size * 0.4, size * 0.34, size * 0.5);
+    c.beginPath();
+    c.ellipse(x, y, size * 0.48, size * 0.58, 0, 0, Math.PI * 2);
+    c.fill();
+    // Hair on top.
+    c.fillStyle = hair;
+    c.beginPath();
+    if (style === 1) {
+      for (let a = 0; a < 9; a++) {
+        const angle = Math.PI + (a / 8) * Math.PI;
+        c.moveTo(x, y);
+        c.arc(
+          x + Math.cos(angle) * size * 0.42,
+          y - size * 0.18 + Math.sin(angle) * size * 0.42,
+          size * 0.16,
+          0,
+          Math.PI * 2,
+        );
+      }
+    } else {
+      c.ellipse(x, y - size * 0.22, size * 0.52, size * 0.42, 0, Math.PI, 0);
+    }
+    c.fill();
+    // Eyes and a smile.
+    c.fillStyle = '#2b2420';
+    for (const dx of [-0.17, 0.17]) {
+      c.beginPath();
+      c.arc(x + dx * size, y + size * 0.02, size * 0.045, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.strokeStyle = '#8a4b3a';
+    c.lineWidth = size * 0.035;
+    c.lineCap = 'round';
+    c.beginPath();
+    c.arc(x, y + size * 0.14, size * smile, Math.PI * 0.15, Math.PI * 0.85);
+    c.stroke();
+  }
+  function picture(width, height, background, draw) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const c = canvas.getContext('2d');
+    const [light, dark] = background;
+    const gradient = c.createRadialGradient(
+      width / 2,
+      height * 0.4,
+      0,
+      width / 2,
+      height * 0.4,
+      height,
+    );
+    gradient.addColorStop(0, light);
+    gradient.addColorStop(1, dark);
+    c.fillStyle = gradient;
+    c.fillRect(0, 0, width, height);
+    draw(c);
+    return canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+  }
+  const portraits = Array.from({ length: pupils }, () => {
+    const child = look();
+    const background = pick(backgrounds);
+    return [
+      picture(900, 1200, background, (c) => person(c, 450, 520, 330, child)),
+      picture(900, 1200, background, (c) => person(c, 470, 500, 350, child, 0.2)),
+    ];
+  }).flat();
+  const group = picture(1800, 1200, pick(backgrounds), (c) => {
+    for (let row = 0; row < 2; row++) {
+      for (let i = 0; i < 6; i++) {
+        person(c, 230 + i * 268 + (row ? 0 : 74), 420 + row * 360, 120, look());
+      }
+    }
+  });
+  return { portraits, group };
+}
 
 await browser.close();

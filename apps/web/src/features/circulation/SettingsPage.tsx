@@ -231,6 +231,20 @@ function SettingsForm({ settings }: { settings: LibrarySettings }) {
             <span className="block text-sm text-muted">{t('settings.modules.equipmentHint')}</span>
           </span>
         </label>
+        <label className="flex min-h-11 items-start gap-3">
+          <input
+            type="checkbox"
+            checked={values.modules.photos}
+            onChange={(e) =>
+              change({ ...values, modules: { ...values.modules, photos: e.target.checked } })
+            }
+            className="mt-1 size-4 accent-[var(--accent)]"
+          />
+          <span>
+            <span className="block font-medium">{t('settings.modules.photos')}</span>
+            <span className="block text-sm text-muted">{t('settings.modules.photosHint')}</span>
+          </span>
+        </label>
       </fieldset>
 
       <fieldset className="space-y-3">

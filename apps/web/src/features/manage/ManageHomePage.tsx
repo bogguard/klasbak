@@ -1,14 +1,18 @@
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router';
-import { useIsLibraryStaff } from '../../lib/auth';
+import { useAuth, useIsLibraryStaff } from '../../lib/auth';
 import { SearchPage } from '../catalog/SearchPage';
 
 /** The staff starting point: find a title to manage, or add a new one. */
 export function ManageHomePage() {
   const { t } = useTranslation();
-  // The ICT coordinator's starting point is the stock, not the library.
-  if (!useIsLibraryStaff()) return <Navigate to="/manage/equipment" replace />;
+  const isLibraryStaff = useIsLibraryStaff();
+  const photographer = useAuth().session?.roles.includes('photographer') ?? false;
+  // The ICT coordinator starts at the stock, the photographer at the photo days.
+  if (!isLibraryStaff) {
+    return <Navigate to={photographer ? '/manage/photos' : '/manage/equipment'} replace />;
+  }
   return (
     <SearchPage
       heading={t('manage.heading')}

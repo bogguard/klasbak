@@ -55,6 +55,7 @@ Globals:
       Variables:
         TABLE_NAME: !Ref Table
         WEB_BUCKET: !Ref WebBucket
+        PHOTOS_BUCKET: !Ref PhotosBucket
         USER_POOL_ID: !Ref UserPool
         INSTITUTION_NUMBER: !Ref InstitutionNumber
         # Staff must use two-step verification; the API checks it (services/api/src/lib/mfa.ts).
@@ -175,6 +176,9 @@ Resources:
   EquipmentGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties: { UserPoolId: !Ref UserPool, GroupName: equipment, Precedence: 4 }
+  PhotographerGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: { UserPoolId: !Ref UserPool, GroupName: photographer, Precedence: 5 }
 
   # ---------------------------------------------------------------- API
 
@@ -184,6 +188,12 @@ Resources:
       DefaultRouteSettings:
         ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50
+      # Parents' download codes can't be guessed (about 60 bits), but nobody needs to try
+      # more than a few a second either. Enough for a whole school opening its slips at once.
+      RouteSettings:
+        'POST /api/photos/public/access':
+          ThrottlingBurstLimit: 40
+          ThrottlingRateLimit: 20
       AccessLogSettings:
         DestinationArn: !GetAtt ApiAccessLogGroup.Arn
         # No IP addresses or paths: they can identify pupils (privacy by design).
@@ -262,6 +272,10 @@ Resources:
             - Effect: Allow
               Action: cognito-idp:AdminGetUser
               Resource: !GetAtt UserPool.Arn
+            # Erasing a reader erases their school photos too.
+            - Effect: Allow
+              Action: s3:DeleteObject
+              Resource: !Sub ${PhotosBucket.Arn}/*
       Events:
         Staff:
           Type: HttpApi
@@ -342,6 +356,51 @@ Resources:
     Properties:
       RetentionInDays: !If [IsProd, 30, 7]
 
+  PhotosFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: School photos (photo days, uploads, download codes) and parents' downloads
+      CodeUri: ../services/api/dist/photos
+      Handler: handler.handler
+      # Making the download codes for a whole school writes one item per pupil.
+      Timeout: 25
+      LoggingConfig:
+        LogGroup: !Ref PhotosLogGroup
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: cognito-idp:AdminGetUser
+              Resource: !GetAtt UserPool.Arn
+            # Signed links carry these rights: uploading, viewing and downloading photos.
+            - Effect: Allow
+              Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+              Resource: !Sub ${PhotosBucket.Arn}/*
+            # Without it, a file that isn't there answers "access denied" instead of "not found".
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt PhotosBucket.Arn
+      Events:
+        ParentsAccess:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/photos/public/access
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        Staff:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/photos/{proxy+}
+            Method: ANY
+
+  PhotosLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !If [IsProd, 30, 7]
+
   StaffFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -390,7 +449,7 @@ Resources:
   RetentionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: Daily removal of old reading history (privacy), kept as anonymous counts
+      Description: Daily removal of old reading history and expired school photos (privacy)
       CodeUri: ../services/api/dist/retention
       Handler: handler.handler
       Timeout: 300
@@ -398,6 +457,13 @@ Resources:
         LogGroup: !Ref RetentionLogGroup
       Policies:
         - DynamoDBCrudPolicy: { TableName: !Ref Table }
+        - Statement:
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt PhotosBucket.Arn
+            - Effect: Allow
+              Action: s3:DeleteObject
+              Resource: !Sub ${PhotosBucket.Arn}/*
       Events:
         Nightly:
           Type: ScheduleV2
@@ -505,6 +571,59 @@ Resources:
             Condition:
               Bool: { aws:SecureTransport: false }
 
+  # School photos (decision 040): private, never behind CloudFront. Browsers reach a file only
+  # with a signed link from the API that works for minutes (upload) or an hour (download).
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      # The app's pages upload with fetch. Any origin: the signed link is the permission, and
+      # naming the site here would make a loop (the site's CSP names this bucket).
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET, POST]
+            AllowedOrigins: ['*']
+            AllowedHeaders: ['*']
+            MaxAge: 3600
+      LifecycleConfiguration:
+        Rules:
+          # A safety net: the nightly job deletes a photo day when it ends (at the latest at
+          # the end of the school year), so nothing should ever get this old.
+          - Id: expire-forgotten-photos
+            Status: Enabled
+            ExpirationInDays: 400
+            AbortIncompleteMultipartUpload: { DaysAfterInitiation: 1 }
+      Tags:
+        - { Key: project, Value: klasbak }
+        - { Key: environment, Value: !Ref Environment }
+
+  PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PhotosBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: TlsOnly
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: [!GetAtt PhotosBucket.Arn, !Sub '${PhotosBucket.Arn}/*']
+            Condition:
+              Bool: { aws:SecureTransport: false }
+
   WebOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -543,11 +662,13 @@ Resources:
             # 'wasm-unsafe-eval' lets the camera barcode reader run WebAssembly (no JS eval).
             # The extra image hosts are only used by staff to preview a cover found by ISBN
             # lookup; the public catalogue only shows covers from our own bucket (decision 008).
+            # Blob URLs show photos the browser is preparing; the photos bucket is where school
+            # photos are shown from and uploaded to (decision 040).
             ContentSecurityPolicy: !Sub >-
               default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline';
-              img-src 'self' data: https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com;
+              img-src 'self' data: blob: https://${PhotosBucket.RegionalDomainName} https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com;
               font-src 'self';
-              connect-src 'self' https://cognito-idp.${AWS::Region}.amazonaws.com;
+              connect-src 'self' https://cognito-idp.${AWS::Region}.amazonaws.com https://${PhotosBucket.RegionalDomainName};
               frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
           StrictTransportSecurity:
             Override: true
@@ -743,7 +864,7 @@ Resources:
               { "type": "metric", "x": 12, "y": 5, "width": 12, "height": 6, "properties": { "title": "API response time (ms)", "region": "${AWS::Region}", "period": 300, "metrics": [ [ "AWS/ApiGateway", "Latency", "ApiId", "${HttpApi}", "Stage", "$default", { "stat": "p50", "label": "median" } ], [ "...", { "stat": "p95", "label": "95th percentile" } ] ] } },
               { "type": "metric", "x": 0, "y": 11, "width": 12, "height": 6, "properties": { "title": "Function errors and throttles", "region": "${AWS::Region}", "stat": "Sum", "period": 300, "metrics": [ [ { "expression": "SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" klasbak-${Environment}', 'Sum', 300)", "label": "", "id": "errors" } ], [ "AWS/Lambda", "Throttles", { "label": "throttles" } ], [ "AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "${DlqName}", { "stat": "Maximum", "label": "search index dead-letter queue" } ] ] } },
               { "type": "metric", "x": 12, "y": 11, "width": 12, "height": 6, "properties": { "title": "Library activity per day", "region": "${AWS::Region}", "stat": "Sum", "period": 86400, "view": "bar", "metrics": [ [ { "expression": "SEARCH('{Klasbak,service} MetricName=\"LoanCreated\" OR MetricName=\"LoanReturned\" OR MetricName=\"LoanReturnedOverdue\" OR MetricName=\"TitleCreated\" OR MetricName=\"ReaderCreated\"', 'Sum', 86400)", "label": "", "id": "activity" } ] ] } },
-              { "type": "log", "x": 0, "y": 17, "width": 24, "height": 8, "properties": { "title": "Latest errors and warnings", "region": "${AWS::Region}", "view": "table", "query": "SOURCE '${CatalogLogs}' | SOURCE '${ReadersLogs}' | SOURCE '${CirculationLogs}' | SOURCE '${EquipmentLogs}' | SOURCE '${StaffLogs}' | SOURCE '${RetentionLogs}' | SOURCE '${IndexerLogs}' | fields @timestamp, level, message, function_name, error.message, function_request_id | filter level in ['ERROR', 'WARN'] | sort @timestamp desc | limit 50" } }
+              { "type": "log", "x": 0, "y": 17, "width": 24, "height": 8, "properties": { "title": "Latest errors and warnings", "region": "${AWS::Region}", "view": "table", "query": "SOURCE '${CatalogLogs}' | SOURCE '${ReadersLogs}' | SOURCE '${CirculationLogs}' | SOURCE '${EquipmentLogs}' | SOURCE '${PhotosLogs}' | SOURCE '${StaffLogs}' | SOURCE '${RetentionLogs}' | SOURCE '${IndexerLogs}' | fields @timestamp, level, message, function_name, error.message, function_request_id | filter level in ['ERROR', 'WARN'] | sort @timestamp desc | limit 50" } }
             ]
           }
         - ApiAlarm: !GetAtt ApiServerErrorsAlarm.Arn
@@ -756,6 +877,7 @@ Resources:
           CatalogLogs: !Ref CatalogLogGroup
           ReadersLogs: !Ref ReadersLogGroup
           EquipmentLogs: !Ref EquipmentLogGroup
+          PhotosLogs: !Ref PhotosLogGroup
           CirculationLogs: !Ref CirculationLogGroup
           StaffLogs: !Ref StaffLogGroup
           RetentionLogs: !Ref RetentionLogGroup
@@ -888,6 +1010,8 @@ Outputs:
     Value: !Ref Distribution
   WebBucketName:
     Value: !Ref WebBucket
+  PhotosBucketName:
+    Value: !Ref PhotosBucket
   UserPoolId:
     Value: !Ref UserPool
   UserPoolClientId:

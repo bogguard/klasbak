@@ -16,7 +16,12 @@ import {
 
 export async function getSettings(): Promise<LibrarySettings> {
   // Defaults first, so settings saved before a new option existed still get a value for it.
-  return { ...DEFAULT_SETTINGS, ...(await getItem<LibrarySettings>(settingsKey)) };
+  const stored = await getItem<LibrarySettings>(settingsKey);
+  return {
+    ...DEFAULT_SETTINGS,
+    ...stored,
+    modules: { ...DEFAULT_SETTINGS.modules, ...stored?.modules },
+  };
 }
 
 export async function saveSettings(

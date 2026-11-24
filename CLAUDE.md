@@ -21,15 +21,15 @@ The layout from the skill (section 3), with these domain areas:
 
 ```
 apps/web/src/features/   catalog, manage (titles and copies), exchange, circulation (desk, loans, kiosk,
-                         settings), equipment, readers, labels, statistics, staff, export, auth
-services/api/src/        catalog, circulation, equipment, readers, staff (API functions); search-indexer, retention (jobs);
+                         settings), equipment, photos, readers, labels, statistics, staff, export, auth
+services/api/src/        catalog, circulation, equipment, photos, readers, staff (API functions); search-indexer, retention (jobs);
                          branding, export (used by the circulation function), exchange (used by the
                          catalog function); local/ (local dev server)
-packages/shared/src/     one file per domain: auth, branding, catalog, circulation, codes, equipment, exchange, export,
+packages/shared/src/     one file per domain: auth, branding, catalog, circulation, codes, equipment, exchange, export, photos,
                          isbn, readers, search, staff
 infra/                   template.yaml, samconfig.toml ([dev] and [prod])
 scripts/                 build-api.mjs, deploy-web.sh, request-certificate.sh
-docs/                    features.md, decisions.md
+docs/                    features.md, decisions.md, runbook.md; legal/ (the agreements with schools, in Dutch)
 site/                    the product site at klasbak.itrw.be (static, own stack; site/README.md)
 ```
 
@@ -62,35 +62,48 @@ Local development: the API runs as plain Hono apps on Node (`services/api/src/lo
 ## Users, roles and privacy
 
 - **Personas**: the librarian at the desk with a queue of children; a pupil (often young) at the "Mijn boeken" screen; the school's administrator a few times a year; the class teacher handing out reminder slips; parents and pupils browsing the public catalogue on a phone.
-- **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics, equipment), `equipment` (only the equipment module, e.g. the ICT coordinator). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin`, `librarian` and `equipment`, enforced by the API.
-- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional school number (stamboeknummer, only to recognise pupils in imports; never printed), optional email; their loans and the equipment they were given. No birth dates, addresses or photos. Staff: name, username, optional email, role.
+- **Roles** (Cognito groups): `admin` (everything, including settings, staff accounts and the full export), `librarian` (desk, catalogue, readers, labels, statistics, equipment), `equipment` (only the equipment module, e.g. the ICT coordinator), `photographer` (only uploading and sorting school photos; opening them to parents, consent and download codes stay with `admin`). `teacher` and `reader` exist for later; readers have no login yet (decision 013). Two-step verification is required for `admin`, `librarian`, `equipment` and `photographer`, enforced by the API.
+- **Personal data collected**: readers' first and last name, class, category (pupil/teacher), card number, optional school number (stamboeknummer, only to recognise pupils in imports; never printed), optional email; their loans and the equipment they were given; school photos (portraits and class photos, without EXIF/GPS) when the school uses that module, deleted after the date it picked (at the latest the end of the school year, decision 040). No birth dates or addresses. Staff: name, username, optional email, role.
+- **Parents** reach school photos only with the personal code on a printed slip (`/fotos`, no account); signed S3 links, never public files.
 - **Third parties** receive only ISBNs (book lookups); covers are stored on our own server, so visitors never contact them.
 - **Statistics** are anonymous counters (month, title, class), never per pupil.
-- **Privacy notice**: `/privacy`, in plain Dutch for parents and children. A data processing agreement (verwerkersovereenkomst) exists between the school and ITRW; keep the app consistent with what it promises (e.g. retention, MFA, dependency checks).
+- **Privacy notice**: `/privacy`, in plain Dutch for parents and children. The data processing agreement between the school and ITRW is `docs/legal/verwerkersovereenkomst.md`; keep the app consistent with what it promises (e.g. retention, MFA, dependency checks).
 - **Region**: `eu-west-1`; one AWS account per installation (school) and one for testing.
+
+## Legal documents
+
+`docs/legal/` holds the agreements a school signs, in Dutch (they are for schools, so the English-only rule doesn't apply): `verwerkersovereenkomst.md` (data processing, GDPR art. 28) and `samenwerkingsovereenkomst.md` (service, price, support). The repository is the source; the copies in Claude Docs are not kept in sync.
+
+- **Update them in the same change** as the code when it alters what they promise: which personal data is kept (art. 3) or for how long, who can see it (roles, MFA, a new module), subprocessors or where data is stored (art. 5, 9), security measures (art. 6), export or erasure (art. 8, 11), or what the service includes. A new module is all of these: describe it in art. 2 and add its data to art. 3.
+- Set the "Versie van …" line to the date of the change. Fields between square brackets (`[naam]`) are filled in per school; leave them.
+- They are drafts reviewed by the school's DPO or a lawyer: change what the code changed, plainly and precisely, and nothing else. Mention the change in the PR description, since signed agreements may need an addendum.
+- Keep `/privacy` (`privacy.*` in the locales) saying the same in plain words.
 
 ## Domain glossary (code → UI nl-BE)
 
-| Code (EN)            | UI (nl-BE)                          | Meaning                                                 |
-| -------------------- | ----------------------------------- | ------------------------------------------------------- |
-| Title                | Titel / Werk                        | Bibliographic record (book, magazine, DVD, game…)       |
-| Copy                 | Exemplaar                           | Physical item with its own barcode                      |
-| Collection           | Collectie / Deelcollectie           | Grouping of copies (e.g. per campus, classroom library) |
-| Reader               | Ontlener / Lezer                    | Person who borrows (pupil, teacher, staff)              |
-| Group                | Klas / Groep                        | Class or group of readers                               |
-| Loan                 | Uitlening                           | A copy lent to a reader                                 |
-| Check-out / Check-in | Uitlenen / Terugbrengen (inleveren) | Desk actions                                            |
-| Renewal              | Verlenging                          | Extending a loan                                        |
-| Reservation          | Reservatie                          | Reader waiting for a title                              |
-| Loan policy          | Uitleenreglement                    | Rules: loan period, max items, renewals, fines          |
-| Fine                 | Boete                               | Fee for late return                                     |
-| Reminder             | Herinnering / Aanmaning             | Overdue notice                                          |
-| Reading level        | Leesniveau (AVI, ZIZO)              | Reading level classification                            |
-| Theme list           | Themalijst                          | Curated list of titles                                  |
-| New acquisitions     | Aanwinsten                          | Recently added titles                                   |
-| Closed day           | Sluitingsdag                        | Day the library is closed (affects due dates)           |
-| Asset                | Materiaal / Toestel                 | One item of equipment, with its own label               |
-| Assignment           | Uitgifte (uitgeven / terugnemen)    | An asset handed to a reader, often for a whole year     |
+| Code (EN)              | UI (nl-BE)                          | Meaning                                                 |
+| ---------------------- | ----------------------------------- | ------------------------------------------------------- |
+| Title                  | Titel / Werk                        | Bibliographic record (book, magazine, DVD, game…)       |
+| Copy                   | Exemplaar                           | Physical item with its own barcode                      |
+| Collection             | Collectie / Deelcollectie           | Grouping of copies (e.g. per campus, classroom library) |
+| Reader                 | Ontlener / Lezer                    | Person who borrows (pupil, teacher, staff)              |
+| Group                  | Klas / Groep                        | Class or group of readers                               |
+| Loan                   | Uitlening                           | A copy lent to a reader                                 |
+| Check-out / Check-in   | Uitlenen / Terugbrengen (inleveren) | Desk actions                                            |
+| Renewal                | Verlenging                          | Extending a loan                                        |
+| Reservation            | Reservatie                          | Reader waiting for a title                              |
+| Loan policy            | Uitleenreglement                    | Rules: loan period, max items, renewals, fines          |
+| Fine                   | Boete                               | Fee for late return                                     |
+| Reminder               | Herinnering / Aanmaning             | Overdue notice                                          |
+| Reading level          | Leesniveau (AVI, ZIZO)              | Reading level classification                            |
+| Theme list             | Themalijst                          | Curated list of titles                                  |
+| New acquisitions       | Aanwinsten                          | Recently added titles                                   |
+| Closed day             | Sluitingsdag                        | Day the library is closed (affects due dates)           |
+| Asset                  | Materiaal / Toestel                 | One item of equipment, with its own label               |
+| Assignment             | Uitgifte (uitgeven / terugnemen)    | An asset handed to a reader, often for a whole year     |
+| Photo day              | Fotodag                             | One round of school photos, with its own end date       |
+| Photo (portrait/class) | Portret / Klasfoto                  | A photo of one pupil, or of a whole class               |
+| Access code            | Code (op het strookje)              | What a parent types or scans to download the photos     |
 
 ## Domain rules to keep in mind
 

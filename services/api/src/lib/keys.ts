@@ -18,6 +18,14 @@
  *   Asset         pk ASSET#<assetId>    sk ASSET          gsi1: ASSETS / <assetId>
  *   Assignment    pk READER#<readerId>  sk ASSIGNMENT#<id> gsi1: ASSET#<assetId> / <id>
  *                 In the reader's partition, like loans: erasing a reader erases these too.
+ *   Photo day     pk PHOTODAY#<dayId>   sk PHOTODAY       gsi1: PHOTODAYS / <dayId>
+ *   Photo         pk PHOTODAY#<dayId>   sk PHOTO#<photoId> gsi1 once it has an owner:
+ *                                                         PHOTOS#<dayId>#R#<readerId> (portrait) or
+ *                                                         PHOTOS#<dayId>#G#<class> (class photo) / <photoId>
+ *   Photo pupil   pk PHOTODAY#<dayId>   sk PUPIL#<readerId> { noPhoto, code }
+ *   Photo code    pk PHOTOCODE#<code>   sk PHOTOCODE      { photoDayId, readerId }
+ *                 Everything of a photo day is in its partition, so deleting the day (and its
+ *                 files, under <dayId>/ in the photos bucket) leaves nothing behind (decision 040).
  *   Settings      pk SETTINGS           sk LIBRARY
  *   Branding      pk SETTINGS           sk BRANDING      name and logo, also published as a file
  *   Counter       pk COUNTER            sk <name>        last generated number
@@ -53,6 +61,20 @@ export const assignmentKey = (readerId: string, assignmentId: string) => ({
 });
 export const assetHistoryIndexPk = (assetId: string) => `ASSET#${assetId}`;
 
+export const photoDayKey = (dayId: string) => ({ pk: `PHOTODAY#${dayId}`, sk: 'PHOTODAY' });
+export const photoKey = (dayId: string, photoId: string) => ({
+  pk: `PHOTODAY#${dayId}`,
+  sk: `PHOTO#${photoId}`,
+});
+export const photoPupilKey = (dayId: string, readerId: string) => ({
+  pk: `PHOTODAY#${dayId}`,
+  sk: `PUPIL#${readerId}`,
+});
+export const photoCodeKey = (code: string) => ({ pk: `PHOTOCODE#${code}`, sk: 'PHOTOCODE' });
+export const pupilPhotosIndexPk = (dayId: string, readerId: string) =>
+  `PHOTOS#${dayId}#R#${readerId}`;
+export const classPhotosIndexPk = (dayId: string, group: string) => `PHOTOS#${dayId}#G#${group}`;
+
 /** Counter for loans in a month (Brussels time), in total or per title or class. */
 export const statsKey = (month: string, sk: string) => ({ pk: `STATS#${month}`, sk });
 
@@ -65,6 +87,7 @@ export const exchangeCopiesIndexPk = (exchangeId: string) => `EXCHANGE#${exchang
 
 export const READERS_INDEX_PK = 'READERS';
 export const ASSETS_INDEX_PK = 'ASSETS';
+export const PHOTO_DAYS_INDEX_PK = 'PHOTODAYS';
 export const ACTIVE_LOANS_INDEX_PK = 'LOANS#ACTIVE';
 export const PENDING_LABELS_INDEX_PK = 'LABELS#PENDING';
 export const GSI1 = 'gsi1';

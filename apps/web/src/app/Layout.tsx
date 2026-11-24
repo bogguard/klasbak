@@ -1,4 +1,4 @@
-import { Library, LogIn, LogOut, Settings } from 'lucide-react';
+import { LogIn, LogOut, School, Settings } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router';
@@ -44,7 +44,7 @@ export function Layout() {
               // The name is right next to it, so the logo itself is decorative.
               <img src={`/${logoKey}`} alt="" className="h-9 w-auto max-w-28 object-contain" />
             ) : (
-              <Library className="size-6 shrink-0 text-accent" aria-hidden="true" />
+              <School className="size-6 shrink-0 text-accent" aria-hidden="true" />
             )}
             <span className="truncate font-display text-xl">{libraryName}</span>
           </Link>
