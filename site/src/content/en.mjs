@@ -138,6 +138,11 @@ export default {
         '€50 a school year extra, only if you use the module',
       ],
       image: 'photos',
+      video: {
+        config: 'photosYoutubeId',
+        target: 'video-schoolfotos',
+        label: 'See it in three and a half minutes',
+      },
       alt: 'Checking a photo day: the progress per class, the class photo and the portraits of each pupil.',
     },
   ],
@@ -182,6 +187,11 @@ export default {
       title: 'Equipment, in three minutes',
       text: 'For the ICT coordinator: scanning in a delivery, printing labels, finding a device and checking a cart now and then. In Dutch, with Dutch subtitles.',
       play: 'Play the webinar about equipment',
+    },
+    photos: {
+      title: 'School photos, in three and a half minutes',
+      text: 'From class list to slip: taking the photos, uploading the whole memory card, checking, and opening them to parents. In Dutch, with Dutch subtitles.',
+      play: 'Play the webinar about school photos',
     },
   },
   privacy: {

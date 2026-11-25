@@ -139,6 +139,11 @@ export default {
         '€50 per schooljaar extra, alleen als je de module gebruikt',
       ],
       image: 'photos',
+      video: {
+        config: 'photosYoutubeId',
+        target: 'video-schoolfotos',
+        label: 'Bekijk het in drie en een halve minuut',
+      },
       alt: 'Een fotodag nakijken: per klas de voortgang, de klasfoto en de portretten van elke leerling.',
     },
   ],
@@ -183,6 +188,11 @@ export default {
       title: 'Materiaal, in drie minuten',
       text: 'Voor de ICT-coördinator: een levering inscannen, labels afdrukken, een toestel terugvinden en af en toe een kar controleren.',
       play: 'Speel de webinar over Materiaal af',
+    },
+    photos: {
+      title: 'Schoolfoto’s, in drie en een halve minuut',
+      text: 'Van klaslijst tot strookje: fotograferen, de hele geheugenkaart opladen, nakijken en openzetten voor de ouders.',
+      play: 'Speel de webinar over Schoolfoto’s af',
     },
   },
   privacy: {
