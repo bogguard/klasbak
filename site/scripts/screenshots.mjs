@@ -2,7 +2,7 @@
 // With `npm run dev:local` running:  npm run demo && node site/scripts/screenshots.mjs
 // SITE_LANG=en takes the English app (files named *-en.jpg) for the English page.
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 
@@ -214,8 +214,10 @@ await shot(await open(`/manage/titles/${damaged}`, { height: 700 }), 'copies');
 
 await shot(await open('/manage/equipment', { role: 'equipment', height: 700 }), 'equipment');
 
-// School photos: illustrated portraits (never real children), uploaded through the app to the
-// demo's photo day, which is then opened to parents. Only once: the English run reuses them.
+// School photos: made-up people (never real children), uploaded through the app to the demo's
+// photo day, which is then opened to parents. Pictures made with AI in video/photos (local, see
+// video/README.md) are used when they are there, otherwise drawings.
+// Only once: the English run reuses them.
 {
   const admin = async (path, method, body) =>
     fetch(BASE + path, {
@@ -232,14 +234,13 @@ await shot(await open('/manage/equipment', { role: 'equipment', height: 700 }), 
     pupils.filter((p) => p.group),
     (p) => p.group,
   );
-  // The class with the "may not be photographed" pupil shows the most of the page.
-  const group =
-    pupils.find((p) => noPhoto.has(p.id))?.group ??
-    Object.keys(byClass).sort((a, b) => byClass[b].length - byClass[a].length)[0];
-  const inClass = byClass[group].sort((a, b) => a.lastName.localeCompare(b.lastName, 'nl'));
+  // Ill on the photo day: that class shows the most of the page.
+  const absent = pupils.find((p) => p.firstName === 'Seppe' && !noPhoto.has(p.id));
+  if (!absent) throw new Error('Run `npm run demo` first');
+  const group = absent.group;
   if (detail.photos.length === 0) {
     const page = await open('/', { role: 'admin' });
-    const pictures = await page.evaluate(drawPictures, inClass.length);
+    const drawn = await page.evaluate(drawPictures, pupils.length);
     await page.context().close();
     const upload = async (query, files) => {
       const up = await open(`/manage/photos/${day.id}/upload?${query}`, { role: 'admin' });
@@ -253,12 +254,29 @@ await shot(await open('/manage/equipment', { role: 'equipment', height: 700 }), 
       await up.getByText(UI.uploaded).waitFor({ timeout: 60000 });
       await up.context().close();
     };
-    // Everyone but the last pupil (who missed the photo day) and the one without consent.
-    const photographed = inClass.filter((p) => !noPhoto.has(p.id)).slice(0, -1);
-    for (const [i, pupil] of photographed.entries()) {
-      await upload(`reader=${pupil.id}`, pictures.portraits.slice(i * 2, i * 2 + 2));
+    const slug = (text) =>
+      text
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+    const picture = (name, fallback) => {
+      const file = join('video/photos', `${name}.jpg`);
+      return existsSync(file) ? readFileSync(file).toString('base64') : fallback;
+    };
+    for (const [i, pupil] of pupils.entries()) {
+      if (noPhoto.has(pupil.id) || pupil === absent) continue;
+      const name = slug(`${pupil.firstName} ${pupil.lastName}`);
+      await upload(
+        `reader=${pupil.id}`,
+        [1, 2].map((take) => picture(`${name}-${take}`, drawn.portraits[i * 2 + take - 1])),
+      );
     }
-    await upload(`group=${encodeURIComponent(group)}`, [pictures.group]);
+    for (const name of Object.keys(byClass)) {
+      await upload(`group=${encodeURIComponent(name)}`, [
+        picture(`klas-${slug(name)}`, drawn.group),
+      ]);
+    }
     const until = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
     await admin(`/api/photos/days/${day.id}`, 'PUT', {
       name: day.name,
