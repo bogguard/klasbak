@@ -9,6 +9,8 @@ export const config = {
   youtubeId: 'C4mgS-DkCsQ',
   // The short webinar about Materiaal (the equipment module), shown below the tour.
   equipmentYoutubeId: 'nw4dn-Ha5ZI',
+  // The short webinar about Schoolfoto’s, below the one about Materiaal.
+  photosYoutubeId: 'nsIJ17ecYDk',
   company: {
     name: 'InTheRealWorld BV',
     address: 'Burgemeester Van Ackerwijk A 39, 9240 Zele',

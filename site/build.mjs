@@ -126,13 +126,27 @@ function page(t, lang) {
       : `<div class="soon">${image}<p>${esc(t.video.soon)}</p></div>`;
   };
   const webinar = player(config.youtubeId, 'webinar', t.video.play);
-  const equipmentWebinar = config.equipmentYoutubeId
-    ? `<figure class="video video-small" id="video-materiaal">
-        <h3>${esc(t.video.equipment.title)}</h3>
-        ${player(config.equipmentYoutubeId, 'materiaal-webinar', t.video.equipment.play)}
-        <figcaption>${esc(t.video.equipment.text)}</figcaption>
+  // A module's own short webinar; left out until it is on YouTube.
+  const moduleWebinar = (id, target, still, text) =>
+    id
+      ? `<figure class="video video-small" id="${target}">
+        <h3>${esc(text.title)}</h3>
+        ${player(id, still, text.play)}
+        <figcaption>${esc(text.text)}</figcaption>
       </figure>`
-    : '';
+      : '';
+  const equipmentWebinar = moduleWebinar(
+    config.equipmentYoutubeId,
+    'video-materiaal',
+    'materiaal-webinar',
+    t.video.equipment,
+  );
+  const photosWebinar = moduleWebinar(
+    config.photosYoutubeId,
+    'video-schoolfotos',
+    'schoolfotos-webinar',
+    t.video.photos,
+  );
 
   return `<!doctype html>
 <html lang="${t.lang}">
@@ -238,6 +252,7 @@ ${og ? `<meta property="og:image" content="${og}"><meta name="twitter:card" cont
         <figcaption>${esc(t.video.webinar)}</figcaption>
       </figure>
       ${equipmentWebinar}
+      ${photosWebinar}
     </div>
   </section>
 
