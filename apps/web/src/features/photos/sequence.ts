@@ -74,6 +74,22 @@ export function classifyShot(current: Owner, codes: string[], index: CodeIndex):
 
 type Box = { x: number; y: number; width: number; height: number };
 
+/** Codes found on a scaled-down copy, with their place on the photo itself. */
+export function inPhotoPixels(
+  results: { rawValue: string; boundingBox?: Box }[],
+  scale: number,
+): { rawValue: string; boundingBox?: Box }[] {
+  return results.map(({ rawValue, boundingBox: box }) => ({
+    rawValue,
+    boundingBox: box && {
+      x: box.x * scale,
+      y: box.y * scale,
+      width: box.width * scale,
+      height: box.height * scale,
+    },
+  }));
+}
+
 /** Codes ordered by how close they are to the middle of the photo. */
 export function centralFirst<T extends { boundingBox?: Box }>(
   results: T[],

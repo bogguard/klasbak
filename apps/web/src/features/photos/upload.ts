@@ -10,7 +10,14 @@ import {
 import { ApiError } from '../../lib/api';
 import { createDetector, type Detector } from '../../lib/barcodeScanner';
 import { readJpegInfo, stripJpegMetadata } from './jpeg';
-import { centralFirst, classifyShot, codeIndex, compareCaptures, type Owner } from './sequence';
+import {
+  centralFirst,
+  classifyShot,
+  codeIndex,
+  compareCaptures,
+  inPhotoPixels,
+  type Owner,
+} from './sequence';
 
 /*
  * Uploading a photo day's photos from the browser. Each photo is cleaned (jpeg.ts), read for a
@@ -37,6 +44,8 @@ export type UploadProgress = {
   /** Not uploaded: the pupil may not be photographed. */
   skipped: number;
   unknownCodes: string[];
+  /** Photos the barcode reader failed on: that says nothing about a card being on them. */
+  unscanned: number;
   /** Files that are not JPEG photos. */
   unreadable: string[];
   failed: FailedUpload[];
@@ -56,6 +65,7 @@ export function emptyProgress(total = 0): UploadProgress {
     classPhotos: 0,
     skipped: 0,
     unknownCodes: [],
+    unscanned: 0,
     unreadable: [],
     failed: [],
     perPupil: {},
@@ -66,7 +76,12 @@ export function emptyProgress(total = 0): UploadProgress {
 type Api = <T>(path: string, options?: { method?: 'POST'; body?: unknown }) => Promise<T>;
 
 const PARALLEL_UPLOADS = 3;
-const DETECT_SIDE = 1600;
+/**
+ * Each photo is read for a card at several sizes. No single size works for every reader: pixels
+ * of a screen or coarse print (moiré) break up the bars when large, and a small code vanishes
+ * when small.
+ */
+const DETECT_SIDES = [1600, 1200, 800];
 const SMALL_QUALITY = 0.82;
 const HEADER_BYTES = 256 * 1024;
 
@@ -77,6 +92,7 @@ type Prepared = {
   height: number;
   takenAt?: string;
   codes: string[];
+  scanFailed: boolean;
 };
 
 function canvasOf(source: CanvasImageSource, width: number, height: number) {
@@ -85,6 +101,8 @@ function canvasOf(source: CanvasImageSource, width: number, height: number) {
   canvas.height = height;
   const context = canvas.getContext('2d');
   if (!context) throw new Error('No canvas');
+  // The default takes shortcuts when scaling far down, which turns fine bars into noise.
+  context.imageSmoothingQuality = 'high';
   context.drawImage(source, 0, 0, width, height);
   return canvas;
 }
@@ -94,21 +112,44 @@ const fitting = (width: number, height: number, side: number) => {
   return [Math.round(width * scale), Math.round(height * scale)] as const;
 };
 
+/**
+ * The codes on a photo, most central first: a photo of the class list often shows the neighbouring
+ * lines too. All sizes are read, as one of them may catch only a neighbour.
+ */
+async function readCodes(
+  bitmap: ImageBitmap,
+  canvases: HTMLCanvasElement[],
+  detector: Detector,
+): Promise<string[]> {
+  const found = [];
+  for (const canvas of canvases) {
+    const results = await detector.detect(canvas);
+    found.push(...inPhotoPixels(results, bitmap.width / canvas.width));
+  }
+  return centralFirst(found, bitmap.width, bitmap.height).map((result) => result.rawValue);
+}
+
 async function prepare(file: File, detector: Detector | undefined): Promise<Prepared> {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const info = readJpegInfo(bytes);
   const original = new Blob([stripJpegMetadata(bytes) as BlobPart], { type: 'image/jpeg' });
   const bitmap = await createImageBitmap(original, { imageOrientation: 'from-image' });
   try {
-    const big = canvasOf(bitmap, ...fitting(bitmap.width, bitmap.height, DETECT_SIDE));
-    // Most central first: a photo of the class list often shows the neighbouring lines too.
-    const codes = detector
-      ? centralFirst(await detector.detect(big).catch(() => []), big.width, big.height).map(
-          (result) => result.rawValue,
-        )
-      : [];
+    let codes: string[] = [];
+    let scanFailed = false;
+    if (detector) {
+      const canvases = DETECT_SIDES.map((side) =>
+        canvasOf(bitmap, ...fitting(bitmap.width, bitmap.height, side)),
+      );
+      try {
+        codes = await readCodes(bitmap, canvases, detector);
+      } catch {
+        // The photo itself is fine: upload it, to be assigned by hand.
+        scanFailed = true;
+      }
+    }
     const small = await new Promise<Blob | null>((resolve) =>
-      canvasOf(big, ...fitting(big.width, big.height, PHOTO_SMALL_SIDE)).toBlob(
+      canvasOf(bitmap, ...fitting(bitmap.width, bitmap.height, PHOTO_SMALL_SIDE)).toBlob(
         resolve,
         'image/jpeg',
         SMALL_QUALITY,
@@ -122,6 +163,7 @@ async function prepare(file: File, detector: Detector | undefined): Promise<Prep
       height: bitmap.height,
       takenAt: info.takenAt,
       codes,
+      scanFailed,
     };
   } finally {
     bitmap.close();
@@ -256,11 +298,15 @@ export async function uploadPhotos(params: {
       continue;
     }
 
+    if (prepared.scanFailed) progress.unscanned++;
+
     let target: PhotoTarget | undefined = targets?.get(file);
     if (!target) {
       if (mode.kind === 'group') target = { group: mode.group };
       else if (mode.kind === 'reader') target = { readerId: mode.readerId };
       else {
+        // It may have been the next pupil's card: better unassigned than with the wrong pupil.
+        if (prepared.scanFailed) owner = { kind: 'none' };
         const shot = classifyShot(owner, prepared.codes, codes);
         owner = shot.owner;
         if (shot.isCard) {

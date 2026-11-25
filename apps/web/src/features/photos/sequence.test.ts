@@ -6,6 +6,7 @@ import {
   classPhotoCode,
   codeIndex,
   compareCaptures,
+  inPhotoPixels,
   type Owner,
 } from './sequence';
 
@@ -110,6 +111,24 @@ describe('which code is meant', () => {
       'middle',
       'above',
       'no position',
+    ]);
+  });
+});
+
+describe('codes read at several sizes', () => {
+  it('compares their places on the photo itself', () => {
+    const small = inPhotoPixels(
+      [{ rawValue: 'middle', boundingBox: { x: 100, y: 180, width: 200, height: 40 } }],
+      4,
+    );
+    const large = inPhotoPixels(
+      [{ rawValue: 'above', boundingBox: { x: 200, y: 100, width: 400, height: 80 } }],
+      2,
+    );
+    expect(small[0]?.boundingBox).toEqual({ x: 400, y: 720, width: 800, height: 160 });
+    expect(centralFirst([...large, ...small], 1600, 1600).map((r) => r.rawValue)).toEqual([
+      'middle',
+      'above',
     ]);
   });
 });

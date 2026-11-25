@@ -1045,6 +1045,8 @@
       "skipped_one": "{{count}} foto niet opgeladen: deze leerling mag niet op de foto.",
       "skipped_other": "{{count}} foto’s niet opgeladen: deze leerlingen mogen niet op de foto.",
       "unknownCodes": "Onbekende kaart of code: {{codes}}. De foto’s erna staan bij ‘Nog niet toegewezen’.",
+      "unscanned_one": "Op {{count}} foto kon de streepjescode niet gelezen worden. Ze staat bij ‘Nog niet toegewezen’; probeer gerust een andere browser.",
+      "unscanned_other": "Op {{count}} foto’s kon de streepjescode niet gelezen worden. Ze staan bij ‘Nog niet toegewezen’; probeer gerust een andere browser.",
       "unreadable": "Geen JPEG-foto, overgeslagen: {{names}}",
       "failed": "Het opladen lukte niet. Controleer je internetverbinding en probeer opnieuw.",
       "failedSome_one": "{{count}} foto kon niet opgeladen worden.",

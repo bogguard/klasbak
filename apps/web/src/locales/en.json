@@ -1045,6 +1045,8 @@
       "skipped_one": "{{count}} photo not uploaded: this pupil may not be photographed.",
       "skipped_other": "{{count}} photos not uploaded: these pupils may not be photographed.",
       "unknownCodes": "Unknown card or code: {{codes}}. The photos after it are under ‘Not assigned yet’.",
+      "unscanned_one": "The barcode reader failed on {{count}} photo. It is under ‘Not assigned yet’; another browser may work.",
+      "unscanned_other": "The barcode reader failed on {{count}} photos. They are under ‘Not assigned yet’; another browser may work.",
       "unreadable": "Not a JPEG photo, skipped: {{names}}",
       "failed": "Uploading failed. Check your internet connection and try again.",
       "failedSome_one": "{{count}} photo could not be uploaded.",

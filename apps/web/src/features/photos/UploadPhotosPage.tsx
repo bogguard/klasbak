@@ -317,6 +317,11 @@ function Uploader({
                 {t('photos.upload.unknownCodes', { codes: progress.unknownCodes.join(', ') })}
               </li>
             )}
+            {progress.unscanned > 0 && (
+              <li className="text-danger">
+                {t('photos.upload.unscanned', { count: progress.unscanned })}
+              </li>
+            )}
             {progress.unreadable.length > 0 && (
               <li className="text-danger">
                 {t('photos.upload.unreadable', { names: progress.unreadable.join(', ') })}
