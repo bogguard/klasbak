@@ -142,7 +142,7 @@ export default {
       video: {
         config: 'photosYoutubeId',
         target: 'video-schoolfotos',
-        label: 'Bekijk het in drie en een halve minuut',
+        label: 'Bekijk de korte video',
       },
       alt: 'Een fotodag nakijken: per klas de voortgang, de klasfoto en de portretten van elke leerling.',
     },
@@ -190,7 +190,7 @@ export default {
       play: 'Speel de webinar over Materiaal af',
     },
     photos: {
-      title: 'Schoolfoto’s, in drie en een halve minuut',
+      title: 'Schoolfoto’s, in een korte video',
       text: 'Van klaslijst tot strookje: fotograferen, de hele geheugenkaart opladen, nakijken en openzetten voor de ouders.',
       play: 'Speel de webinar over Schoolfoto’s af',
     },
