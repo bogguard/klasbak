@@ -18,7 +18,7 @@
     "@aws-sdk/s3-presigned-post": "^3.1152.0",
     "@aws-sdk/s3-request-presigner": "^3.1152.0",
     "@klasbak/shared": "*",
-    "hono": "^4.13.13",
+    "hono": "^4.13.16",
     "minisearch": "^7.2.0",
     "ulid": "^3.0.2",
     "zod": "^4.6.7"
