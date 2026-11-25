@@ -141,7 +141,7 @@ export default {
       video: {
         config: 'photosYoutubeId',
         target: 'video-schoolfotos',
-        label: 'See it in three and a half minutes',
+        label: 'Watch the short video',
       },
       alt: 'Checking a photo day: the progress per class, the class photo and the portraits of each pupil.',
     },
@@ -189,7 +189,7 @@ export default {
       play: 'Play the webinar about equipment',
     },
     photos: {
-      title: 'School photos, in three and a half minutes',
+      title: 'School photos, in a short video',
       text: 'From class list to slip: taking the photos, uploading the whole memory card, checking, and opening them to parents. In Dutch, with Dutch subtitles.',
       play: 'Play the webinar about school photos',
     },
