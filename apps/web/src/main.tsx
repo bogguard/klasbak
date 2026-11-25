@@ -26,6 +26,13 @@ const router = createBrowserRouter([
       { index: true, element: <SearchPage /> },
       { path: 'titles/:id', element: <TitlePage /> },
       { path: 'privacy', element: <PrivacyPage /> },
+      // Parents download school photos here with the code from their slip (no sign-in).
+      {
+        path: 'fotos',
+        lazy: async () => ({
+          Component: (await import('./features/photos/PublicPhotosPage')).PublicPhotosPage,
+        }),
+      },
       {
         path: 'login',
         lazy: async () => ({ Component: (await import('./features/auth/LoginPage')).LoginPage }),
@@ -122,6 +129,24 @@ const router = createBrowserRouter([
             path: 'equipment/:id',
             lazy: async () => ({
               Component: (await import('./features/equipment/AssetPage')).AssetPage,
+            }),
+          },
+          {
+            path: 'photos',
+            lazy: async () => ({
+              Component: (await import('./features/photos/PhotoDaysPage')).PhotoDaysPage,
+            }),
+          },
+          {
+            path: 'photos/:id',
+            lazy: async () => ({
+              Component: (await import('./features/photos/PhotoDayPage')).PhotoDayPage,
+            }),
+          },
+          {
+            path: 'photos/:id/upload',
+            lazy: async () => ({
+              Component: (await import('./features/photos/UploadPhotosPage')).UploadPhotosPage,
             }),
           },
           {

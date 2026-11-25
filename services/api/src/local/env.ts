@@ -7,6 +7,9 @@ const defaults: Record<string, string> = {
   DYNAMODB_ENDPOINT: 'http://localhost:8000',
   LOCAL_PUBLIC_DIR: '.local/public',
   WEB_BUCKET: 'unused-locally',
+  // School photos go to a folder; the local server stands in for the signed S3 links.
+  LOCAL_PHOTOS_DIR: '.local/photos',
+  PHOTOS_BUCKET: 'unused-locally',
   // Clearly not a real instellingsnummer: codes made locally never look like a school's.
   INSTITUTION_NUMBER: '000000',
   // No Cognito locally: staff accounts are kept in memory.

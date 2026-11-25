@@ -7,6 +7,7 @@ export * from './equipment';
 export * from './exchange';
 export * from './export';
 export * from './isbn';
+export * from './photos';
 export * from './readers';
 export * from './search';
 export * from './staff';

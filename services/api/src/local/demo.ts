@@ -26,6 +26,7 @@ import {
   updateAsset,
 } from '../equipment/service';
 import { addExchangeBooks, createExchange, returnExchange } from '../exchange/service';
+import { createDay, setNoPhoto } from '../photos/service';
 import type { Actor } from '../lib/auth';
 import { db, env } from '../lib/aws';
 import { brandingKey } from '../lib/keys';
@@ -94,6 +95,7 @@ async function wipe() {
   const publicDir = process.env.LOCAL_PUBLIC_DIR ?? '.local/public';
   await rm(join(publicDir, 'covers'), { recursive: true, force: true });
   await rm(join(publicDir, 'search'), { recursive: true, force: true });
+  await rm(process.env.LOCAL_PHOTOS_DIR ?? '.local/photos', { recursive: true, force: true });
   console.log(`Emptied the local database (${removed} items); name and logo kept.`);
 }
 
@@ -378,7 +380,7 @@ async function main() {
     actor,
     {
       ...DEFAULT_SETTINGS,
-      modules: { equipment: true },
+      modules: { equipment: true, photos: true },
       closedPeriods: [
         { from: on('2026-10-26'), to: on('2026-11-01'), label: 'Herfstvakantie' },
         { from: on('2026-12-21'), to: on('2027-01-03'), label: 'Kerstvakantie' },
@@ -659,7 +661,21 @@ async function main() {
     );
 
   await addEquipment(pupils);
+  await addPhotoDay(pupils);
   console.log(`Search index: ${await rebuildSearchIndex()} titles.`);
+}
+
+/** A photo day without photos yet (the demo has no pictures): ready to try uploading. */
+async function addPhotoDay(pupils: Reader[]) {
+  const day = await createDay(
+    actor,
+    { name: 'Schoolfoto’s', takenOn: on('2026-10-15') },
+    at(on('2026-10-01')),
+  );
+  // One family said no to photos.
+  const [declined] = pupils;
+  if (declined) await setNoPhoto(actor, day.id, declined.id, true, at(on('2026-10-02')));
+  console.log('Photos: one photo day, without photos yet.');
 }
 
 async function setStatus(asset: Asset, status: 'repair' | 'lost', day: string, note?: string) {

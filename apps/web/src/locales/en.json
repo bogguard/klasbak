@@ -115,12 +115,18 @@
     "EXCHANGE_RETURNED": "This exchange collection was already returned.",
     "EXCHANGE_HAS_LOANS": "{{count}} books are still on loan. Have them returned first.",
     "reference": "(Reference for support: {{reference}})",
-    "MODULE_OFF": "Equipment isn’t switched on yet. An administrator can do that under Settings.",
+    "MODULE_OFF": "This module isn’t switched on yet. An administrator can switch it on in Settings.",
     "ASSET_NOT_AVAILABLE": "This item was just handed out or is no longer available. Reload the page.",
     "ASSET_ASSIGNED": "This item is handed out. Take it back first.",
     "SERIAL_IN_USE": "This serial number is already used for something else.",
     "READER_HAS_EQUIPMENT": "This reader still has equipment. Take it back first.",
-    "CODE_IS_EQUIPMENT": "This is the code of a piece of equipment, not a book. Look under Equipment."
+    "CODE_IS_EQUIPMENT": "This is the code of a piece of equipment, not a book. Look under Equipment.",
+    "PHOTO_CODE_UNKNOWN": "We don’t know this code. Check the code on the slip (letters and digits, no O or I).",
+    "PHOTOS_NOT_AVAILABLE": "These photos aren’t available now. They aren’t open yet, or the date on the slip has passed. Ask the school.",
+    "PHOTO_DATE_OUT_OF_RANGE": "Choose a date from today until the end of the school year.",
+    "NO_PHOTO_CONSENT": "This pupil may not be photographed. Give the photo to someone else or delete it.",
+    "PUPIL_HAS_PHOTOS": "This pupil already has photos. Delete them first.",
+    "PHOTO_NOT_UPLOADED": "The photo didn’t arrive completely. Try again."
   },
   "notFound": {
     "title": "This page doesn't exist",
@@ -131,7 +137,8 @@
     "librarian": "librarian",
     "teacher": "teacher",
     "reader": "reader",
-    "equipment": "equipment manager"
+    "equipment": "equipment manager",
+    "photographer": "photographer"
   },
   "auth": {
     "heading": "Sign in",
@@ -282,7 +289,14 @@
     "staff": "Staff",
     "statistics": "Statistics",
     "exchanges": "Exchange collections",
-    "equipment": "Equipment"
+    "equipment": "Equipment",
+    "photos": "School photos",
+    "sections": {
+      "library": "Library",
+      "equipment": "Equipment",
+      "photos": "School photos",
+      "school": "School"
+    }
   },
   "readers": {
     "heading": "Readers",
@@ -488,15 +502,15 @@
       "retentionHint": "Returned loans are deleted after this; only anonymous counts remain. Between 30 and 3650 days."
     },
     "branding": {
-      "heading": "Library",
-      "name": "Name of the library",
-      "nameHint": "Shown at the top of every page and on reader cards.",
+      "heading": "School",
+      "name": "Name of the school",
+      "nameHint": "Shown at the top of every page, on reader cards and on the school photo slips.",
       "logoAlt": "Logo of the school",
       "addLogo": "Add logo",
       "replaceLogo": "Choose another logo",
       "logoHint": "A PNG with a transparent background looks best. Shown at the top of the website, on reader cards and as the browser tab icon. A chosen logo is saved right away.",
       "logo": "Logo",
-      "nameRequired": "Give the library a name."
+      "nameRequired": "Give the name of the school."
     },
     "export": {
       "heading": "Export data",
@@ -510,7 +524,9 @@
     "modules": {
       "heading": "Modules",
       "equipment": "Equipment",
-      "equipmentHint": "Keep track of Chromebooks and other equipment: how many there are, where they are and who has what."
+      "equipmentHint": "Keep track of Chromebooks and other equipment: how many there are, where they are and who has what.",
+      "photos": "School photos",
+      "photosHint": "Take school photos yourselves or with a photographer, and let parents download them with a code. Agree on this in the data processing agreement first."
     }
   },
   "labels": {
@@ -596,19 +612,19 @@
     },
     "what": {
       "heading": "What data do we keep?",
-      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. If the school gives you equipment, such as a Chromebook, we also note which device you have and until when. We don't ask for a date of birth, address or photo."
+      "body": "Only what's needed to lend books: your first name, last name, class, card number and, if the school wants, an email address. We also keep track of which books you borrow and when they're due. If the school gives you equipment, such as a Chromebook, we also note which device you have and until when. If the school takes its school photos through this website, we keep those photos too, with your name and class. Location and camera details are removed. We don't ask for a date of birth or address."
     },
     "why": {
       "heading": "What do we use it for?",
-      "body": "To lend books, remind you when they're due and run the library well, and to know where the school's equipment is. Not for advertising. We don't sell or share your data with anyone."
+      "body": "To lend books, remind you when they're due and run the library well, to know where the school's equipment is, and to let your parents download the school photos. Not for advertising. We don't sell or share your data with anyone."
     },
     "retention": {
       "heading": "How long do we keep it?",
-      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). The same goes for equipment you returned. For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. When you leave the school, the school can delete all your data."
+      "body": "What you read is private. A loan is deleted some time after the book is returned (by default after one year; the school can change this). The same goes for equipment you returned. For statistics we only count anonymously, like ‘120 books were lent in October’ or ‘class 3B borrowed 40 books’, never who read what. School photos are deleted after the date on the slip, at the latest at the end of the school year. When you leave the school, the school can delete all your data."
     },
     "where": {
       "heading": "Where is the data?",
-      "body": "Encrypted at Amazon Web Services, in a data centre in Ireland (European Union). Only the people who run the library or the equipment can see it, and their access is protected with two-step verification. We store book covers ourselves, so browsing the catalogue doesn't reach other companies."
+      "body": "Encrypted at Amazon Web Services, in a data centre in Ireland (European Union). Only the people who run the library, the equipment or the school photos can see it, and their access is protected with two-step verification. Apart from them, only someone with the code on your slip can see your school photos. We store book covers ourselves, so browsing the catalogue doesn't reach other companies."
     },
     "cookies": {
       "heading": "Cookies",
@@ -633,7 +649,7 @@
     "name": "Name",
     "role": "Role",
     "roleOf": "Role of {{name}}",
-    "roleHint": "Choose ‘equipment manager’ for people who only manage equipment, like the ICT coordinator. Choose ‘administrator’ only for people who also need to manage staff.",
+    "roleHint": "Choose ‘equipment manager’ for people who only manage equipment, like the ICT coordinator, and ‘photographer’ for people who only upload and sort school photos (a hired photographer too). Choose ‘administrator’ only for people who also need to manage staff.",
     "status": "Status",
     "you": "you",
     "active": "Active",
@@ -971,5 +987,207 @@
       "confirmed_one": "{{count}} label ticked off.",
       "confirmed_other": "{{count}} labels ticked off."
     }
+  },
+  "photos": {
+    "heading": "School photos",
+    "intro": "Take the school photos yourselves or with a photographer. Parents download the original photos with the code on their slip, until a date you choose. After that, all photos are deleted.",
+    "back": "Back to photo days",
+    "cancel": "Cancel",
+    "count_one": "{{count}} photo",
+    "count_other": "{{count}} photos",
+    "class": "Class",
+    "withoutClass": "Without a class",
+    "none": "No photo yet",
+    "photoOf": "Photo of {{name}}",
+    "missing": "No photo yet: {{names}}. Photograph them at a catch-up moment and upload the photos here.",
+    "status": {
+      "draft": "Not open to parents yet",
+      "open": "Open to parents until {{date}}",
+      "closed": "Closed to parents"
+    },
+    "empty": {
+      "title": "No photo days yet",
+      "hint": "An administrator of the school creates a photo day. Then you can upload the photos here.",
+      "hintAdmin": "Create a photo day for the day the photos will be taken."
+    },
+    "new": {
+      "button": "New photo day",
+      "heading": "New photo day",
+      "defaultName": "School photos {{years}}",
+      "create": "Create photo day"
+    },
+    "fields": {
+      "name": "Name",
+      "takenOn": "Date of the photos",
+      "takenOnHint": "Also decides which school year the photo day belongs to."
+    },
+    "upload": {
+      "link": "Upload photos",
+      "back": "Back to the photo day",
+      "heading": "Upload photos",
+      "what": "What are you uploading?",
+      "cards": "Portraits, with a photo of the pupil card before them",
+      "cardsHint": "For each pupil, first take a photo of their pupil card or of the barcode on the class list, then the portraits. For the class photo, first photograph the class photo code at the top of the class list. Feel free to upload the whole memory card at once: we sort by the camera’s time.",
+      "classPhoto": "A class photo",
+      "onePupil": "Photos of one pupil",
+      "pupil": "Pupil",
+      "drop": "Drag the photos here or choose them.",
+      "choose": "Choose photos",
+      "jpegOnly": "JPEG photos, as a camera or phone makes them. Location and camera details are removed before uploading.",
+      "progress": "{{done}} of {{total}} photos processed",
+      "current": "Now: {{name}}",
+      "done_one": "Done: {{count}} photo uploaded.",
+      "done_other": "Done: {{count}} photos uploaded.",
+      "cardsFound_one": "{{count}} card recognised",
+      "cardsFound_other": "{{count}} cards recognised",
+      "unassigned_one": "{{count}} photo without a pupil: assign it under ‘Not assigned yet’.",
+      "unassigned_other": "{{count}} photos without a pupil: assign them under ‘Not assigned yet’.",
+      "skipped_one": "{{count}} photo not uploaded: this pupil may not be photographed.",
+      "skipped_other": "{{count}} photos not uploaded: these pupils may not be photographed.",
+      "unknownCodes": "Unknown card or code: {{codes}}. The photos after it are under ‘Not assigned yet’.",
+      "unscanned_one": "The barcode reader failed on {{count}} photo. It is under ‘Not assigned yet’; another browser may work.",
+      "unscanned_other": "The barcode reader failed on {{count}} photos. They are under ‘Not assigned yet’; another browser may work.",
+      "unreadable": "Not a JPEG photo, skipped: {{names}}",
+      "failed": "Uploading failed. Check your internet connection and try again.",
+      "failedSome_one": "{{count}} photo could not be uploaded.",
+      "failedSome_other": "{{count}} photos could not be uploaded.",
+      "stop": "Stop",
+      "perPupil_one": "Photos per pupil ({{count}} pupil)",
+      "perPupil_other": "Photos per pupil ({{count}} pupils)",
+      "review": "Go to the overview",
+      "classPhotos_one": "{{count}} class photo",
+      "classPhotos_other": "{{count}} class photos"
+    },
+    "unassigned": {
+      "hint": "Photos from before the first card, or after a card we didn’t recognise. Click a photo to give it to a pupil or class, or to delete it.",
+      "photo": "Photo without a pupil",
+      "chip": "Not assigned yet"
+    },
+    "classPhoto": {
+      "heading": "Class photo {{group}}",
+      "none": "No class photo yet. Everyone in the class gets the class photo with their own photos.",
+      "photo": "Class photo {{group}}"
+    },
+    "noPhoto": {
+      "badge": "Do not photograph",
+      "set": "May not be photographed",
+      "undo": "May be photographed after all"
+    },
+    "dialog": {
+      "title": "Photo",
+      "owner": "Who is in it?",
+      "nobody": "Nobody yet",
+      "classPhoto": "Class photo {{group}}",
+      "delete": "Delete photo",
+      "confirmDelete": "Delete this photo? This can’t be undone.",
+      "close": "Close",
+      "position": "{{index}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next",
+      "search": "Type a name or class",
+      "hint": "Enter picks the first. The next photo follows right away; ← → browse.",
+      "noMatch": "Nobody found.",
+      "deleted": "Deleted"
+    },
+    "print": {
+      "failed": "Making the PDF failed. Try again."
+    },
+    "classList": {
+      "button": "Class list {{group}}",
+      "all": "All class lists",
+      "heading": "Class list {{group}}",
+      "instructions": "Photograph a pupil’s barcode (or their pupil card) right before their portraits, with the code in the middle of the photo. For the class photo, first photograph the class photo code above. That way the photos end up in the right place by themselves.",
+      "hint": "The class lists are for the photographer: with a barcode per pupil, for those who don’t have their pupil card with them, and a code for the class photo at the top.",
+      "fileName": "class-list-photos",
+      "classPhoto": "Class photo {{group}}"
+    },
+    "codes": {
+      "button": "Slips {{group}}",
+      "all": "All slips",
+      "hint": "The slips are for parents: with a personal code and QR code to download the photos. Printing again gives the same codes.",
+      "openFirst": "You can print the slips once the photos are open to parents: the date is printed on them.",
+      "nothing": "There are no pupils with photos in this selection yet.",
+      "renew": "New code",
+      "confirmRenew": "Make a new code for {{name}}? The old code stops working at once. The new slip is downloaded.",
+      "fileName": "photo-slips"
+    },
+    "slip": {
+      "howTo": "Download the photos: scan the QR code or go to {{site}}/fotos and type this code:",
+      "until": "Available until {{date}}. After that, the photos are deleted."
+    },
+    "parents": {
+      "closed": "Parents can’t see the photos yet. Choose until when they can download and open the photo day. Then you can print the slips.",
+      "openUntil": "Parents can download the photos until {{date}}.",
+      "until": "Downloads possible until",
+      "untilHint": "30 days by default, at the latest the end of the school year ({{date}}).",
+      "untilInvalid": "Choose a date from today until {{date}}.",
+      "open": "Open to parents",
+      "saveDate": "Save date",
+      "close": "Close to parents",
+      "deleted": "All photos of this photo day are deleted after {{date}}."
+    },
+    "edit": {
+      "heading": "Change name and date, or delete the photo day",
+      "save": "Save",
+      "saved": "Saved.",
+      "delete": "Delete photo day",
+      "confirmDelete": "Delete ‘{{name}}’? Parents can no longer download at once, and all photos are deleted for good tonight.",
+      "deleteHint": "Deleting closes the photo day at once; the photos themselves are deleted for good tonight."
+    },
+    "public": {
+      "heading": "School photos",
+      "intro": "Type the code from the slip your child brought home, or scan the QR code on it.",
+      "code": "Code",
+      "codeHint": "Twelve letters and digits, for example K7PM-3QXD-9TWA.",
+      "show": "Show photos",
+      "checking": "Checking…",
+      "photosOf": "Photos of {{name}}",
+      "until": "to download until {{date}}",
+      "none": "There are no photos ready yet. Try again later or ask the school.",
+      "downloadAll": "Download all (zip)",
+      "zipping": "Packing…",
+      "zipFailed": "Downloading everything at once failed. Download the photos one by one instead.",
+      "zipName": "school-photos",
+      "otherCode": "Another code",
+      "hint": "You get the original photos. On a phone: tap ‘Download’ and save the photo to your photos.",
+      "portrait": "Portrait",
+      "classPhoto": "Class photo",
+      "photoAlt": "Photo {{number}} of {{name}}",
+      "classPhotoAlt": "Class photo",
+      "download": "Download",
+      "saveToDevice": "Save to your phone",
+      "preparing": "Getting the photos ready…",
+      "saveNow_one": "Save the photo",
+      "saveNow_other": "Save the {{count}} photos",
+      "hintShare": "You get the original photos. Tap ‘Save to your phone’, then choose to save them to your photos."
+    },
+    "steps": {
+      "number": "Step {{number}}:",
+      "done": "done",
+      "classLists": {
+        "title": "Print the class lists",
+        "status": "For the photographer: a barcode per pupil and a code for the class photo."
+      },
+      "upload": {
+        "title": "Photograph and upload",
+        "none": "No photos yet.",
+        "done_one": "{{count}} photo uploaded.",
+        "done_other": "{{count}} photos uploaded."
+      },
+      "review": {
+        "title": "Check",
+        "status": "{{done}} of {{total}} pupils have a photo",
+        "unassigned_one": "{{count}} photo not assigned yet",
+        "unassigned_other": "{{count}} photos not assigned yet"
+      },
+      "parents": {
+        "title": "Open to parents and print the slips",
+        "notAdmin": "An administrator opens the photos to parents."
+      }
+    },
+    "classProgress": "{{done}}/{{total}}",
+    "add": "Add",
+    "addFor": "Add photos for {{name}}",
+    "moreFor": "More for {{name}}"
   }
 }

@@ -1,15 +1,18 @@
 import './env';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { readFile } from 'node:fs/promises';
 import { Hono } from 'hono';
 import type { LambdaEvent } from 'hono/aws-lambda';
 import { ROLES, type Role } from '../lib/auth';
 import { app as catalog } from '../catalog/handler';
 import { app as circulation } from '../circulation/handler';
 import { app as equipment } from '../equipment/handler';
+import { app as photos } from '../photos/handler';
 import { app as readers } from '../readers/handler';
 import { app as staff } from '../staff/handler';
 import { logger } from '../lib/observability';
+import { localPath, writeLocalFile } from '../lib/photo-files';
 import { rebuildSearchIndex } from '../search-indexer/rebuild';
 import { ensureLocalTable, migrateLocalData } from './table';
 
@@ -19,11 +22,13 @@ import { ensureLocalTable, migrateLocalData } from './table';
  *   - API Gateway's JWT authorizer → a dev sign-in: "Authorization: Dev <role>"
  *   - the DynamoDB stream + indexer Lambda → rebuild the search index after each change
  *   - S3 + CloudFront → serve /search, /covers and /config.json from disk
+ *   - signed links to the photos bucket → /local-photos, a folder on disk (no checks: local only)
  * It is never deployed: SAM only builds the Lambda handlers.
  */
 
 const PORT = Number(process.env.PORT ?? 3000);
 const publicDir = process.env.LOCAL_PUBLIC_DIR ?? '.local/public';
+const photosDir = process.env.LOCAL_PHOTOS_DIR ?? '.local/photos';
 
 function fakeEvent(authorization: string | undefined): { event: LambdaEvent } {
   const role = authorization?.match(/^Dev (\w+)$/)?.[1] as Role | undefined;
@@ -80,6 +85,31 @@ server.all('/api/staff/*', (c) => staff.fetch(c.req.raw, fakeEvent(c.req.header(
 server.all('/api/equipment/*', (c) =>
   equipment.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
 );
+server.all('/api/photos/*', (c) =>
+  photos.fetch(c.req.raw, fakeEvent(c.req.header('authorization'))),
+);
+// Like a presigned S3 POST: the form's fields, then the file.
+server.post('/local-photos', async (c) => {
+  const form = await c.req.formData();
+  const key = form.get('key');
+  const file = form.get('file');
+  if (typeof key !== 'string' || !(file instanceof File)) return c.text('Bad upload', 400);
+  await writeLocalFile(photosDir, key, new Uint8Array(await file.arrayBuffer()));
+  return c.body(null, 204);
+});
+server.get('/local-photos/*', async (c) => {
+  const key = decodeURIComponent(c.req.path.slice('/local-photos/'.length));
+  try {
+    const bytes = await readFile(localPath(photosDir, key));
+    const download = c.req.query('download');
+    return c.body(bytes, 200, {
+      'Content-Type': 'image/jpeg',
+      ...(download ? { 'Content-Disposition': `attachment; filename="${download}"` } : {}),
+    });
+  } catch {
+    return c.text('Not found', 404);
+  }
+});
 server.all('/api/circulation/*', async (c) => {
   const response = await circulation.fetch(c.req.raw, fakeEvent(c.req.header('authorization')));
   // Loans change copy statuses, and availability is part of the search index.

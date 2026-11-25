@@ -19,6 +19,7 @@ What Klasbak does and what's planned: first the school library, from cataloguing
 | Exchange collections from the public library (decision 031)                | Built; runs on AWS            |
 | Demo library for local development (`npm run demo`)                        | Built                         |
 | Equipment stock: items, handing out, labels (decision 039)                 | Built; not yet run on AWS     |
+| School photos: photo days, uploads, slips with codes, downloads (040)      | Built; not yet run on AWS     |
 
 ## Phase 1 — MVP: run a school library
 
@@ -78,7 +79,7 @@ What Klasbak does and what's planned: first the school library, from cataloguing
 
 ## Beyond the library — modules (decision 036)
 
-Other school tools on the same installation, each switched on per school. Order: equipment, lost and found, maintenance requests, duty planning.
+Other school tools on the same installation, each switched on per school. Order: equipment, school photos, lost and found, maintenance requests, duty planning.
 
 ### Module 1 — Equipment (`equipment`, UI "Materiaal")
 
@@ -116,3 +117,25 @@ The first need is stock: what the school has and where it is, checked now and th
 
 - Statistics for equipment (use per kind and month) or none.
 - Liability for damage: stays outside the app (no fines, decision 007).
+
+### Module 2 — School photos (`photos`, UI "Schoolfoto’s")
+
+The school takes its own school photos, or hires a photographer only to take them; parents download the original files with a code. The platform comes with Klasbak, so it is affordable for school and parents; what parents pay, if anything, is up to the school. Switched on in Instellingen → Modules; decision 040.
+
+**Version 1 (built)**
+
+- Photo days (name, date) created by an administrator.
+- Uploading a whole memory card in the browser: sorted by the camera's time, cleaned of EXIF/GPS without re-compressing, matched to pupils by a photo of their card or of their line on a printed class list (barcodes, the one in the middle of the photo counts), and to a class by the class photo code on that list; straight to a private bucket. Class photos per class; extra photos for one pupil.
+- Sorting per class: every pupil with their photos, who has none yet, photos without a pupil; move or delete a photo.
+- "May not be photographed" per pupil and photo day: no photos, no code.
+- Opening to parents until a date (30 days by default, at the latest 31 August); slips per class with a code and a QR code; a new code for a lost slip.
+- `/fotos` for parents: type or scan the code, see the portraits and the class photo, download one by one or all as a zip.
+- Everything deleted the night after the last day (or after the school deletes the photo day); erased with the reader.
+- Role `photographer`: uploads and sorts, nothing else.
+
+**Next, when schools ask**
+
+- One code per family for brothers and sisters.
+- An export of one portrait per pupil (by school number) for Smartschool, Informat or the pupil cards.
+- A catch-up day as a second round under the same photo day.
+- A link to order prints from a photographer of the school's choice (payments stay outside Klasbak).

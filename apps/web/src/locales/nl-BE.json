@@ -115,12 +115,18 @@
     "EXCHANGE_RETURNED": "Deze wisselcollectie is al teruggebracht.",
     "EXCHANGE_HAS_LOANS": "Er zijn nog {{count}} boeken uitgeleend. Laat ze eerst terugbrengen.",
     "reference": "(Referentie voor de helpdesk: {{reference}})",
-    "MODULE_OFF": "Materiaal staat nog niet aan. Een beheerder kan het aanzetten bij Instellingen.",
+    "MODULE_OFF": "Deze module staat nog niet aan. Een beheerder kan ze aanzetten bij Instellingen.",
     "ASSET_NOT_AVAILABLE": "Dit toestel is net uitgegeven of niet meer beschikbaar. Herlaad de pagina.",
     "ASSET_ASSIGNED": "Dit toestel is uitgegeven. Neem het eerst terug.",
     "SERIAL_IN_USE": "Dit serienummer is al in gebruik voor iets anders.",
     "READER_HAS_EQUIPMENT": "Deze lezer heeft nog materiaal. Neem het eerst terug.",
-    "CODE_IS_EQUIPMENT": "Dit is de code van materiaal, geen boek. Kijk bij Materiaal."
+    "CODE_IS_EQUIPMENT": "Dit is de code van materiaal, geen boek. Kijk bij Materiaal.",
+    "PHOTO_CODE_UNKNOWN": "Deze code kennen we niet. Controleer de code op het strookje (letters en cijfers, geen O of I).",
+    "PHOTOS_NOT_AVAILABLE": "Deze foto’s zijn nu niet beschikbaar. Ze staan nog niet open, of de datum op het strookje is voorbij. Vraag het aan de school.",
+    "PHOTO_DATE_OUT_OF_RANGE": "Kies een datum vanaf vandaag tot en met het einde van het schooljaar.",
+    "NO_PHOTO_CONSENT": "Deze leerling mag niet op de foto. Geef de foto aan iemand anders of verwijder ze.",
+    "PUPIL_HAS_PHOTOS": "Deze leerling heeft al foto’s. Verwijder ze eerst.",
+    "PHOTO_NOT_UPLOADED": "De foto kwam niet volledig aan. Probeer opnieuw."
   },
   "notFound": {
     "title": "Deze pagina bestaat niet",
@@ -131,7 +137,8 @@
     "librarian": "bibliothecaris",
     "teacher": "leerkracht",
     "reader": "lezer",
-    "equipment": "materiaalbeheerder"
+    "equipment": "materiaalbeheerder",
+    "photographer": "fotograaf"
   },
   "auth": {
     "heading": "Aanmelden",
@@ -282,7 +289,14 @@
     "staff": "Medewerkers",
     "statistics": "Statistieken",
     "exchanges": "Wisselcollecties",
-    "equipment": "Materiaal"
+    "equipment": "Materiaal",
+    "photos": "Schoolfoto’s",
+    "sections": {
+      "library": "Bibliotheek",
+      "equipment": "Materiaal",
+      "photos": "Schoolfoto’s",
+      "school": "School"
+    }
   },
   "readers": {
     "heading": "Lezers",
@@ -488,15 +502,15 @@
       "retentionHint": "Teruggebrachte uitleningen worden daarna gewist; alleen anonieme aantallen blijven over. Tussen 30 en 3650 dagen."
     },
     "branding": {
-      "heading": "Bibliotheek",
-      "name": "Naam van de bibliotheek",
-      "nameHint": "Staat bovenaan elke pagina en op de lezerskaarten.",
+      "heading": "School",
+      "name": "Naam van de school",
+      "nameHint": "Staat bovenaan elke pagina, op lezerskaarten en op de strookjes voor de schoolfoto’s.",
       "logoAlt": "Logo van de school",
       "addLogo": "Logo toevoegen",
       "replaceLogo": "Ander logo kiezen",
       "logoHint": "PNG met doorzichtige achtergrond werkt het mooist. Verschijnt bovenaan de website, op lezerskaarten en als icoontje in de browser. Een gekozen logo wordt meteen bewaard.",
       "logo": "Logo",
-      "nameRequired": "Geef de bibliotheek een naam."
+      "nameRequired": "Geef de naam van de school."
     },
     "export": {
       "heading": "Gegevens exporteren",
@@ -510,7 +524,9 @@
     "modules": {
       "heading": "Modules",
       "equipment": "Materiaal",
-      "equipmentHint": "Chromebooks en ander materiaal bijhouden: hoeveel er zijn, waar ze staan en wie wat heeft."
+      "equipmentHint": "Chromebooks en ander materiaal bijhouden: hoeveel er zijn, waar ze staan en wie wat heeft.",
+      "photos": "Schoolfoto’s",
+      "photosHint": "Schoolfoto’s zelf nemen of met een fotograaf, en ouders de foto’s laten downloaden met een code. Spreek dit eerst af in de verwerkersovereenkomst."
     }
   },
   "labels": {
@@ -596,19 +612,19 @@
     },
     "what": {
       "heading": "Welke gegevens bewaren we?",
-      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. Krijg je van de school materiaal mee, zoals een Chromebook, dan noteren we ook welk toestel je hebt en tot wanneer. We vragen geen geboortedatum, adres of foto."
+      "body": "Alleen wat nodig is om boeken uit te lenen: je voornaam, achternaam, klas, kaartnummer en, als de school dat wil, een e-mailadres. Daarnaast houden we bij welke boeken je leent en wanneer ze terug moeten. Krijg je van de school materiaal mee, zoals een Chromebook, dan noteren we ook welk toestel je hebt en tot wanneer. Neemt de school de schoolfoto’s via deze website, dan bewaren we die foto’s ook, met je naam en klas. Locatie- en cameragegevens halen we eruit. We vragen geen geboortedatum of adres."
     },
     "why": {
       "heading": "Waarvoor gebruiken we ze?",
-      "body": "Om boeken uit te lenen, eraan te herinneren als ze terug moeten en de bibliotheek goed te beheren. En om bij te houden waar het materiaal van de school is. Niet voor reclame. We verkopen of delen je gegevens met niemand."
+      "body": "Om boeken uit te lenen, eraan te herinneren als ze terug moeten en de bibliotheek goed te beheren. En om bij te houden waar het materiaal van de school is, en om je ouders de schoolfoto’s te laten downloaden. Niet voor reclame. We verkopen of delen je gegevens met niemand."
     },
     "retention": {
       "heading": "Hoe lang bewaren we ze?",
-      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Hetzelfde geldt voor materiaal dat je terugbracht. Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Verlaat je de school, dan kan de school al je gegevens wissen."
+      "body": "Wat je leest is privé. Een uitlening wordt een tijd na het terugbrengen gewist (standaard na één jaar; de school kan dat aanpassen). Hetzelfde geldt voor materiaal dat je terugbracht. Voor de statistieken tellen we alleen anoniem, zoals ‘in oktober werden 120 boeken uitgeleend’ of ‘klas 3B leende 40 boeken’, nooit wie wat las. Schoolfoto’s worden gewist na de datum op het strookje, ten laatste op het einde van het schooljaar. Verlaat je de school, dan kan de school al je gegevens wissen."
     },
     "where": {
       "heading": "Waar staan de gegevens?",
-      "body": "Versleuteld bij Amazon Web Services, in een datacenter in Ierland (Europese Unie). Alleen wie de bibliotheek of het materiaal beheert, kan ze bekijken, en hun toegang is beveiligd met tweestapsverificatie. Boekomslagen bewaren we zelf, zodat wie de catalogus bekijkt niet bij andere bedrijven terechtkomt."
+      "body": "Versleuteld bij Amazon Web Services, in een datacenter in Ierland (Europese Unie). Alleen wie de bibliotheek, het materiaal of de schoolfoto’s beheert, kan ze bekijken, en hun toegang is beveiligd met tweestapsverificatie. Je schoolfoto’s kan verder alleen bekijken wie de code van je strookje heeft. Boekomslagen bewaren we zelf, zodat wie de catalogus bekijkt niet bij andere bedrijven terechtkomt."
     },
     "cookies": {
       "heading": "Cookies",
@@ -633,7 +649,7 @@
     "name": "Naam",
     "role": "Rol",
     "roleOf": "Rol van {{name}}",
-    "roleHint": "Kies ‘materiaalbeheerder’ voor wie alleen het materiaal beheert, zoals de ICT-coördinator. Kies ‘beheerder’ alleen voor wie ook medewerkers moet kunnen beheren.",
+    "roleHint": "Kies ‘materiaalbeheerder’ voor wie alleen het materiaal beheert, zoals de ICT-coördinator, en ‘fotograaf’ voor wie alleen schoolfoto’s oplaadt en sorteert (ook een ingehuurde fotograaf). Kies ‘beheerder’ alleen voor wie ook medewerkers moet kunnen beheren.",
     "status": "Status",
     "you": "jij",
     "active": "Actief",
@@ -971,5 +987,207 @@
       "confirmed_one": "{{count}} label afgevinkt.",
       "confirmed_other": "{{count}} labels afgevinkt."
     }
+  },
+  "photos": {
+    "heading": "Schoolfoto’s",
+    "intro": "Neem de schoolfoto’s zelf of met een fotograaf. Ouders downloaden de originele foto’s met de code op hun strookje, tot een datum die jullie kiezen. Daarna worden alle foto’s gewist.",
+    "back": "Terug naar de fotodagen",
+    "cancel": "Annuleren",
+    "count_one": "{{count}} foto",
+    "count_other": "{{count}} foto’s",
+    "class": "Klas",
+    "withoutClass": "Zonder klas",
+    "none": "Nog geen foto",
+    "photoOf": "Foto van {{name}}",
+    "missing": "Nog geen foto: {{names}}. Fotografeer ze op een inhaalmoment en laad de foto’s hier op.",
+    "status": {
+      "draft": "Nog niet open voor ouders",
+      "open": "Open voor ouders tot {{date}}",
+      "closed": "Gesloten voor ouders"
+    },
+    "empty": {
+      "title": "Nog geen fotodagen",
+      "hint": "Een beheerder van de school maakt een fotodag aan. Daarna kan je hier de foto’s opladen.",
+      "hintAdmin": "Maak een fotodag aan voor de dag dat de foto’s genomen worden."
+    },
+    "new": {
+      "button": "Nieuwe fotodag",
+      "heading": "Nieuwe fotodag",
+      "defaultName": "Schoolfoto’s {{years}}",
+      "create": "Fotodag aanmaken"
+    },
+    "fields": {
+      "name": "Naam",
+      "takenOn": "Datum van de foto’s",
+      "takenOnHint": "Bepaalt ook in welk schooljaar de fotodag valt."
+    },
+    "upload": {
+      "link": "Foto’s opladen",
+      "back": "Terug naar de fotodag",
+      "heading": "Foto’s opladen",
+      "what": "Wat laad je op?",
+      "cards": "Portretten, met een foto van de leerlingenkaart ervoor",
+      "cardsHint": "Neem bij elke leerling eerst een foto van de leerlingenkaart of van de streepjescode op de klaslijst, daarna de portretten. Voor de klasfoto fotografeer je eerst de klasfotocode bovenaan de klaslijst. Laad gerust de hele geheugenkaart in één keer op: we sorteren op het tijdstip van de camera.",
+      "classPhoto": "Een klasfoto",
+      "onePupil": "Foto’s van één leerling",
+      "pupil": "Leerling",
+      "drop": "Sleep de foto’s hierheen of kies ze.",
+      "choose": "Foto’s kiezen",
+      "jpegOnly": "JPEG-foto’s, zoals een camera of gsm ze maakt. Locatie- en cameragegevens halen we eruit voor het opladen.",
+      "progress": "{{done}} van {{total}} foto’s verwerkt",
+      "current": "Nu: {{name}}",
+      "done_one": "Klaar: {{count}} foto opgeladen.",
+      "done_other": "Klaar: {{count}} foto’s opgeladen.",
+      "cardsFound_one": "{{count}} kaart herkend",
+      "cardsFound_other": "{{count}} kaarten herkend",
+      "unassigned_one": "{{count}} foto zonder leerling: wijs ze toe bij ‘Nog niet toegewezen’.",
+      "unassigned_other": "{{count}} foto’s zonder leerling: wijs ze toe bij ‘Nog niet toegewezen’.",
+      "skipped_one": "{{count}} foto niet opgeladen: deze leerling mag niet op de foto.",
+      "skipped_other": "{{count}} foto’s niet opgeladen: deze leerlingen mogen niet op de foto.",
+      "unknownCodes": "Onbekende kaart of code: {{codes}}. De foto’s erna staan bij ‘Nog niet toegewezen’.",
+      "unscanned_one": "Op {{count}} foto kon de streepjescode niet gelezen worden. Ze staat bij ‘Nog niet toegewezen’; probeer gerust een andere browser.",
+      "unscanned_other": "Op {{count}} foto’s kon de streepjescode niet gelezen worden. Ze staan bij ‘Nog niet toegewezen’; probeer gerust een andere browser.",
+      "unreadable": "Geen JPEG-foto, overgeslagen: {{names}}",
+      "failed": "Het opladen lukte niet. Controleer je internetverbinding en probeer opnieuw.",
+      "failedSome_one": "{{count}} foto kon niet opgeladen worden.",
+      "failedSome_other": "{{count}} foto’s konden niet opgeladen worden.",
+      "stop": "Stoppen",
+      "perPupil_one": "Foto’s per leerling ({{count}} leerling)",
+      "perPupil_other": "Foto’s per leerling ({{count}} leerlingen)",
+      "review": "Naar het overzicht",
+      "classPhotos_one": "{{count}} klasfoto",
+      "classPhotos_other": "{{count}} klasfoto’s"
+    },
+    "unassigned": {
+      "hint": "Foto’s van voor de eerste kaart, of na een kaart die we niet herkenden. Klik op een foto om ze aan een leerling of klas te geven, of om ze te verwijderen.",
+      "photo": "Foto zonder leerling",
+      "chip": "Nog niet toegewezen"
+    },
+    "classPhoto": {
+      "heading": "Klasfoto {{group}}",
+      "none": "Nog geen klasfoto. Iedereen van de klas krijgt de klasfoto bij zijn eigen foto’s.",
+      "photo": "Klasfoto {{group}}"
+    },
+    "noPhoto": {
+      "badge": "Niet fotograferen",
+      "set": "Mag niet op de foto",
+      "undo": "Mag toch op de foto"
+    },
+    "dialog": {
+      "title": "Foto",
+      "owner": "Wie staat erop?",
+      "nobody": "Nog niemand",
+      "classPhoto": "Klasfoto {{group}}",
+      "delete": "Foto verwijderen",
+      "confirmDelete": "Deze foto verwijderen? Dat kan niet ongedaan gemaakt worden.",
+      "close": "Sluiten",
+      "position": "{{index}} van {{total}}",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "search": "Typ een naam of klas",
+      "hint": "Enter kiest de eerste. Daarna volgt meteen de volgende foto; met ← → blader je.",
+      "noMatch": "Niemand gevonden.",
+      "deleted": "Verwijderd"
+    },
+    "print": {
+      "failed": "Het PDF-bestand maken lukte niet. Probeer opnieuw."
+    },
+    "classList": {
+      "button": "Klaslijst {{group}}",
+      "all": "Alle klaslijsten",
+      "heading": "Klaslijst {{group}}",
+      "instructions": "Fotografeer de streepjescode van een leerling (of de leerlingenkaart) vlak voor zijn of haar portretten, met de code in het midden van de foto. Voor de klasfoto fotografeer je eerst de klasfotocode hierboven. Zo komen de foto’s vanzelf op de juiste plaats.",
+      "hint": "De klaslijsten zijn voor de fotograaf: met een streepjescode per leerling, voor wie geen leerlingenkaart bij heeft, en bovenaan een code voor de klasfoto.",
+      "fileName": "klaslijst-fotos",
+      "classPhoto": "Klasfoto {{group}}"
+    },
+    "codes": {
+      "button": "Strookjes {{group}}",
+      "all": "Alle strookjes",
+      "hint": "De strookjes zijn voor de ouders: met een persoonlijke code en QR-code om de foto’s te downloaden. Opnieuw afdrukken geeft dezelfde codes.",
+      "openFirst": "Strookjes kan je afdrukken zodra de foto’s open staan voor ouders: de datum staat erop.",
+      "nothing": "Er zijn nog geen leerlingen met foto’s in deze selectie.",
+      "renew": "Nieuwe code",
+      "confirmRenew": "Een nieuwe code maken voor {{name}}? De oude code werkt dan meteen niet meer. Het nieuwe strookje wordt gedownload.",
+      "fileName": "strookjes-fotos"
+    },
+    "slip": {
+      "howTo": "Download de foto’s: scan de QR-code of ga naar {{site}}/fotos en typ deze code:",
+      "until": "Beschikbaar tot en met {{date}}. Daarna worden de foto’s gewist."
+    },
+    "parents": {
+      "closed": "Ouders kunnen de foto’s nog niet bekijken. Kies tot wanneer ze kunnen downloaden en zet de fotodag open. Daarna kan je de strookjes afdrukken.",
+      "openUntil": "Ouders kunnen de foto’s downloaden tot en met {{date}}.",
+      "until": "Downloaden kan tot en met",
+      "untilHint": "Standaard 30 dagen, ten laatste het einde van het schooljaar ({{date}}).",
+      "untilInvalid": "Kies een datum vanaf vandaag tot en met {{date}}.",
+      "open": "Openzetten voor ouders",
+      "saveDate": "Datum bewaren",
+      "close": "Sluiten voor ouders",
+      "deleted": "Alle foto’s van deze fotodag worden gewist na {{date}}."
+    },
+    "edit": {
+      "heading": "Naam en datum wijzigen, of fotodag verwijderen",
+      "save": "Bewaren",
+      "saved": "Bewaard.",
+      "delete": "Fotodag verwijderen",
+      "confirmDelete": "‘{{name}}’ verwijderen? Ouders kunnen meteen niet meer downloaden en alle foto’s worden vannacht definitief gewist.",
+      "deleteHint": "Verwijderen sluit de fotodag meteen; de foto’s zelf worden vannacht definitief gewist."
+    },
+    "public": {
+      "heading": "Schoolfoto’s",
+      "intro": "Typ de code van het strookje dat je kind meekreeg, of scan de QR-code erop.",
+      "code": "Code",
+      "codeHint": "Twaalf letters en cijfers, bijvoorbeeld K7PM-3QXD-9TWA.",
+      "show": "Foto’s bekijken",
+      "checking": "Even kijken…",
+      "photosOf": "De foto’s van {{name}}",
+      "until": "te downloaden tot en met {{date}}",
+      "none": "Er staan nog geen foto’s klaar. Probeer later opnieuw of vraag het aan de school.",
+      "downloadAll": "Alles downloaden (zip)",
+      "zipping": "Bezig met inpakken…",
+      "zipFailed": "Alles samen downloaden lukte niet. Download de foto’s dan één voor één.",
+      "zipName": "schoolfotos",
+      "otherCode": "Andere code",
+      "hint": "Je krijgt de originele foto’s. Op een gsm: tik op ‘Downloaden’ en bewaar de foto in je foto’s.",
+      "portrait": "Portret",
+      "classPhoto": "Klasfoto",
+      "photoAlt": "Foto {{number}} van {{name}}",
+      "classPhotoAlt": "Klasfoto",
+      "download": "Downloaden",
+      "saveToDevice": "Bewaren op je toestel",
+      "preparing": "Foto’s klaarzetten…",
+      "saveNow_one": "Bewaar de foto",
+      "saveNow_other": "Bewaar de {{count}} foto’s",
+      "hintShare": "Je krijgt de originele foto’s. Tik op ‘Bewaren op je toestel’ en daarna op ‘Bewaar’ in je foto’s."
+    },
+    "steps": {
+      "number": "Stap {{number}}:",
+      "done": "klaar",
+      "classLists": {
+        "title": "Klaslijsten afdrukken",
+        "status": "Voor de fotograaf: een streepjescode per leerling en een code voor de klasfoto."
+      },
+      "upload": {
+        "title": "Fotograferen en opladen",
+        "none": "Nog geen foto’s.",
+        "done_one": "{{count}} foto opgeladen.",
+        "done_other": "{{count}} foto’s opgeladen."
+      },
+      "review": {
+        "title": "Nakijken",
+        "status": "{{done}} van de {{total}} leerlingen hebben een foto",
+        "unassigned_one": "{{count}} foto nog niet toegewezen",
+        "unassigned_other": "{{count}} foto’s nog niet toegewezen"
+      },
+      "parents": {
+        "title": "Openzetten voor ouders en strookjes afdrukken",
+        "notAdmin": "Een beheerder zet de foto’s open voor ouders."
+      }
+    },
+    "classProgress": "{{done}}/{{total}}",
+    "add": "Toevoegen",
+    "addFor": "Foto’s toevoegen voor {{name}}",
+    "moreFor": "Meer voor {{name}}"
   }
 }

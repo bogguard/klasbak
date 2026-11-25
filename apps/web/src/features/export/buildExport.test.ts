@@ -105,6 +105,8 @@ describe('buildExportZip', () => {
     expect(Object.keys(files).sort()).toEqual([
       'alles.json',
       'exemplaren.csv',
+      'fotodagen.csv',
+      'fotos.csv',
       'lezers.csv',
       'materiaal-uitgiftes.csv',
       'materiaal.csv',
@@ -114,5 +116,65 @@ describe('buildExportZip', () => {
     expect(files['exemplaren.csv']).toContain('00000001;T1;Dolfje;onLoan');
     expect(files['uitleningen.csv']).toContain('L000001;Lotte Peeters;;00000001;Dolfje');
     expect(JSON.parse(files['alles.json'] ?? '{}').readers[0].firstName).toBe('Lotte');
+  });
+});
+
+describe('school photos in the export', () => {
+  it('lists the photo days and what each photo is, without the files', () => {
+    const zip = buildExportZip(
+      [
+        {
+          kind: 'reader',
+          data: {
+            id: 'R1',
+            memberNumber: 'L123456000001',
+            firstName: 'Emma',
+            lastName: 'Peeters',
+            category: 'pupil',
+            active: true,
+            activeLoanCount: 0,
+            createdAt: '',
+            updatedAt: '',
+            version: 1,
+          },
+        },
+        {
+          kind: 'photoDay',
+          data: {
+            id: 'D1',
+            name: 'Schoolfoto’s 2026–2027',
+            takenOn: '2026-10-15',
+            open: true,
+            availableUntil: '2026-12-01',
+            createdAt: '',
+            updatedAt: '',
+          },
+        },
+        {
+          kind: 'photo',
+          data: {
+            id: 'P1',
+            photoDayId: 'D1',
+            kind: 'portrait',
+            readerId: 'R1',
+            fileName: 'IMG_0001.JPG',
+            width: 3000,
+            height: 4000,
+            size: 1,
+            uploadedAt: '',
+          },
+        },
+      ],
+      new Date('2026-11-24T10:00:00Z'),
+    );
+    const files = unzipSync(zip);
+    const text = (name: string) => strFromU8(files[name] as Uint8Array);
+    expect(text('fotodagen.csv')).toContain('Schoolfoto’s 2026–2027;2026-10-15;ja;2026-12-01');
+    expect(text('fotos.csv')).toContain(
+      'Schoolfoto’s 2026–2027;portret;L123456000001;;IMG_0001.JPG;',
+    );
+    const all = JSON.parse(text('alles.json')) as { photoDays: unknown[]; photos: unknown[] };
+    expect(all.photoDays).toHaveLength(1);
+    expect(all.photos).toHaveLength(1);
   });
 });

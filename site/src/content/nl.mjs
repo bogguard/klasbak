@@ -4,7 +4,7 @@ export default {
   meta: {
     title: 'Klasbak: degelijke, betaalbare software voor je school',
     description:
-      'Open-source software voor de school. Een schoolbib die vlot uitleent, met een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. En een overzicht van de Chromebooks en ander materiaal. In de browser, gegevens in de EU, €10 per maand voor alles.',
+      'Open-source software voor de school. Een schoolbib die vlot uitleent, met een catalogus met echte kaften, etiketten, lezerskaarten en statistieken. Een overzicht van de Chromebooks en ander materiaal. En schoolfoto’s in eigen beheer, betaalbaar voor school en ouders. In de browser, gegevens in de EU, €10 per maand; schoolfoto’s €50 per schooljaar extra.',
   },
   nav: {
     features: 'Functies',
@@ -20,7 +20,7 @@ export default {
   hero: {
     eyebrow: 'Open source · Gemaakt in Vlaanderen',
     title: 'Software voor je school, degelijk en betaalbaar.',
-    lead: 'Klasbak begint met wat elke school nodig heeft: een schoolbib die uitleent in twee scans, en een overzicht van de Chromebooks en ander materiaal. Alles in de browser, klaar om te gebruiken, voor één prijs.',
+    lead: 'Klasbak begint met wat elke school nodig heeft: een schoolbib die uitleent in twee scans, een overzicht van de Chromebooks en ander materiaal, en schoolfoto’s in eigen beheer. Alles in de browser, klaar om te gebruiken, voor een vaste prijs per maand.',
     primary: 'Starten met je school',
     secondary: 'Bekijk het in actie',
     facts: ['€10 per maand', 'Geen installatie', 'Gegevens in de EU'],
@@ -31,7 +31,7 @@ export default {
     badgeText: 'Vakanties tellen vanzelf niet mee',
   },
   strip: [
-    { value: '1 prijs', label: 'voor de schoolbib en het materiaal' },
+    { value: '€10', label: 'per maand voor de schoolbib en het materiaal' },
     { value: '0', label: 'installaties: het werkt in de browser' },
     { value: 'EU', label: 'gegevens in Europa, versleuteld' },
     { value: 'MIT', label: 'open source, zelf hosten mag' },
@@ -126,6 +126,21 @@ export default {
       },
       alt: 'Het overzicht van het materiaal: per soort hoeveel er vrij zijn, en daaronder elk toestel met zijn plaats en status.',
     },
+    {
+      id: 'schoolfotos',
+      kicker: 'De fotodag',
+      title: 'Schoolfoto’s, betaalbaar voor school en ouders',
+      text: 'Het hele platform voor schoolfoto’s zit erbij: neem de foto’s zelf, of huur een fotograaf in om ze te nemen. Laad de hele geheugenkaart in één keer op: een foto van de leerlingenkaart of de klaslijst vóór de portretten zet elke foto vanzelf bij de juiste leerling. Ouders krijgen een strookje met een code en downloaden de originele foto’s. Wat dat kost, beslist de school zelf.',
+      points: [
+        'Klaslijsten met een streepjescode per leerling en een code voor de klasfoto',
+        'Per klas zie je wie al een foto heeft; een foto verplaatsen is een naam typen',
+        'Leerlingen die niet op de foto mogen, slaan we over',
+        'Locatie- en cameragegevens gaan eruit; alles wordt gewist na de datum die je kiest',
+        '€50 per schooljaar extra, alleen als je de module gebruikt',
+      ],
+      image: 'photos',
+      alt: 'Een fotodag nakijken: per klas de voortgang, de klasfoto en de portretten van elke leerling.',
+    },
   ],
   more: {
     title: 'En verder',
@@ -177,11 +192,11 @@ export default {
       { title: 'In Europa', text: 'Alles staat in een datacenter in Ierland en is versleuteld.' },
       {
         title: 'Alleen het team',
-        text: 'Wie de bib of het materiaal beheert, meldt aan met een wachtwoord en een code op de gsm.',
+        text: 'Wie de bib, het materiaal of de schoolfoto’s beheert, meldt aan met een wachtwoord en een code op de gsm.',
       },
       {
         title: 'Zo weinig mogelijk',
-        text: 'Geen geboortedatum, adres of foto. Een e-mailadres is niet nodig.',
+        text: 'Geen geboortedatum of adres. Een e-mailadres is niet nodig. Schoolfoto’s alleen als de school die module gebruikt, en ze worden vanzelf gewist.',
       },
       {
         title: 'Vanzelf gewist',
@@ -199,7 +214,7 @@ export default {
   },
   price: {
     kicker: 'Prijs',
-    title: 'Eén prijs, alles inbegrepen',
+    title: 'Een vaste prijs, zonder verrassingen',
     hosted: {
       name: 'Klasbak',
       per: 'per maand, per school',
@@ -208,7 +223,8 @@ export default {
         'Een eigen installatie, met gegevens in de EU',
         'Updates en beveiligingsfixes',
         'Back-ups: elk moment van de laatste 35 dagen',
-        'De schoolbib en Materiaal, en wat er nog bijkomt',
+        'De schoolbib en Materiaal',
+        'Schoolfoto’s: €50 per schooljaar extra, als je de module gebruikt',
         'Geen limiet op leerlingen, boeken of toestellen',
         'Hulp per e-mail',
         'Verwerkersovereenkomst',
@@ -233,7 +249,7 @@ export default {
       },
       {
         title: 'Wij zetten Klasbak klaar',
-        text: 'Met de naam en het logo van je school, en een account voor wie de bib of het materiaal beheert.',
+        text: 'Met de naam en het logo van je school, en een account voor wie de bib, het materiaal of de schoolfoto’s beheert.',
       },
       {
         title: 'Importeer en leen uit',
@@ -271,8 +287,12 @@ export default {
         a: 'Ja. Zet Materiaal aan in de instellingen. Je ziet wat de school heeft en waar het ligt. Geef je een toestel mee aan een leerling, dan kan je ook dat noteren.',
       },
       {
+        q: 'Kunnen we onze schoolfoto’s zelf nemen?',
+        a: 'Ja. Zet Schoolfoto’s aan in de instellingen. Je neemt de foto’s zelf, of een fotograaf neemt ze en laadt ze op met een eigen account. Ouders downloaden de originele bestanden met de code op hun strookje, tot de datum die je kiest. Daarna worden de foto’s gewist. Of ouders iets betalen, en hoeveel, beslist de school. De module kost €50 per schooljaar extra, hoeveel fotodagen je ook houdt.',
+      },
+      {
         q: 'Komt er nog meer bij?',
-        a: 'Dat is de bedoeling. Klasbak bestaat uit modules die je aanzet als je ze nodig hebt, allemaal voor dezelfde prijs. Wat er eerst komt, hangt af van wat scholen vragen. Een idee? Mail het ons.',
+        a: 'Dat is de bedoeling. Klasbak bestaat uit modules die je aanzet als je ze nodig hebt. Wat er eerst komt, hangt af van wat scholen vragen. Een idee? Mail het ons.',
       },
       {
         q: 'Is het echt open source?',
@@ -291,7 +311,7 @@ export default {
   },
   footer: {
     tagline:
-      'Degelijke, betaalbare open-source software voor de school: de schoolbib, het materiaal, en wat nog volgt.',
+      'Degelijke, betaalbare open-source software voor de school: de schoolbib, het materiaal, de schoolfoto’s en wat nog volgt.',
     by: 'Een project van',
     vat: 'btw',
     source: 'Broncode',

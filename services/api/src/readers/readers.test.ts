@@ -36,9 +36,16 @@ beforeEach(() => {
   ddb.on(BatchWriteCommand).resolves({});
 });
 
+/** The reader's partition; index queries (photo days, for their school photos) find nothing. */
+function storedReader(items: object[]) {
+  ddb.on(QueryCommand).callsFake((input: { IndexName?: string }) => ({
+    Items: input.IndexName ? [] : items,
+  }));
+}
+
 describe('deleting a reader', () => {
   it('removes the reader, the card number and the reading history', async () => {
-    ddb.on(QueryCommand).resolves({ Items: [reader, returnedLoan] });
+    storedReader([reader, returnedLoan]);
 
     await deleteReader(admin, 'R1');
 
@@ -54,21 +61,19 @@ describe('deleting a reader', () => {
   });
 
   it('refuses while books are still on loan', async () => {
-    ddb.on(QueryCommand).resolves({ Items: [reader, { ...returnedLoan, returnedAt: undefined }] });
+    storedReader([reader, { ...returnedLoan, returnedAt: undefined }]);
     await expect(deleteReader(admin, 'R1')).rejects.toMatchObject({ code: 'READER_HAS_LOANS' });
     expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
   });
 
   it('refuses while they still have equipment, and erases who had what', async () => {
     const assignment = { pk: 'READER#R1', sk: 'ASSIGNMENT#S1', id: 'S1' };
-    ddb.on(QueryCommand).resolves({ Items: [reader, assignment] });
+    storedReader([reader, assignment]);
     await expect(deleteReader(admin, 'R1')).rejects.toMatchObject({
       code: 'READER_HAS_EQUIPMENT',
     });
 
-    ddb.on(QueryCommand).resolves({
-      Items: [reader, { ...assignment, returnedAt: '2026-10-01T10:00:00Z' }],
-    });
+    storedReader([reader, { ...assignment, returnedAt: '2026-10-01T10:00:00Z' }]);
     await deleteReader(admin, 'R1');
     const deletes =
       ddb.commandCalls(BatchWriteCommand)[0]?.args[0].input.RequestItems?.['test-table'];
@@ -76,7 +81,7 @@ describe('deleting a reader', () => {
   });
 
   it('refuses when a book was lent at the very moment of deleting', async () => {
-    ddb.on(QueryCommand).resolves({ Items: [reader] });
+    storedReader([reader]);
     ddb.on(TransactWriteCommand).rejects(
       new TransactionCanceledException({
         message: 'cancelled',

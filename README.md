@@ -7,7 +7,8 @@ Practical open-source tools for schools, starting with the school library: a pub
 with real covers, a lending desk with barcodes, readers, labels and reader cards, reminder slips
 and anonymous statistics, imports from school administrations (Informat, Wisa, Smartschool) and
 exchange collections from the public library. A second module keeps track of Chromebooks and other
-equipment: what the school has and where it is. More tools (lost and found,
+equipment: what the school has and where it is. A third lets the school take its own school photos
+(or have a photographer do it) and lets parents download the original files. More tools (lost and found,
 maintenance requests, duty planning) are planned as modules of the same installation
 ([decision 036](docs/decisions.md), [roadmap](docs/features.md)). Dutch (Flemish) and English.
 Serverless on AWS, one installation per school, data in the EU.
@@ -101,13 +102,14 @@ two-step verification with an authenticator app.
 
 The administrator then, in the app:
 
-- sets the library's name and logo (Instellingen → **Bibliotheek**), the loan rules and the days the
+- sets the school's name and logo (School → Instellingen → **School**), the loan rules and the days the
   library is closed (Instellingen);
-- adds colleagues who run the library (Beheer → **Medewerkers**);
-- adds the readers, one by one or imported from a spreadsheet (Lezers → **Importeren**): the
+- adds colleagues who run the library (School → **Medewerkers**);
+- adds the readers, one by one or imported from a spreadsheet (School → Lezers → **Importeren**): the
   pupils from Informat, Wisa or Smartschool;
 - prints reader cards and labels (**Labels**);
-- switches on **Materiaal** if the school wants it (Instellingen → **Modules**).
+- switches on **Materiaal** and **Schoolfoto’s** if the school wants them (Instellingen →
+  **Modules**).
 
 ### A test environment
 
@@ -219,7 +221,7 @@ skipped. Locally, set `GOOGLE_BOOKS_API_KEY` in the terminal before `npm run dev
 
 ## Running the library
 
-- **Staff accounts** are managed by administrators in the app, under Beheer → **Medewerkers**: add a
+- **Staff accounts** are managed by administrators in the app, under School → **Medewerkers**: add a
   colleague (the app shows a temporary password once, to pass on), change their role, give a new
   password, reset two-step verification after a lost or new phone, or deactivate the account.
 - **Staff sign-in** requires two-step verification. The first sign-in shows a QR code for an
@@ -234,9 +236,9 @@ skipped. Locally, set `GOOGLE_BOOKS_API_KEY` in the terminal before `npm run dev
 
 ## Keeping track of equipment
 
-Switched on in Instellingen → **Modules**; the menu then shows **Materiaal**. It is off by default,
+Switched on in Instellingen → **Modules**; the menu then shows the section **Materiaal**. It is off by default,
 and the API refuses requests while it is off. Give the ICT coordinator the role
-_materiaalbeheerder_ (Beheer → **Medewerkers**): they see this module and nothing of the library.
+_materiaalbeheerder_ (School → **Medewerkers**): they see this module and nothing of the library.
 
 - **The overview**: per kind, how many there are and how many are free; below it every item with
   its place and status. Filter on a place or status, or search.
@@ -254,6 +256,33 @@ _materiaalbeheerder_ (Beheer → **Medewerkers**): they see this module and noth
   is deleted after the retention period for reading history. See
   [decision 039](docs/decisions.md).
 
+## School photos
+
+Switched on in Instellingen → **Modules**; the menu then shows the section **Schoolfoto’s**. Off by default.
+Give the photographer (someone of the school, or one the school hires) the role _fotograaf_
+(School → **Medewerkers**): they upload and sort photos and see nothing else. Opening the photos to
+parents, who may not be photographed and the download codes are for administrators. See
+[decision 040](docs/decisions.md).
+
+- **A photo day**: an administrator creates one (name and date).
+- **Taking the photos**: for each pupil, first a photo of their pupil card, or of their line on the
+  class list (Afdrukken → **Klaslijst**, with a barcode per pupil, alternately left and right), then
+  the portraits. For the class photo, first photograph the class photo code at the top of the list.
+  When a photo shows several barcodes, the one in the middle counts. Class photos can also be
+  uploaded per class.
+- **Uploading**: Foto’s opladen, and choose the whole memory card. The browser sorts the photos by
+  the camera’s time, reads the cards, removes location and camera details (EXIF, GPS) without
+  re-compressing, makes a screen version, and uploads straight to a private S3 bucket. Photos it
+  couldn’t place wait under _Nog niet toegewezen_.
+- **Sorting**: per class, every pupil with their photos; click a photo to give it to someone else
+  or delete it. Pupils without a photo are listed for a catch-up moment.
+- **For parents**: pick until when they can download (30 days by default, at the latest 31 August,
+  the end of the school year), open the photo day and print the slips (eight per A4) for the class
+  teachers. A slip has a personal code and a QR code to `/fotos`; parents see their child’s
+  portraits and class photo and download the originals. A lost slip: **Nieuwe code** on the pupil.
+- **Privacy**: everything of a photo day (files, codes, entries) is deleted the night after its last
+  day, or the night after the school deletes it; erasing a reader erases their photos.
+
 ## Local development
 
 Everything runs on your machine; no AWS account is needed. Requires Docker Desktop.
@@ -267,12 +296,13 @@ npm run seed        # once, in a second terminal: a small sample catalogue
 The local API runs the same code as the Lambdas. A small server
 ([services/api/src/local/server.ts](services/api/src/local/server.ts)) stands in for the AWS parts:
 
-| On AWS                                  | Locally                                                                                           |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Cognito sign-in + API Gateway JWT check | Dev sign-in: header `Authorization: Dev librarian` (or `admin`, `equipment`, `teacher`, `reader`) |
-| DynamoDB                                | DynamoDB Local in Docker (data kept in a Docker volume)                                           |
-| DynamoDB stream → search indexer Lambda | Index rebuilt right after each change                                                             |
-| S3 + CloudFront for covers and search   | Files in `.local/public`, served by the local server                                              |
+| On AWS                                  | Locally                                                                                                           |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Cognito sign-in + API Gateway JWT check | Dev sign-in: header `Authorization: Dev librarian` (or `admin`, `equipment`, `photographer`, `teacher`, `reader`) |
+| DynamoDB                                | DynamoDB Local in Docker (data kept in a Docker volume)                                                           |
+| DynamoDB stream → search indexer Lambda | Index rebuilt right after each change                                                                             |
+| S3 + CloudFront for covers and search   | Files in `.local/public`, served by the local server                                                              |
+| Photos bucket with signed links         | Files in `.local/photos`, uploaded and served at `/local-photos` by the local server                              |
 
 To work on the frontend against a deployed dev stack instead, put its `AppUrl` in
 `apps/web/.env.local` (see `.env.example`) and run `npm run dev`.
@@ -287,8 +317,8 @@ and, in a second terminal:
 npm run demo
 ```
 
-This **empties the local database** first; the library's name and logo (Instellingen →
-Bibliotheek) are kept. It refuses to run against AWS. Then it loads:
+This **empties the local database** first; the school's name and logo (Instellingen →
+School) are kept. It refuses to run against AWS. Then it loads:
 
 - a catalogue of real children's books with their covers (looked up by ISBN, so an internet
   connection helps; offline the covers are generated), added over the last year;
@@ -296,6 +326,8 @@ Bibliotheek) are kept. It refuses to run against AWS. Then it loads:
 - loans since last March up to today, a few of them overdue now, so the statistics, the overdue
   list and the reminder slips have something to show;
 - Chromebooks, tablets and chargers (one late, one in repair, one missing, some awaiting a label);
+- a photo day without photos yet (try uploading your own), with one pupil who may not be
+  photographed;
 - a few damaged, missing and withdrawn copies, books waiting for a label, two exchange collections
   from the public library (in use until their return date, then returned with their book list) and
   the school holidays as closed days.
@@ -303,7 +335,7 @@ Bibliotheek) are kept. It refuses to run against AWS. Then it loads:
 Open http://localhost:5173, choose **Aanmelden** and sign in as a role (no password locally):
 **beheerder** (admin) sees everything, including Instellingen; **bibliothecaris** (librarian) the
 desk, catalogue, readers, statistics and equipment; **materiaalbeheerder** (equipment) only the
-equipment. Run `npm run demo` again to start from a clean demo; after
+equipment; **fotograaf** (photographer) only the school photos. Run `npm run demo` again to start from a clean demo; after
 `docker compose down -v` the database is empty. To see the demo as on another day (e.g. to check a
 change in another season), run `DEMO_TODAY=2027-05-20 npm run demo`.
 

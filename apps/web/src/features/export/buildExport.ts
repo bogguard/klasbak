@@ -1,4 +1,14 @@
-import type { Asset, Assignment, Copy, ExportRecord, Loan, Reader, Title } from '@klasbak/shared';
+import type {
+  Asset,
+  Assignment,
+  Copy,
+  ExportRecord,
+  Loan,
+  Photo,
+  PhotoDay,
+  Reader,
+  Title,
+} from '@klasbak/shared';
 import { strToU8, zipSync } from 'fflate';
 
 /*
@@ -42,6 +52,9 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
   const loans = of('loan') as Loan[];
   const assets = of('asset') as Asset[];
   const assignments = of('assignment') as Assignment[];
+  const photoDays = of('photoDay') as PhotoDay[];
+  const photos = of('photo') as Photo[];
+  const photoDayById = new Map(photoDays.map((d) => [d.id, d.name]));
   const titleById = new Map(titles.map((t) => [t.id, t.title]));
   const memberNumberById = new Map(readers.map((r) => [r.id, r.memberNumber]));
 
@@ -117,6 +130,21 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
       ['terug_op', (a) => a.dueDate],
       ['teruggenomen', (a) => a.returnedAt],
     ]),
+    'fotodagen.csv': toCsv(photoDays, [
+      ['naam', (d) => d.name],
+      ['datum', (d) => d.takenOn],
+      ['open_voor_ouders', (d) => (d.open ? 'ja' : 'nee')],
+      ['beschikbaar_tot', (d) => d.availableUntil],
+    ]),
+    // What each photo is; the photo files themselves are not part of the export.
+    'fotos.csv': toCsv(photos, [
+      ['fotodag', (p) => photoDayById.get(p.photoDayId)],
+      ['soort', (p) => (p.kind === 'class' ? 'klasfoto' : 'portret')],
+      ['kaartnummer', (p) => (p.readerId ? memberNumberById.get(p.readerId) : undefined)],
+      ['klas', (p) => p.group],
+      ['bestand', (p) => p.fileName],
+      ['genomen', (p) => p.takenAt],
+    ]),
     'alles.json': JSON.stringify(
       {
         exportedAt: exportedAt.toISOString(),
@@ -126,6 +154,8 @@ export function buildExportZip(records: ExportRecord[], exportedAt: Date): Uint8
         loans,
         assets,
         assignments,
+        photoDays,
+        photos,
         settings: of('settings')[0],
       },
       null,
