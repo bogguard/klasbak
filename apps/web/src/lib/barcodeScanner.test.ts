@@ -1,5 +1,13 @@
+import { ZXING_WASM_VERSION } from 'barcode-detector/ponyfill';
 import { describe, expect, it } from 'vitest';
+import packageJson from '../../package.json';
 import { normalizeScan } from './barcodeScanner';
+
+describe('the WebAssembly reader', () => {
+  it('is the version barcode-detector was built for: with any other, every scan fails', () => {
+    expect(packageJson.dependencies['zxing-wasm']).toBe(ZXING_WASM_VERSION);
+  });
+});
 
 describe('normalizeScan', () => {
   it('drops the start and stop letters of Codabar, as hand scanners do', () => {
